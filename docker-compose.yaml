@@ -1,0 +1,28 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/vol:/app/vol
+      - ./backend/fixtures:/app/fixtures
+    depends_on:
+      - db
+    restart: unless-stopped
+    command: sh -c "python manage.py wait_for_db &&
+                    python manage.py migrate &&
+                    python manage.py init_data &&
+                    gunicorn --access-logfile - --error-logfile - --bind 0.0.0.0:8000 catalogue_system.wsgi"
+    environment:
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-false}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
+  db:
+    image: postgres:16.0-alpine
+    restart: unless-stopped
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
