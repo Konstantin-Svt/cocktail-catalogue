@@ -1,9 +1,11 @@
+# cocktail catalogue
+
 ## Backend
-# Installation & Run
+### Installation & Run
 In working directory ```cocktail-catalogue``` run in terminal:
 ```bash
 docker compose build
-docker compose run
+docker compose up
 ```
 
 - API is available at http://127.0.0.1:8000/api/
