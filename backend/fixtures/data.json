@@ -17,7 +17,8 @@
     ],
     "similar_cocktails": [
       2,
-      3
+      3,
+      4
     ]
   }
 },
@@ -54,7 +55,7 @@
     "sweetness_level": "medium",
     "preparation": "",
     "preparation_time": 5,
-    "image": "cocktails/brown-derbie-b5a61387-444e-4f91-8cb3-adcab8df6aa7.jpeg",
+    "image": "cocktails/brown-derbie-2dd7fe3f-150f-432a-b5de-2339366babd4.jpeg",
     "created_at": "2026-03-09T19:59:22.443",
     "vibes": [
       3,
@@ -63,6 +64,29 @@
     "similar_cocktails": [
       1,
       2
+    ]
+  }
+},
+{
+  "model": "cocktail.cocktail",
+  "pk": 4,
+  "fields": {
+    "name": "Blood Mary",
+    "description": "",
+    "average_price": "15.00",
+    "alcohol_level": "strong",
+    "sweetness_level": "dry",
+    "preparation": "",
+    "preparation_time": 10,
+    "image": "cocktails/blood-mary-00e80f5f-db20-49db-b4a6-689d751ed739.jpg",
+    "created_at": "2026-03-12T01:45:50.751",
+    "vibes": [
+      3,
+      4,
+      6
+    ],
+    "similar_cocktails": [
+      1
     ]
   }
 },
@@ -97,7 +121,7 @@
   "model": "cocktail.ingredient",
   "pk": 4,
   "fields": {
-    "name": "rum",
+    "name": "white rum",
     "category": "alcohol",
     "unit": "ml"
   }
@@ -136,6 +160,42 @@
     "name": "grapefruit slice",
     "category": "garnish",
     "unit": "piece"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 9,
+  "fields": {
+    "name": "coca-cola",
+    "category": "mixer",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 10,
+  "fields": {
+    "name": "black rum",
+    "category": "alcohol",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 11,
+  "fields": {
+    "name": "wine",
+    "category": "alcohol",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 12,
+  "fields": {
+    "name": "tomato juice",
+    "category": "mixer",
+    "unit": "ml"
   }
 },
 {
@@ -208,6 +268,33 @@
     "ingredient": 8,
     "cocktail": 3,
     "amount": 1
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 9,
+  "fields": {
+    "ingredient": 9,
+    "cocktail": 3,
+    "amount": 100
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 10,
+  "fields": {
+    "ingredient": 1,
+    "cocktail": 4,
+    "amount": 50
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 11,
+  "fields": {
+    "ingredient": 12,
+    "cocktail": 4,
+    "amount": 100
   }
 },
 {
@@ -659,8 +746,8 @@
   "model": "auth.user",
   "pk": 1,
   "fields": {
-    "password": "pbkdf2_sha256$1200000$ebTHZvWH17TIwV8gqYJifR$oikyaHP9nN5b+6HILnimzIYx1uJ88aMrwBDVe/EIg64=",
-    "last_login": "2026-03-12T00:14:02.251",
+    "password": "pbkdf2_sha256$1200000$rO7EjZcuONMJ6goJnR2cTx$FxYo0cLMqg9n8KCakh/Xzlja7KdBrPuoF9//O+UoQy4=",
+    "last_login": "2026-03-13T00:03:53.902",
     "is_superuser": true,
     "username": "admin",
     "first_name": "",
@@ -669,6 +756,24 @@
     "is_staff": true,
     "is_active": true,
     "date_joined": "2026-03-08T00:34:55.727",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$me8kXPwwKfUhIAkFW2VM7R$GKFUGnB3J8pW9j7HMfDPJbJZcqN77h2dzOCj8SFXgME=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "administrator",
+    "first_name": "",
+    "last_name": "",
+    "email": "admin2@admin.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-03-13T00:07:26.661",
     "groups": [],
     "user_permissions": []
   }

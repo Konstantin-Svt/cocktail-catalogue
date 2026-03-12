@@ -12,12 +12,16 @@ from cocktail.models import (
 admin.site.unregister(Group)
 admin.site.unregister(get_user_model())
 
-admin.site.register(Vibe)
+
+@admin.register(Vibe)
+class VibeAdmin(admin.ModelAdmin):
+    search_fields = ("name",)
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     search_fields = ("name",)
+    list_display = ("name", "category", "unit")
 
 
 class CocktailIngredientsInline(admin.TabularInline):
@@ -31,3 +35,5 @@ class CocktailIngredientsInline(admin.TabularInline):
 class CocktailAdmin(admin.ModelAdmin):
     inlines = [CocktailIngredientsInline]
     search_fields = ["name", "description"]
+    autocomplete_fields = ("ingredients", "vibes", "similar_cocktails")
+    list_display = ("name", "alcohol_level", "sweetness_level")

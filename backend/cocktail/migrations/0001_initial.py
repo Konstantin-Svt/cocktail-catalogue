@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                     "alcohol_level",
                     models.CharField(
                         choices=[
-                            ("zero", "Zero"),
+                            ("non_alcoholic", "Non-alcoholic"),
                             ("low", "Low"),
                             ("medium", "Medium"),
                             ("strong", "Strong"),

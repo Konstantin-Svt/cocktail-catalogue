@@ -13,7 +13,7 @@ def create_cocktail_image_path(instance, filename):
 
 class Cocktail(models.Model):
     class AlcoholLevel(models.TextChoices):
-        ZERO = "zero"
+        NON_ALCOHOLIC = "non-alcoholic"
         LOW = "low"
         MEDIUM = "medium"
         STRONG = "strong"
@@ -73,6 +73,9 @@ class Ingredient(models.Model):
         max_length=60,
         choices=Unit.choices,
     )
+
+    class Meta:
+        ordering = ("category",)
 
     def save(self, *args, **kwargs):
         self.name = self.name.lower().strip()
