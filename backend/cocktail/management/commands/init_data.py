@@ -9,4 +9,6 @@ class Command(BaseCommand):
             return
 
         call_command("loaddata", "fixtures/data.json")
-        self.stdout.write(self.style.SUCCESS("Successfully loaded sample data"))
+        self.stdout.write(
+            self.style.SUCCESS("Successfully loaded sample data")
+        )

@@ -8,7 +8,7 @@ from django.utils.text import slugify
 def create_cocktail_image_path(instance, filename):
     ext = os.path.splitext(filename)[1]
     path = f"{slugify(instance.name)}-{uuid.uuid4()}{ext}"
-    return os.path.join("cocktails/", path)
+    return "cocktails/" + path
 
 
 class Cocktail(models.Model):
@@ -33,6 +33,7 @@ class Cocktail(models.Model):
         choices=SweetnessLevel.choices, max_length=60
     )
     preparation = models.TextField(blank=True)
+    preparation_time = models.PositiveIntegerField(default=5)
     image = models.ImageField(
         upload_to=create_cocktail_image_path, blank=True, null=True
     )
@@ -43,7 +44,9 @@ class Cocktail(models.Model):
         through="CocktailIngredients",
         blank=True,
     )
-    tags = models.ManyToManyField("Tag", related_name="cocktails", blank=True)
+    vibes = models.ManyToManyField(
+        "Vibe", related_name="cocktails", blank=True
+    )
     similar_cocktails = models.ManyToManyField("self", blank=True)
 
     def __str__(self):
@@ -71,6 +74,10 @@ class Ingredient(models.Model):
         choices=Unit.choices,
     )
 
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower().strip()
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
@@ -92,8 +99,12 @@ class CocktailIngredients(models.Model):
         unique_together = ("cocktail", "ingredient")
 
 
-class Tag(models.Model):
+class Vibe(models.Model):
     name = models.CharField(max_length=255, unique=True)
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.lower().strip()
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

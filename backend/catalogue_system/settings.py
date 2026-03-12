@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "drf_spectacular",
     "corsheaders",
+    "storages",
     # apps
     "cocktail",
 ]
@@ -110,6 +111,15 @@ else:
             "HOST": os.environ.get("POSTGRES_HOST", "db"),
         }
     }
+if os.environ.get("POSTGRES_SSLMODE", "disabled").lower() in ("require", "1", "true"):
+    DATABASES.update(
+        {
+            "OPTIONS": {
+                "sslmode": "require",
+                "channel_binding": "require",
+            },
+        }
+    )
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -140,13 +150,7 @@ USE_I18N = True
 
 USE_TZ = False
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
-STATIC_URL = "static/"
-
-MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "vol/media/"
+# External libs settings
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -166,3 +170,32 @@ SPECTACULAR_SETTINGS = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/6.0/howto/static-files/
+
+STATIC_URL = "static/"
+
+AWS_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY")
+AWS_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_KEY")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME")
+AWS_S3_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL")
+AWS_S3_CUSTOM_DOMAIN = os.environ.get("R2_CUSTOM_DOMAIN")
+AWS_S3_REGION_NAME = "auto"
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_S3_ADDRESSING_STYLE = "path"
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = False
+
+if AWS_ACCESS_KEY_ID:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+else:
+    MEDIA_URL = "media/"
+    MEDIA_ROOT = BASE_DIR / "vol/media/"

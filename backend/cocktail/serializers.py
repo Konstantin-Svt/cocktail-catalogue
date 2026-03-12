@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from cocktail.models import Cocktail, Ingredient, CocktailIngredients, Tag
+from cocktail.models import Cocktail, Ingredient, CocktailIngredients, Vibe
 
 
-class TagSerializer(serializers.ModelSerializer):
+class VibeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Tag
+        model = Vibe
         fields = ("id", "name")
         read_only_fields = fields
 
@@ -30,7 +30,7 @@ class IngredientForCocktailSerializer(serializers.ModelSerializer):
 
 
 class CocktailListSerializer(serializers.ModelSerializer):
-    tags = serializers.StringRelatedField(many=True, read_only=True)
+    vibes = serializers.StringRelatedField(many=True, read_only=True)
     ingredients = serializers.StringRelatedField(many=True, read_only=True)
 
     class Meta:
@@ -42,7 +42,8 @@ class CocktailListSerializer(serializers.ModelSerializer):
             "average_price",
             "alcohol_level",
             "sweetness_level",
-            "tags",
+            "preparation_time",
+            "vibes",
             "ingredients",
         )
         read_only_fields = fields
@@ -52,7 +53,7 @@ class CocktailDetailSerializer(CocktailListSerializer):
     ingredients = IngredientForCocktailSerializer(
         many=True, read_only=True, source="through_ingredients"
     )
-    tags = TagSerializer(many=True, read_only=True)
+    vibes = VibeSerializer(many=True, read_only=True)
 
     class Meta(CocktailListSerializer.Meta):
         fields = CocktailListSerializer.Meta.fields + (
