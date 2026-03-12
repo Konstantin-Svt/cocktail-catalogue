@@ -19,6 +19,4 @@ RUN chmod -R 755 vol
 
 USER django-user
 
-EXPOSE 8000
-
-CMD python manage.py wait_for_db && python manage.py migrate && gunicorn --access-logfile - --error-logfile - --bind 0.0.0.0:8000 catalogue_system.wsgi
+CMD sh -c "python manage.py wait_for_db && python manage.py migrate && gunicorn --access-logfile - --error-logfile - --bind 0.0.0.0:${PORT:-8000} --workers 1 --threads 10 catalogue_system.wsgi:application"
