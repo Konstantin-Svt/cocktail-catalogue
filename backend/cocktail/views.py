@@ -4,6 +4,7 @@ from functools import reduce
 from django.db.models import Prefetch, Q, QuerySet
 from django.db.models.aggregates import Count
 from rest_framework import viewsets, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -31,21 +32,33 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
                 .split(",")
             )
         )
-    if q_params.get("alcohol_lvl"):
+    if q_params.get("alcohol_level"):
         conditions.append(
             Q(
-                cocktails__alcohol_level__in=q_params["alcohol_lvl"]
+                cocktails__alcohol_level__in=q_params["alcohol_level"]
                 .lower()
                 .split(",")
             )
         )
-    if q_params.get("sweetness_lvl"):
+    if q_params.get("sweetness_level"):
         conditions.append(
             Q(
-                cocktails__sweetness_level__in=q_params["sweetness_lvl"]
+                cocktails__sweetness_level__in=q_params["sweetness_level"]
                 .lower()
                 .split(",")
             )
+        )
+    if q_params.get("min_price"):
+        if not q_params.get("min_price").isdigit():
+            raise ValidationError("Min price must be an integer")
+        conditions.append(
+            Q(cocktails__average_price__gte=q_params["min_price"])
+        )
+    if q_params.get("max_price"):
+        if not q_params.get("max_price").isdigit():
+            raise ValidationError("Max price must be an integer")
+        conditions.append(
+            Q(cocktails__average_price__lte=q_params["max_price"])
         )
     filters = reduce(operator.and_, conditions, Q())
     return base_qs.annotate(cocktail_count=Count("cocktails", filter=filters))
@@ -59,14 +72,22 @@ def apply_queryset_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
         qs = qs.filter(
             ingredients__name__in=q_params["ingredients"].lower().split(",")
         )
-    if q_params.get("alcohol_lvl"):
+    if q_params.get("alcohol_level"):
         qs = qs.filter(
-            alcohol_level__in=q_params["alcohol_lvl"].lower().split(",")
+            alcohol_level__in=q_params["alcohol_level"].lower().split(",")
         )
-    if q_params.get("sweetness_lvl"):
+    if q_params.get("sweetness_level"):
         qs = qs.filter(
-            sweetness_level__in=q_params["sweetness_lvl"].lower().split(",")
+            sweetness_level__in=q_params["sweetness_level"].lower().split(",")
         )
+    if q_params.get("min_price"):
+        if not q_params.get("min_price").isdigit():
+            raise ValidationError("Min price must be an integer")
+        qs = qs.filter(average_price__gte=q_params["min_price"])
+    if q_params.get("max_price"):
+        if not q_params.get("max_price").isdigit():
+            raise ValidationError("Max price must be an integer")
+        qs = qs.filter(average_price__lte=q_params["max_price"])
     return qs
 
 
@@ -142,11 +163,15 @@ class SummaryAPIView(APIView):
         )
         filtered_cocktails = apply_queryset_filters(
             self.base_cocktails, request.query_params
-        ).aggregate(**self.cocktails_enums)
-        vibe_count = {
+        )
+        general_count = filtered_cocktails.count()
+        filtered_cocktails = filtered_cocktails.aggregate(
+            **self.cocktails_enums
+        )
+        vibes_count = {
             vibe.name: vibe.cocktail_count for vibe in filtered_vibes
         }
-        ingredient_count = {
+        ingredients_count = {
             ingredient.name: ingredient.cocktail_count
             for ingredient in filtered_ingredients
         }
@@ -163,10 +188,11 @@ class SummaryAPIView(APIView):
 
         return Response(
             {
-                "ingredient_count": ingredient_count,
+                "general_count": general_count,
+                "ingredients_count": ingredients_count,
                 "alcohol_level_count": alcohol_count,
                 "sweetness_level_count": sweetness_count,
-                "vibe_count": vibe_count,
+                "vibes_count": vibes_count,
             },
             status=status.HTTP_200_OK,
         )

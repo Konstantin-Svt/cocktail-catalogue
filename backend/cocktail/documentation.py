@@ -17,13 +17,13 @@ cocktail_filters_documentation = extend_schema(
             type=str,
             many=True,
             description="Accepts one or many ALCOHOLic ingredients "
-            "names separated by commas to filter cocktails, "
+            "names separated by commas to filter cocktails "
             "which ingredients contain corresponding alcohol name."
             " If more than one is given they are "
             "treated as OR clauses.",
         ),
         OpenApiParameter(
-            name="alcohol_lvl",
+            name="alcohol_level",
             type=str,
             many=True,
             description="Accepts one or many alcohol levels "
@@ -33,7 +33,7 @@ cocktail_filters_documentation = extend_schema(
             "treated as OR clauses.",
         ),
         OpenApiParameter(
-            name="sweetness_lvl",
+            name="sweetness_level",
             type=str,
             many=True,
             description="Accepts one or many sweetness levels "
@@ -41,6 +41,18 @@ cocktail_filters_documentation = extend_schema(
             "with corresponding sweetness levels. "
             "If more than one is given they are "
             "treated as OR clauses.",
+        ),
+        OpenApiParameter(
+            name="min_price",
+            type=int,
+            description="Accepts minimum price integer to filter "
+            "cocktails with higher or equal average price.",
+        ),
+        OpenApiParameter(
+            name="max_price",
+            type=int,
+            description="Accepts maximum price integer to filter "
+            "cocktails with lower or equal average price.",
         ),
     ]
 )
