@@ -1,0 +1,55 @@
+.catalog {
+    // Оскільки батьківська <section> вже має grid-column: span 9,
+    // тут нам не потрібно додавати grid-column: 4/13, 
+    // він автоматично заповнить ці 9 колонок.
+
+    &__title {
+        margin-bottom: 24px;
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #362c2c;
+        }
+    }
+
+    &__info {
+
+        display: grid;
+
+
+        grid-template-columns: repeat(9, 1fr);
+        column-gap: 20px; 
+
+        padding: 16px;
+        background-color: rgba(238, 238, 238, 1);
+        border-radius: 8px;
+        border: 1px solid rgba(44, 44, 44, 1);
+        align-items: start;
+    }
+
+    &__text {
+
+        grid-column: span 8;
+        line-height: 1.5;
+        color: #362c2c;
+    }
+
+    &__button {
+
+        grid-column: 9;
+        justify-self: end; 
+
+        background-image: url(../../public/img/Close.svg);
+        width: 12px;
+        height: 12px;
+        border: none;
+        background-color: transparent;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        cursor: pointer;
+        margin-top: 4px;
+    }
+}
+
