@@ -20,6 +20,13 @@ from cocktail.serializers import (
 
 def apply_annotate_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
     conditions = []
+    if q_params.get("search"):
+        conditions.append(
+            (
+                Q(cocktails__name__icontains=q_params["search"])
+                | Q(cocktails__description__icontains=q_params["search"])
+            )
+        )
     if q_params.get("vibes"):
         conditions.append(
             Q(cocktails__vibes__name__in=q_params["vibes"].lower().split(","))
@@ -66,6 +73,11 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
 
 def apply_queryset_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
     qs = base_qs
+    if q_params.get("search"):
+        qs = qs.filter(
+            Q(name__icontains=q_params["search"])
+            | Q(description__icontains=q_params["search"])
+        )
     if q_params.get("vibes"):
         qs = qs.filter(vibes__name__in=q_params["vibes"].lower().split(","))
     if q_params.get("ingredients"):
@@ -113,7 +125,7 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
                 Prefetch(
                     "through_ingredients",
                     queryset=CocktailIngredients.objects.select_related(
-                        "ingredient"
+                        "ingredient", "alternative_ingredient"
                     ),
                 )
             )

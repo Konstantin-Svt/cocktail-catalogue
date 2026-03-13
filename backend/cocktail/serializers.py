@@ -22,10 +22,19 @@ class IngredientForCocktailSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="ingredient.name")
     category = serializers.CharField(source="ingredient.category")
     unit = serializers.CharField(source="ingredient.unit")
+    alternative = serializers.StringRelatedField(source="alternative_ingredient")
 
     class Meta:
         model = CocktailIngredients
-        fields = ("id", "name", "category", "amount", "unit")
+        fields = (
+            "id",
+            "name",
+            "category",
+            "amount",
+            "unit",
+            "alternative",
+            "optional",
+        )
         read_only_fields = fields
 
 

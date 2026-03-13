@@ -7,6 +7,7 @@ from cocktail.models import (
     Vibe,
     Ingredient,
     CocktailIngredients,
+    SimilarCocktails,
 )
 
 admin.site.unregister(Group)
@@ -24,16 +25,23 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = ("name", "category", "unit")
 
 
+class SimilarCocktailsInline(admin.TabularInline):
+    model = SimilarCocktails
+    fk_name = "from_cocktail"
+    extra = 1
+    autocomplete_fields = ("to_cocktail",)
+
+
 class CocktailIngredientsInline(admin.TabularInline):
     model = CocktailIngredients
     fk_name = "cocktail"
     extra = 1
-    autocomplete_fields = ("ingredient",)
+    autocomplete_fields = ("ingredient", "alternative_ingredient")
 
 
 @admin.register(Cocktail)
 class CocktailAdmin(admin.ModelAdmin):
-    inlines = [CocktailIngredientsInline]
+    inlines = [CocktailIngredientsInline, SimilarCocktailsInline]
     search_fields = ["name", "description"]
     autocomplete_fields = ("ingredients", "vibes", "similar_cocktails")
     list_display = ("name", "alcohol_level", "sweetness_level")

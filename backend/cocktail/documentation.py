@@ -3,6 +3,12 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 cocktail_filters_documentation = extend_schema(
     parameters=[
         OpenApiParameter(
+            name="search",
+            type=str,
+            description="Filters by searching given text in "
+            "cocktails name or description (case insensitive).",
+        ),
+        OpenApiParameter(
             name="vibes",
             type=str,
             many=True,

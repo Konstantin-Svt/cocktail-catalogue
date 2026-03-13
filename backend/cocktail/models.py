@@ -42,15 +42,38 @@ class Cocktail(models.Model):
         "Ingredient",
         related_name="cocktails",
         through="CocktailIngredients",
+        through_fields=("cocktail", "ingredient"),
         blank=True,
     )
     vibes = models.ManyToManyField(
         "Vibe", related_name="cocktails", blank=True
     )
-    similar_cocktails = models.ManyToManyField("self", blank=True)
+    similar_cocktails = models.ManyToManyField(
+        "self", blank=True, through="SimilarCocktails", symmetrical=True
+    )
 
     def __str__(self):
         return self.name
+
+
+class SimilarCocktails(models.Model):
+    from_cocktail = models.ForeignKey(
+        Cocktail,
+        on_delete=models.CASCADE,
+        related_name="similar_cocktails_from",
+    )
+    to_cocktail = models.ForeignKey(
+        Cocktail, on_delete=models.CASCADE, related_name="similar_cocktails_to"
+    )
+
+    class Meta:
+        unique_together = ("from_cocktail", "to_cocktail")
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(from_cocktail=models.F("to_cocktail")),
+                name="prevent_self_cocktail_similarity",
+            )
+        ]
 
 
 class Ingredient(models.Model):
@@ -91,15 +114,31 @@ class CocktailIngredients(models.Model):
         on_delete=models.CASCADE,
         related_name="through_cocktails",
     )
+    alternative_ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name="through_cocktails_alternative",
+        null=True,
+        blank=True,
+    )
     cocktail = models.ForeignKey(
         Cocktail,
         on_delete=models.CASCADE,
         related_name="through_ingredients",
     )
     amount = models.PositiveIntegerField()
+    optional = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ("cocktail", "ingredient")
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(
+                    ingredient=models.F("alternative_ingredient")
+                ),
+                name="prevent_ingredient_&_alt_similarity",
+            )
+        ]
 
 
 class Vibe(models.Model):
