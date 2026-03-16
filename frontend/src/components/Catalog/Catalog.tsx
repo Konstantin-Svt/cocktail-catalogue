@@ -1,61 +1,98 @@
 import { CatalogCard } from '../CatalogCard/CatalogCard';
 import './Catalog.scss';
-import data from '../../../../backend/fixtures/data.json';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FilterState } from '../MainPage/MainPage';
 
-interface CocktailItem {
-    pk: number;
-    model: string;
-    fields: {
-        name: string;
-        average_price: string;
-        image: string;
-        description: string;
-        alcohol_level: string;
-    };
+interface Cocktail {
+    id: number;
+    name: string;
+    description: string;
+    average_price: string;
+    alcohol_level: string;
+    sweetness_level: string;
+    preparation: string;
+    preparation_time: number;
+    image: string;
+    vibes: any[]; // зазвичай масив об'єктів або ID
+    ingredients: any[]; // зазвичай масив ID або об'єктів
 }
 
 interface Props {
     activeFilters: FilterState;
     setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
+    cocktails: any[];
+    ingredients: any[];
 }
 
-export const Catalog: React.FC<Props> = ({ activeFilters, setFilters }) => {
-    // Базовий масив коктейлів
-    const allCocktails = data.filter(item => item.model === 'cocktail.cocktail') as unknown as CocktailItem[];
+export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails, ingredients }) => {
 
-    // Логіка фільтрації
-    const filteredCocktails = allCocktails.filter(cocktail => {
-        const { alcoholType, alcoholLevel, price, sweetnessLevel, vibe } = activeFilters;
-        const fields = cocktail.fields;
-        const avgPrice = parseFloat(fields.average_price);
+    const getIngredientsForCocktail = (cocktail: Cocktail): string[] => {
+        // Перевірка на існування масиву інгредієнтів
+        if (!cocktail.ingredients || !Array.isArray(cocktail.ingredients)) {
+            return [];
+        }
 
-        // Текст для пошуку (назва + опис) для перевірки солодкості та вайбу
-        const searchableText = `${fields.name} ${fields.description}`.toLowerCase();
+        if (typeof cocktail.ingredients[0] === 'string') {
+            return cocktail.ingredients as unknown as string[];
+        }
 
-        const matchesType = alcoholType.length === 0 ||
-            alcoholType.some(type =>
-                fields.description.toLowerCase().includes(type.toLowerCase()) ||
-                fields.name.toLowerCase().includes(type.toLowerCase())
-            );
+        return ingredients
+            .filter(ing => cocktail.ingredients?.includes(ing.id))
+            .map(ing => ing.name || ""); // Додано fallback для імені
+    };
 
-        const matchesLevel = !alcoholLevel || fields.alcohol_level === alcoholLevel;
+    // 2. Основна логіка фільтрації
+    const filteredCocktails = useMemo(() => {
+        // Додаємо перевірку, чи взагалі прийшли коктейлі
+        if (!cocktails || !Array.isArray(cocktails)) return [];
 
-        const matchesPrice = avgPrice >= price[0] && avgPrice <= price[1];
+        return cocktails.filter(cocktail => {
+            const { alcoholType, alcoholLevel, price, sweetnessLevel, vibe } = activeFilters;
 
-        // Фільтр за солодкістю (шукаємо входження слова в описі)
-        const matchesSweetness = !sweetnessLevel || searchableText.includes(sweetnessLevel.toLowerCase());
+            const avgPrice = parseFloat(cocktail.average_price || "0");
 
-        // Фільтр за вайбом
-        const matchesVibe = !vibe || searchableText.includes(vibe.toLowerCase());
+            // 1. Фільтр: Тип алкоголю (Чекбокси)
+            const matchesType = alcoholType.length === 0 ||
+                alcoholType.some(type => {
+                    const searchStr = type.toLowerCase();
 
-        return matchesType && matchesLevel && matchesPrice && matchesSweetness && matchesVibe;
-    });
+                    // Використовуємо || "" щоб уникнути помилок на null значеннях
+                    const name = (cocktail.name || "").toLowerCase();
+                    const description = (cocktail.description || "").toLowerCase();
+
+                    const inBasicInfo = name.includes(searchStr) || description.includes(searchStr);
+
+                    const cocktailIngredients = getIngredientsForCocktail(cocktail);
+                    const inIngredients = cocktailIngredients.some(ingName =>
+                        (ingName || "").toLowerCase().includes(searchStr)
+                    );
+
+                    return inBasicInfo || inIngredients;
+                });
+
+            // 2. Фільтр: Міцність (Радіо)
+            const matchesLevel = !alcoholLevel ||
+                (cocktail.alcohol_level || "").toLowerCase() === alcoholLevel.toLowerCase();
+
+            // 3. Фільтр: Ціна (Слайдер)
+            const matchesPrice = avgPrice >= price[0] && avgPrice <= price[1];
+
+            // 4. Фільтр: Солодкість (Радіо)
+            const matchesSweetness = !sweetnessLevel ||
+                (cocktail.sweetness_level || "").toLowerCase() === sweetnessLevel.toLowerCase();
+
+            // 5. Фільтр: Вайб (Радіо)
+            const matchesVibe = !vibe || (cocktail.vibes && Array.isArray(cocktail.vibes) && cocktail.vibes.some((v: any) => {
+                const vibeName = typeof v === 'string' ? v : v.name;
+                return vibeName?.toLowerCase() === vibe.toLowerCase();
+            }));
+
+            return matchesType && matchesLevel && matchesPrice && matchesSweetness && matchesVibe;
+        });
+    }, [activeFilters, cocktails, ingredients]);
 
     const cocktailsCount = filteredCocktails.length;
 
-    // Функції видалення фільтрів
     const removeType = (type: string) => {
         setFilters(prev => ({
             ...prev,
@@ -126,9 +163,10 @@ export const Catalog: React.FC<Props> = ({ activeFilters, setFilters }) => {
                 {filteredCocktails.length > 0 ? (
                     filteredCocktails.map((cocktail) => (
                         <CatalogCard
-                            id={cocktail.pk}
-                            key={cocktail.pk}
-                            data={cocktail.fields}
+                            id={cocktail.id}
+                            key={cocktail.id}
+                            data={cocktail}
+                            ingredients={getIngredientsForCocktail(cocktail)}
                         />
                     ))
                 ) : (

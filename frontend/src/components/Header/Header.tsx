@@ -18,7 +18,7 @@ export const Header = () => {
                 type="text" 
                 className="header__input" 
                 placeholder='Search cocktails or ingredients'
-                maxLength={26}/>
+                maxLength={50}/>
             </div>
         </header>
     )
