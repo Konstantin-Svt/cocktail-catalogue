@@ -6,7 +6,7 @@ export const Header = () => {
             <div 
             className="header__left">
                 <button className='header__button'>
-                    LOGO
+
                 </button>
                 <div 
             className="header__logo">
