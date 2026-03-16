@@ -1,17 +1,14 @@
 .catalog {
     &__list {
         display: grid;
-        // Створюємо 3 рівні колонки. Оскільки батько займає 9 колонок сайту,
-        // кожна з цих 3-х колонок буде займати рівно по 3 колонки основної сітки.
         grid-template-columns: repeat(3, 1fr);
-        column-gap: 20px; // Такий самий, як у всього сайту
-        row-gap: 32px; // Відступ між рядами
+        column-gap: 20px;
+        row-gap: 32px; 
         margin-top: 32px;
     }
 }
 
 .cocktail-card {
-    // Картка автоматично займає 1 фракцію (тобто 3 колонки сайту)
     background: #FFFFFF;
     border: 1px solid #E0E0E0;
     border-radius: 8px;
@@ -19,9 +16,30 @@
     display: flex;
     flex-direction: column;
 
-    &__image {
-        aspect-ratio: 320 / 220; // Співвідношення сторін як на макеті
-        background-color: #D9D9D9; // Плейсхолдер для картинки
+&__image {
+        // Властивості батьківського (сірого) контейнера
+        background-color: #D9D9D9;
+        margin: 16px;
+        border-radius: 16px;
+        width: 288px;
+        height: 221px;
+
+        // ВАЖЛИВО: щоб картинка не вилазила за border-radius
+        overflow: hidden;
+
+        // Властивості самої картинки всередині контейнера
+        &-img {
+            width: 100%; // Заповнює весь батьківський блок по ширині
+            height: 100%; // Заповнює весь батьківський блок по висоті
+
+            // НАЙВАЖЛИВІШЕ: масштабує картинку, зберігаючи пропорції,
+            // і обрізає зайве, щоб заповнити весь контейнер
+            object-fit: cover;
+
+            // Додаткові властивості
+            object-position: center; // Центрує картинку, якщо вона обрізається
+            display: block; // Забирає відступ знизу у інлайнових елементів
+        }
     }
 
     &__content {
@@ -35,6 +53,8 @@
         font-size: 18px;
         font-weight: 700;
         margin-bottom: 8px;
+        color: black;
+        text-decoration: none;
     }
 
     &__ingredients {
@@ -43,6 +63,7 @@
         margin-bottom: 16px;
         line-height: 1.4;
         flex-grow: 1;
+        gap: 8px;
     }
 
     &__footer {
@@ -52,5 +73,19 @@
         color: #333;
         border-top: 1px solid #F2F2F2;
         padding-top: 12px;
+    }
+    &__tag {
+        border: 1px solid rgba(245, 247, 250, 1);
+        border-radius: 16px;
+        padding: 4px 10px;
+        margin-left: 8px;
+    }
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    &__link {
+        text-decoration: none;
     }
 }
