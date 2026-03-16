@@ -1,6 +1,21 @@
 import './AlcoFilters.scss';
+import React, { useState } from 'react';
 
-export const AlcoFilters = () => {
+interface FilterState {
+    alcoholType: string[];
+    alcoholLevel: string;
+    price: [number, number];
+    sweetnessLevel: string;
+    vibe: string;
+}
+
+interface Props {
+    onFilterChange: React.Dispatch<React.SetStateAction<FilterState>>;
+    filters: FilterState;
+}
+
+export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters }) => {
+    
     const alcoholTypes = [
         { name: 'Vodka', count: 12 },
         { name: 'Rum', count: 43 },
@@ -11,6 +26,7 @@ export const AlcoFilters = () => {
         { name: 'Non-alcoholic', count: 12 },
     ];
     const alcoholLevels = [
+        { name: 'Non-Alcoholic', count: 67 },
         { name: 'Low', count: 23 },
         { name: 'Medium', count: 58 },
         { name: 'Strong', count: 32 },
@@ -20,11 +36,6 @@ export const AlcoFilters = () => {
         { name: 'Medium', count: 21 },
         { name: 'Sweet', count: 46 },
     ];
-    const priceRanges = [
-        { name: 'Low', count: 21 },
-        { name: 'Medium', count: 34 },
-        { name: 'High', count: 12 },
-    ];
     const vibeTypes = [
         { name: 'Party', count: 12 },
         { name: 'Romantic', count: 21 },
@@ -32,14 +43,52 @@ export const AlcoFilters = () => {
         { name: 'Tropical', count: 23 },
         { name: 'Classic', count: 12 },
     ];
+
+    const totalMax = 180;
+
+    const trackStyle = {
+        left: `${(filters.price[0] / totalMax) * 100}%`,
+        right: `${100 - (filters.price[1] / totalMax) * 100}%`
+    };
+    const handleReset = (e: React.MouseEvent) => {
+        e.preventDefault();
+        onFilterChange({
+            alcoholType: [],
+            alcoholLevel: '',
+            price: [0, 180],
+            sweetnessLevel: '',
+            vibe: '',
+        });
+    };
+    const handleCheckbox = (name: string) => {
+        const newTypes = filters.alcoholType.includes(name)
+            ? filters.alcoholType.filter(t => t !== name)
+            : [...filters.alcoholType, name];
+        onFilterChange({ ...filters, alcoholType: newTypes });
+    };
+
+    const handleRadio = (key: keyof FilterState, value: string) => {
+        onFilterChange({ ...filters, [key]: value });
+    };
+
+    const handlePrice = (val: number, isMin: boolean) => {
+        const newPrice = (isMin
+            ? [val, filters.price[1]]
+            : [filters.price[0], val]) as [number, number];
+
+        onFilterChange(prev => ({
+            ...prev,
+            price: newPrice
+        }));
+    };
+
     return (
         <div className="alcoFilters">
             <div className="alcoFilters__sections">
                 <div className="alcoFilters__section">
                     <div className="section__right">Your Filters</div>
                     <div className="section__left">
-                        <span className="reset__icon"></span> 
-                        <a href="" className='reset__text'>Reset Filters</a>
+                        <a href="" className='reset__text' onClick={handleReset}><span className="reset__icon"></span> Reset Filters</a>
                     </div>
                 </div>
                 <div className="alcoFilters__section">
@@ -51,7 +100,10 @@ export const AlcoFilters = () => {
                             {alcoholTypes.map((type) => (
                                 <label key={type.name} className="filter-item">
                                     <div className="filter-item__left">
-                                        <input type="checkbox" className="filter-item__checkbox" />
+                                        <input type="checkbox" 
+                                        className="filter-item__checkbox" 
+                                        checked={filters.alcoholType.includes(type.name)}
+                                        onChange={() => handleCheckbox(type.name)} />
                                         <span className="filter-item__custom"></span>
                                         <span className="filter-item__name">{type.name}</span>
                                     </div>
@@ -67,7 +119,12 @@ export const AlcoFilters = () => {
                         {alcoholLevels.map((level) => (
                             <label key={level.name} className="filter-item">
                                 <div className="filter-item__left">
-                                    <input type="radio" name="alcohol-level" className="filter-item__radio" />
+                                    <input 
+                                    type="radio" 
+                                    name="alcohol-level" 
+                                    className="filter-item__radio"
+                                    checked={filters.alcoholLevel === level.name}
+                                    onChange={() => handleRadio('alcoholLevel', level.name)} />
                                     <span className="filter-item__custom-radio"></span>
                                     <span className="filter-item__name">{level.name}</span>
                                 </div>
@@ -86,6 +143,8 @@ export const AlcoFilters = () => {
                                         type="radio"
                                         name="sweetness"
                                         className="filter-item__radio"
+                                        checked={filters.sweetnessLevel === level.name}
+                                        onChange={() => handleRadio('sweetnessLevel', level.name)}
                                     />
                                     <span className="filter-item__custom-radio"></span>
                                     <span className="filter-item__name">{level.name}</span>
@@ -96,21 +155,32 @@ export const AlcoFilters = () => {
                     </div> 
                 </div>
                 <div className="alcoFilters__section">
-                    <h3 className="filter-title">Price Range</h3>
                     <div className="type__filters">
                         <div className="price-range">
-                            <div className="price-range__inputs">
-                                <div className="price-range__field">
-                                    <input type="text" placeholder="From" className="price-range__input" />
-                                    <span className="price-range__currency">$</span>
-                                </div>
+                            <h3 className="price-range__title">Price Range</h3>
+                            <div className="price-range__display">
+                                {filters.price[0]} $ - {filters.price[1]} $ +
+                            </div>
 
-                                <span className="price-range__divider">-</span>
+                            <div className="range-slider-root">
+                                <div className="range-slider-track" style={trackStyle}></div>
 
-                                <div className="price-range__field">
-                                    <input type="text" placeholder="to" className="price-range__input" />
-                                    <span className="price-range__currency">$</span>
-                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max={totalMax}
+                                    value={filters.price[0]}
+                                    onChange={(e) => handlePrice(Number(e.target.value), true)}
+                                    className="range-input"
+                                />
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max={totalMax}
+                                    value={filters.price[1]}
+                                    onChange={(e) => handlePrice(Number(e.target.value), false)}
+                                    className="range-input"
+                                />
                             </div>
                         </div>
                     </div>
@@ -125,6 +195,8 @@ export const AlcoFilters = () => {
                                         type="radio"
                                         name="vibe"
                                         className="filter-item__radio"
+                                        checked={filters.vibe === vibe.name}
+                                        onChange={() => handleRadio('vibe', vibe.name)}
                                     />
                                     <span className="filter-item__custom-radio"></span>
                                     <span className="filter-item__name">{vibe.name}</span>

@@ -1,8 +1,14 @@
 .catalog {
-    // Оскільки батьківська <section> вже має grid-column: span 9,
-    // тут нам не потрібно додавати grid-column: 4/13, 
-    // він автоматично заповнить ці 9 колонок.
-
+    &__img {
+        background-image: url(../../public/img/Pop.svg);
+        height: 20px;
+        width: 20px;
+    }
+        &__img2 {
+            background-image: url(../../public/img/Pop2.svg);
+            height: 20px;
+            width: 20px;
+        }
     &__title {
         margin-bottom: 24px;
 
@@ -13,33 +19,25 @@
         }
     }
 
-    &__info {
-
+    &__sortBy {
+        background-color: rgba(255, 255, 255, 1);
+        cursor: pointer;
+        padding: 12px;
         display: grid;
-
-
-        grid-template-columns: repeat(9, 1fr);
-        column-gap: 20px; 
-
-        padding: 16px;
-        background-color: rgba(238, 238, 238, 1);
-        border-radius: 8px;
-        border: 1px solid rgba(44, 44, 44, 1);
-        align-items: start;
+        grid-template-columns: auto 1fr auto;
+        width: fit-content;
+        align-items: center;
+        border-radius: 16px;
+        border: 1px solid rgba(228, 231, 238, 1);
+        &-text {
+            font-size: 14px;
+            font-weight: 500;
+            padding-right: 8px;
+            padding-left: 8px;
+        }
     }
-
-    &__text {
-
-        grid-column: span 8;
-        line-height: 1.5;
-        color: #362c2c;
-    }
-
     &__button {
-
-        grid-column: 9;
         justify-self: end; 
-
         background-image: url(../../public/img/Close.svg);
         width: 12px;
         height: 12px;
@@ -51,5 +49,33 @@
         cursor: pointer;
         margin-top: 4px;
     }
+    &__controls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    &__chip {
+        margin-left: 15px;
+    }
 }
 
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border: 1px solid #a37d8d; // Твій колір зі скріншоту
+    border-radius: 20px;
+    background: #f8f6f7;
+    color: #6b4d5a;
+    font-size: 14px;
+    gap: 8px;
+
+    &__close {
+        cursor: pointer;
+        font-weight: bold;
+
+        &:hover {
+            color: #000;
+        }
+    }
+}

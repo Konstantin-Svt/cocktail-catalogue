@@ -1,29 +1,35 @@
-
 import './CatalogCard.scss';
+import { Link } from 'react-router-dom';
 
-export const CatalogCard = () => {
-    const cocktails = [
-        { id: 1, name: 'Mojito', ingredients: 'White rum, lime, mint, sugar, soda water', time: '5 min', level: 'Easy' },
-        { id: 2, name: 'Margarita', ingredients: 'Tequila, lime juice, triple sec', time: '5 min', level: 'Easy' },
-        { id: 3, name: 'Classic Margarita', ingredients: 'White rum, coconut cream, pineapple juice', time: '10 min', level: 'Easy' },
-    ];
+interface Props {
+    data: {
+        name: string;
+        average_price: string;
+        image: string;
+        description: string;
+        alcohol_level: string;
+    }
+    id: number,
+}
+
+export const CatalogCard: React.FC<Props> = ({ data, id }) => {
     return (
-        <div className="catalog">
-            <div className="catalog__list">
-                {cocktails.map(cocktail => (
-                    <article key={cocktail.id} className="cocktail-card">
-                        <div className="cocktail-card__image"></div>
-                        <div className="cocktail-card__content">
-                            <h3 className="cocktail-card__name">{cocktail.name}</h3>
-                            <p className="cocktail-card__ingredients">{cocktail.ingredients}</p>
-                            <div className="cocktail-card__footer">
-                                <span className="cocktail-card__time">{cocktail.time}</span>
-                                <span className="cocktail-card__level">{cocktail.level}</span>
-                            </div>
-                        </div>
-                    </article>
-                ))}
+        <article className="cocktail-card">
+            <Link to={`/product/${id}`} className="cocktail-card__link">
+            <div className="cocktail-card__image">
+                <img src={data.image} alt={data.name} />
             </div>
-        </div>
+            </Link>
+            <div className="cocktail-card__content">
+                <Link to={`/product/${id}`} className="cocktail-card__link">
+                <h3 className="cocktail-card__name">{data.name}</h3>
+                </Link>
+                <p className="cocktail-card__description">{data.description}</p>
+                <div className="cocktail-card__footer">
+                    <span className="cocktail-card__price">${data.average_price}</span>
+                    <span className="cocktail-card__level">{data.alcohol_level}</span>
+                </div>
+            </div>
+        </article>
     );
 }

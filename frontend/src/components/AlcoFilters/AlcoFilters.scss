@@ -3,16 +3,15 @@
 }
 
 .alcoFilters {
-    border: 1px solid rgba(54, 44, 44, 1);
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border: 1px solid rgba(228, 231, 238, 1);
+    border-radius: 8px;
     &__section {
     flex-direction: column;
         display: flex;
         justify-content: space-between;
         padding: 16px;
         &:not(:last-child) {
-            border-bottom: 1px solid rgba(54, 44, 44, 1);
+            border-bottom: 1px solid rgba(228, 231, 238, 1);
             }
         &:first-child {
             flex-direction: row; 
@@ -25,12 +24,13 @@
         height: 16px;
         background-size: contain; 
             vertical-align: middle;
-        background-image: url(/img/reset.svg);
+        background-image: url(../../public/img/reset_filter.svg);
         background-repeat: no-repeat;
 }
 .reset__text {
-    color: rgba(150, 150, 150, 1);
+    color: rgba(126, 47, 78, 1);
     text-decoration: none;
+    font-family: Arial, Helvetica, sans-serif;
 }
 .filter-title {
     font-weight: 700;
@@ -51,7 +51,39 @@
     align-items: center;
     padding: 6px 0;
     cursor: pointer;
+    &__radio {
+        box-sizing: border-box;
+        appearance: none;
+        -webkit-appearance: none;
+        display: grid;
+        place-content: center;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #E0E0E0;
+        border-radius: 50%;
+        outline: none;
+        cursor: pointer;
 
+        place-content: center;
+        transition: border-color 0.2s ease;
+    
+        &:hover {
+            border-color: black;
+        }
+&:checked {
+    border-color: rgba(126, 47, 78, 1); 
+
+    &::before {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: rgba(126, 47, 78, 1); 
+        justify-self: center;
+        align-self: center;
+    }
+}
+    }
     &__left {
         display: flex;
         align-items: center;
@@ -60,9 +92,9 @@
 
     &__checkbox {
         display: none; 
-
+        border: rgba(217, 217, 217, 1);
         &:checked+.filter-item__custom {
-            background-color: #362c2c;
+            background-color: rgba(126, 47, 78, 1);
 
             &::after {
                 display: block;
@@ -75,7 +107,7 @@
     &__custom {
         width: 18px;
         height: 18px;
-        border: 1.5px solid #362c2c;
+        border: 1.5px solid rgba(217, 217, 217, 1);
         border-radius: 4px;
         position: relative;
 
@@ -105,50 +137,81 @@
 }
 
 .price-range {
-    margin-top: 12px;
-    width: 100%; 
+    width: 100%;
+    max-width: 280px;
+    padding: 10px 0;
+}
 
-    &__inputs {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 100%; 
-    }
+.price-range__title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #333;
+}
 
-    &__field {
-        position: relative;
-        flex: 1; 
-        min-width: 0;
-    }
+.price-range__display {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 20px;
+}
 
-    &__input {
-        width: 100%; 
-        box-sizing: border-box;
+.range-slider-root {
+    position: relative;
+    width: 100%;
+    height: 4px;
+    background: #f0f0f0;
+    /* Світло-сіра основа */
+    border-radius: 2px;
+}
 
-        padding: 11px 30px 11px 12px;
-        font-size: 14px;
-        color: #362c2c;
-        background-color: #f8f9fb;
-        border: 1px solid rgba(54, 44, 44, 0.05);
-        border-radius: 40px;
-        outline: none;
+.range-slider-track {
+    position: absolute;
+    height: 100%;
+    background-color: #8B2E40;
+    /* Бордовий колір лінії */
+    border-radius: 2px;
+    z-index: 1;
+}
 
-        &::placeholder {
-            color: rgba(150, 150, 150, 0.8);
-        }
-    }
+.range-input {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    top: 0;
+    left: 0;
+    background: none;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+    z-index: 2;
+    margin: 0;
+}
 
-    &__currency {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 14px;
-        color: rgba(54, 44, 44, 0.5);
-    }
+/* Стиль кружечка для Chrome/Safari */
+.range-input::-webkit-slider-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #8B2E40;
+    border: none;
+    cursor: pointer;
+    pointer-events: auto;
+    /* Дозволяє тягнути кружечок */
+    -webkit-appearance: none;
+}
 
-    &__divider {
-        flex-shrink: 0; 
-        color: #362c2c;
-    }
+/* Стиль кружечка для Firefox */
+.range-input::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    border: none;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+/* Щоб повзунки не перекривали один одного некоректно */
+.range-input:focus {
+    z-index: 5;
 }
