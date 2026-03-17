@@ -1,5 +1,6 @@
 import './AlcoFilters.scss';
 import React, { useEffect, useMemo } from 'react';
+import { fetchCocktailsSummary, fetchFilteredCocktails } from '../../api/cocktailApi';
 
 const ALCOHOL_TYPE_MAPPING: Record<string, string[]> = {
     'whiskey': ['whiskey'],
@@ -35,6 +36,7 @@ interface Props {
 
 export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktails, allCocktails, setCocktails }) => {
     const [tempPrice, setTempPrice] = React.useState<[number, number]>(filters.price);
+    const [summary, setSummary] = React.useState<any>(null);
 
     const priceTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const sourceForCounts = allCocktails || cocktails;
@@ -43,43 +45,26 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
     }, [filters.price]);
 
     useEffect(() => {
+        const getSummary = async () => {
+            const data = await fetchCocktailsSummary(filters);
+            setSummary(data);
+        };
+        getSummary();
+    }, [filters]);
+
+    useEffect(() => {
         const controller = new AbortController();
 
-        const fetchFilteredCocktails = async () => {
-            const params = new URLSearchParams();
-
-
-            if (filters.search) {
-                params.append('search', filters.search);
-            }
-
-            if (filters.alcoholType.length > 0) {
-                const allTypesToSearch = filters.alcoholType.flatMap(type => {
-                    const lowerType = type.toLowerCase();
-                    return ALCOHOL_TYPE_MAPPING[lowerType] || [lowerType];
-                });
-                params.append('types', allTypesToSearch.join(','));
-            }
-
-            if (filters.alcoholLevel) params.append('level', filters.alcoholLevel);
-            if (filters.sweetnessLevel) params.append('sweetness', filters.sweetnessLevel);
-            if (filters.vibe) params.append('vibe', filters.vibe);
-            params.append('minPrice', filters.price[0].toString());
-            params.append('maxPrice', filters.price[1].toString());
-
+        const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/cocktails?${params.toString()}`, {
-                    signal: controller.signal
-                });
-                if (!response.ok) throw new Error('Network response was not ok');
-                const data = await response.json();
+                const data = await fetchFilteredCocktails(filters);
                 setCocktails(data);
             } catch (error: any) {
                 if (error.name !== 'AbortError') console.error(error);
             }
         };
 
-        const timeoutId = setTimeout(fetchFilteredCocktails, 300);
+        const timeoutId = setTimeout(fetchData, 300);
         return () => {
             clearTimeout(timeoutId);
             controller.abort();
@@ -98,39 +83,43 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
                 .map(s => s.toLowerCase());
 
             const count = sourceForCounts.filter((c: any) => {
-                
                 const cocktailIngredients = Array.isArray(c.ingredients) ? c.ingredients : [];
-
-               
-                return cocktailIngredients.some((ing: string) =>
-                    synonyms.includes(ing.toString().toLowerCase().trim())
-                );
+                return cocktailIngredients.some((ing: any) => {
+                    const ingName = (typeof ing === 'string' ? ing : ing.name || '').toLowerCase().trim();
+                    return synonyms.includes(ingName);
+                });
             }).length;
 
             return { name, count };
         });
     }, [sourceForCounts]); 
 
+    // Alcohol Levels
     const alcoholLevels = useMemo(() =>
         ALCOHOL_LEVELS.map(level => ({
             name: level,
-            count: sourceForCounts.filter((c: any) => (c.alcohol_level || "").toLowerCase() === level.toLowerCase()).length
-        })), [sourceForCounts]);
+            count: summary?.alcohol_levels?.[level.toLowerCase()] ??
+                sourceForCounts.filter((c: any) => (c.alcohol_level || "").toLowerCase() === level.toLowerCase()).length
+        })), [sourceForCounts, summary]);
 
+    // Sweetness Levels
     const sweetnessLevels = useMemo(() =>
         SWEETNESS_LEVELS.map(level => ({
             name: level,
-            count: sourceForCounts.filter((c: any) => (c.sweetness_level || "").toLowerCase() === level.toLowerCase()).length
-        })), [sourceForCounts]);
+            count: summary?.sweetness_levels?.[level.toLowerCase()] ??
+                sourceForCounts.filter((c: any) => (c.sweetness_level || "").toLowerCase() === level.toLowerCase()).length
+        })), [sourceForCounts, summary]);
 
+    // Vibe Types
     const vibeTypes = useMemo(() =>
         VIBE_NAMES.map(name => ({
             name,
-            count: sourceForCounts.filter((c: any) => {
-                const vibes = Array.isArray(c.vibes) ? c.vibes : [];
-                return vibes.some((v: any) => (typeof v === 'string' ? v : v.name).toLowerCase() === name.toLowerCase());
-            }).length
-        })), [sourceForCounts]);
+            count: summary?.vibes?.[name.toLowerCase()] ??
+                sourceForCounts.filter((c: any) => {
+                    const vibes = Array.isArray(c.vibes) ? c.vibes : [];
+                    return vibes.some((v: any) => (typeof v === 'string' ? v : v.name).toLowerCase() === name.toLowerCase());
+                }).length
+        })), [sourceForCounts, summary]);
 
 
     const handleReset = (e: React.MouseEvent) => {
@@ -209,7 +198,7 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
                                         <span className="filter-item__custom"></span>
                                         <span className="filter-item__name">{type.name}</span>
                                     </div>
-                                    <span className="filter-item__quantity">{type.count}</span>
+                                    <span className="filter-item__quantity">{summary?.alcohol_types?.[type.name.toLowerCase()] ?? type.count}</span>
                                 </label>
                             ))}
                         </div>

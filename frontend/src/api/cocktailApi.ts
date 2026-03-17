@@ -1,4 +1,6 @@
-const BASE_URL = 'https://cocktail-catalogue.onrender.com/api';
+const DEFAULT_URL = 'https://cocktail-catalogue.onrender.com/api';
+
+export const BASE_URL = (import.meta as any).env?.VITE_API_URL || DEFAULT_URL;
 
 const ALCOHOL_SYNONYMS: Record<string, string[]> = {
     'whiskey': ['whiskey', 'bourbon', 'scotch', 'rye', 'whisky'],
@@ -10,7 +12,6 @@ const ALCOHOL_SYNONYMS: Record<string, string[]> = {
 export const fetchCocktails = () => fetch(`${BASE_URL}/cocktails/`).then(res => res.json());
 export const fetchIngredients = () => fetch(`${BASE_URL}/ingredients/`).then(res => res.json());
 export const fetchVibes = () => fetch(`${BASE_URL}/vibes/`).then(res => res.json());
-
 export const fetchFilteredCocktails = (filters: any = {}) => {
     const params = new URLSearchParams();
 
@@ -48,4 +49,16 @@ export const fetchFilteredCocktails = (filters: any = {}) => {
     return fetch(`${BASE_URL}/cocktails/?${params.toString()}`)
         .then(res => res.json())
         .then(data => Array.isArray(data) ? data : data.results || []);
+};
+
+export const fetchFilterCounts = (filters: any = {}) => {
+    return fetchFilteredCocktails(filters);
+};
+export const fetchCocktailsSummary = (filters: any = {}) => {
+    const params = new URLSearchParams();
+    if (filters.search) params.append('search', filters.search);
+    if (filters.vibe) params.append('vibe', filters.vibe);
+
+    return fetch(`${BASE_URL}/cocktails/summary/?${params.toString()}`)
+        .then(res => res.json());
 };
