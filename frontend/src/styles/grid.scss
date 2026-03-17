@@ -8,19 +8,18 @@
     .grid {
         max-width: 1440px;
         margin: 0 auto;
-
         grid-template-columns: repeat(12, 1fr);
         column-gap: 20px;
     }
 }
 
 
-//  @media (min-width: 640px) and (max-width: 1399px) {
-//     .grid {
-//         grid-template-columns: repeat(12, 1fr);
-//         column-gap: 16px;
-//     }
-// }
+@media (min-width: 640px) and (max-width: 1399px) {
+    .grid {
+        grid-template-columns: repeat(12, 1fr);
+        column-gap: 16px;
+    }
+ }
 
 
 // @media (max-width: 639px) {
@@ -28,4 +27,4 @@
 //         grid-template-columns: repeat(4, 1fr);
 //         column-gap: 16px;
 //     } 
-// }
+// } 375

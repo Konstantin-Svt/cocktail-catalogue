@@ -2,19 +2,7 @@ import './AlcoFilters.scss';
 import React, { useEffect, useMemo } from 'react';
 import { fetchCocktailsSummary, fetchFilteredCocktails } from '../../api/cocktailApi';
 
-const ALCOHOL_TYPE_MAPPING: Record<string, string[]> = {
-    'whiskey': ['whiskey'],
-    'rum': ['rum', 'dark rum', 'white rum', 'spiced rum'],
-    'gin': ['gin', 'dry gin'],
-    'vodka': ['vodka'],
-    'tequila': ['tequila'],
-    'liqueur': ['liqueur'],
-    'non-alcoholic': ['non-alcoholic', 'none']
-};
 
-const ALCOHOL_LEVELS = ['Non-Alcoholic', 'Low', 'Medium', 'Strong'];
-const SWEETNESS_LEVELS = ['Dry', 'Medium', 'Sweet'];
-const VIBE_NAMES = ['Party', 'Relax', 'Romantic', 'Energizing'];
 
 interface FilterState {
     alcoholType: string[];
@@ -47,6 +35,7 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
     useEffect(() => {
         const getSummary = async () => {
             const data = await fetchCocktailsSummary(filters);
+            console.log("DEBUG: Summary Data:", data);
             setSummary(data);
         };
         getSummary();
@@ -75,51 +64,39 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
 
 
     const alcoholTypes = useMemo(() => {
-        const types = ['Vodka', 'Rum', 'Gin', 'Tequila', 'Whiskey', 'Liqueur', 'Non-alcoholic'];
+        if (!summary?.ingredients_count) return [];
+        return Object.entries(summary.ingredients_count).map(([key, count]) => ({
+            name: key.charAt(0).toUpperCase() + key.slice(1),
+            count: count as number
+        }));
+    }, [summary]);
 
-        return types.map(name => {
- 
-            const synonyms = (ALCOHOL_TYPE_MAPPING[name.toLowerCase()] || [name.toLowerCase()])
-                .map(s => s.toLowerCase());
 
-            const count = sourceForCounts.filter((c: any) => {
-                const cocktailIngredients = Array.isArray(c.ingredients) ? c.ingredients : [];
-                return cocktailIngredients.some((ing: any) => {
-                    const ingName = (typeof ing === 'string' ? ing : ing.name || '').toLowerCase().trim();
-                    return synonyms.includes(ingName);
-                });
-            }).length;
+    const alcoholLevels = useMemo(() => {
+        if (!summary?.alcohol_level_count) return [];
+        return Object.entries(summary.alcohol_level_count).map(([key, count]) => ({
+            name: key.charAt(0).toUpperCase() + key.slice(1),
+            count: count as number
+        }));
+    }, [summary]);
 
-            return { name, count };
-        });
-    }, [sourceForCounts]); 
 
-    // Alcohol Levels
-    const alcoholLevels = useMemo(() =>
-        ALCOHOL_LEVELS.map(level => ({
-            name: level,
-            count: summary?.alcohol_levels?.[level.toLowerCase()] ??
-                sourceForCounts.filter((c: any) => (c.alcohol_level || "").toLowerCase() === level.toLowerCase()).length
-        })), [sourceForCounts, summary]);
+    const sweetnessLevels = useMemo(() => {
+        if (!summary?.sweetness_level_count) return [];
+        return Object.entries(summary.sweetness_level_count).map(([key, count]) => ({
+            name: key.charAt(0).toUpperCase() + key.slice(1),
+            count: count as number
+        }));
+    }, [summary]);
 
-    // Sweetness Levels
-    const sweetnessLevels = useMemo(() =>
-        SWEETNESS_LEVELS.map(level => ({
-            name: level,
-            count: summary?.sweetness_levels?.[level.toLowerCase()] ??
-                sourceForCounts.filter((c: any) => (c.sweetness_level || "").toLowerCase() === level.toLowerCase()).length
-        })), [sourceForCounts, summary]);
 
-    // Vibe Types
-    const vibeTypes = useMemo(() =>
-        VIBE_NAMES.map(name => ({
-            name,
-            count: summary?.vibes?.[name.toLowerCase()] ??
-                sourceForCounts.filter((c: any) => {
-                    const vibes = Array.isArray(c.vibes) ? c.vibes : [];
-                    return vibes.some((v: any) => (typeof v === 'string' ? v : v.name).toLowerCase() === name.toLowerCase());
-                }).length
-        })), [sourceForCounts, summary]);
+    const vibeTypes = useMemo(() => {
+        if (!summary?.vibes_count) return [];
+        return Object.entries(summary.vibes_count).map(([key, count]) => ({
+            name: key.charAt(0).toUpperCase() + key.slice(1),
+            count: count as number
+        }));
+    }, [summary]);
 
 
     const handleReset = (e: React.MouseEvent) => {
@@ -192,8 +169,8 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
                                     <div className="filter-item__left">
                                         <input type="checkbox"
                                             className="filter-item__checkbox"
-                                            checked={filters.alcoholType.includes(type.name)}
-                                            onChange={() => handleCheckbox(type.name)}
+                                            checked={filters.alcoholType.some(t => t.toLowerCase() === type.name.toLowerCase())}
+                                            onChange={() => handleCheckbox(type.name.toLowerCase())}
                                         />
                                         <span className="filter-item__custom"></span>
                                         <span className="filter-item__name">{type.name}</span>
@@ -215,8 +192,8 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
                                     <input type="radio"
                                         name="alcohol-level"
                                         className="filter-item__radio"
-                                        checked={filters.alcoholLevel === level.name}
-                                        onChange={() => handleRadio('alcoholLevel', level.name)}
+                                        onChange={() => handleRadio('alcoholLevel', level.name.toLowerCase())}
+                                        checked={filters.alcoholLevel.toLowerCase() === level.name.toLowerCase()}
                                     />
                                     <span className="filter-item__custom-radio"></span>
                                     <span className="filter-item__name">{level.name}</span>
@@ -237,8 +214,8 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
                                     <input type="radio"
                                         name="sweetness"
                                         className="filter-item__radio"
-                                        checked={filters.sweetnessLevel === level.name}
-                                        onChange={() => handleRadio('sweetnessLevel', level.name)}
+                                        checked={filters.sweetnessLevel.toLowerCase() === level.name.toLowerCase()}
+                                        onChange={() => handleRadio('sweetnessLevel', level.name.toLowerCase())}
                                     />
                                     <span className="filter-item__custom-radio"></span>
                                     <span className="filter-item__name">{level.name}</span>
@@ -276,8 +253,8 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
                             <label key={vibe.name} className="filter-item">
                                 <div className="filter-item__left">
                                     <input type="radio" name="vibe" className="filter-item__radio"
-                                        checked={filters.vibe === vibe.name}
-                                        onChange={() => handleRadio('vibe', vibe.name)} />
+                                        checked={filters.vibe.toLowerCase() === vibe.name.toLowerCase()}
+                                        onChange={() => handleRadio('vibe', vibe.name.toLowerCase())} />
                                     <span className="filter-item__custom-radio"></span>
                                     <span className="filter-item__name">{vibe.name}</span>
                                 </div>
