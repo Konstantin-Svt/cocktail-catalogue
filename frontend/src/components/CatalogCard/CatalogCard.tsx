@@ -41,7 +41,7 @@ export const CatalogCard: React.FC<Props> = ({ data, ingredients, id }) => {
                 <div className="cocktail-card__ingredients">
                     {ingredients.map((ing, index) => (
                         <span key={index} className="cocktail-card__tag">
-                            {ing}{index < ingredients.length - 1 ? ',' : ''}
+                            {ing}{index < ingredients.length - 1 && ''}
                         </span>
                     ))}
                 </div>
