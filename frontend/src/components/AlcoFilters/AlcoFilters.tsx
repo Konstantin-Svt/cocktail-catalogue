@@ -34,9 +34,14 @@ interface Props {
 }
 
 export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktails, allCocktails, setCocktails }) => {
+    const [tempPrice, setTempPrice] = React.useState<[number, number]>(filters.price);
 
-
+    const priceTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const sourceForCounts = allCocktails || cocktails;
+    useEffect(() => {
+        setTempPrice(filters.price);
+    }, [filters.price]);
+
     useEffect(() => {
         const controller = new AbortController();
 
@@ -80,6 +85,8 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
             controller.abort();
         };
     }, [filters, setCocktails]);
+
+    
 
 
     const alcoholTypes = useMemo(() => {
@@ -151,16 +158,27 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
     };
 
     const handlePrice = (val: number, isMin: boolean) => {
+
         const newPrice = (isMin
-            ? [Math.min(val, filters.price[1]), filters.price[1]]
-            : [filters.price[0], Math.max(val, filters.price[0])]) as [number, number];
-        onFilterChange(prev => ({ ...prev, price: newPrice }));
+            ? [Math.min(val, tempPrice[1]), tempPrice[1]]
+            : [tempPrice[0], Math.max(val, tempPrice[0])]) as [number, number];
+
+        setTempPrice(newPrice);
+
+
+        if (priceTimeoutRef.current) {
+            clearTimeout(priceTimeoutRef.current);
+        }
+
+        priceTimeoutRef.current = setTimeout(() => {
+            onFilterChange(prev => ({ ...prev, price: newPrice }));
+        }, 800);
     };
 
     const totalMax = 180;
     const trackStyle = {
-        left: `${(filters.price[0] / totalMax) * 100}%`,
-        right: `${100 - (filters.price[1] / totalMax) * 100}%`
+        left: `${(tempPrice[0] / totalMax) * 100}%`,
+        right: `${100 - (tempPrice[1] / totalMax) * 100}%`
     };
 
     return (
@@ -247,14 +265,14 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
                     <div className="price-range">
                         <h3 className="price-range__title">Price Range</h3>
                         <div className="price-range__display">
-                            {filters.price[0]} $ - {filters.price[1]} $ +
+                            {tempPrice[0]} $ - {tempPrice[1]} $ +
                         </div>
                         <div className="range-slider-root">
                             <div className="range-slider-track" style={trackStyle}></div>
-                            <input type="range" min="0" max={totalMax} value={filters.price[0]}
+                            <input type="range" min="0" max={totalMax} value={tempPrice[0]}
                                 onChange={(e) => handlePrice(Number(e.target.value), true)}
                                 className="range-input" />
-                            <input type="range" min="0" max={totalMax} value={filters.price[1]}
+                            <input type="range" min="0" max={totalMax} value={tempPrice[1]}
                                 onChange={(e) => handlePrice(Number(e.target.value), false)}
                                 className="range-input" />
                         </div>
