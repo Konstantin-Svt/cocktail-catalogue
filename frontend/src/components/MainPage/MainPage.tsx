@@ -10,15 +10,21 @@ export interface FilterState {
     price: [number, number];
     sweetnessLevel: string;
     vibe: string;
+    search: string;
 }
 
-export const MainPage = () => {
+interface MainPageProps {
+    searchQuery: string;
+}
+
+export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
     const [activeFilters, setActiveFilters] = useState<FilterState>({
         alcoholType: [],
         alcoholLevel: '',
         price: [0, 180],
         sweetnessLevel: '',
         vibe: '',
+        search: '',
     });
 
     const [cocktails, setCocktails] = useState<any[]>([]);
@@ -55,7 +61,13 @@ export const MainPage = () => {
             .catch(() => setIsFiltering(false));
     }, [activeFilters]);
 
-
+    useEffect(() => {
+        setActiveFilters(prev => ({
+            ...prev,
+            search: searchQuery
+        }));
+    }, [searchQuery]);
+    
     if (initialLoading) return <div className="loader">Завантаження додатка...</div>;
 
     return (

@@ -21,7 +21,7 @@ interface FilterState {
     price: [number, number];
     sweetnessLevel: string;
     vibe: string;
-    search?: string;
+    search: string;
 }
 
 interface Props {
@@ -43,12 +43,11 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
         const fetchFilteredCocktails = async () => {
             const params = new URLSearchParams();
 
-            // --- ДОДАЄМО ПОШУК ---
+
             if (filters.search) {
                 params.append('search', filters.search);
             }
 
-            // Твоя існуюча логіка фільтрів
             if (filters.alcoholType.length > 0) {
                 const allTypesToSearch = filters.alcoholType.flatMap(type => {
                     const lowerType = type.toLowerCase();
@@ -87,15 +86,15 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
         const types = ['Vodka', 'Rum', 'Gin', 'Tequila', 'Whiskey', 'Liqueur', 'Non-alcoholic'];
 
         return types.map(name => {
-            // Отримуємо синоніми для пошуку (наприклад, ['whiskey', 'bourbon', ...])
+ 
             const synonyms = (ALCOHOL_TYPE_MAPPING[name.toLowerCase()] || [name.toLowerCase()])
                 .map(s => s.toLowerCase());
 
             const count = sourceForCounts.filter((c: any) => {
-                // Шукаємо в полі ingredients, яке ми побачили в консолі
+                
                 const cocktailIngredients = Array.isArray(c.ingredients) ? c.ingredients : [];
 
-                // Перевіряємо, чи хоча б один інгредієнт коктейлю є в нашому списку синонімів
+               
                 return cocktailIngredients.some((ing: string) =>
                     synonyms.includes(ing.toString().toLowerCase().trim())
                 );
@@ -126,7 +125,7 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
             }).length
         })), [sourceForCounts]);
 
-    // --- Обробники ---
+
     const handleReset = (e: React.MouseEvent) => {
         e.preventDefault();
         onFilterChange({
