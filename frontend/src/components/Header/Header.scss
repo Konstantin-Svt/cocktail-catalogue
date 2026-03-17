@@ -36,10 +36,12 @@
         background-image: url(../../public/img/Vector.svg);
         background-repeat: no-repeat;
         gap: 16px;
+        border: 1px solid rgba(228, 231, 238, 1);
         border-radius: 16px;
         font-weight: 400;
         font-size: 16px;
         text-align: center;
         background-position: center left 16px;
+        background-color: #F5F7FA;
     }
 }

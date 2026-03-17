@@ -14,6 +14,11 @@ export const fetchVibes = () => fetch(`${BASE_URL}/vibes/`).then(res => res.json
 export const fetchFilteredCocktails = (filters: any = {}) => {
     const params = new URLSearchParams();
 
+
+    if (filters.search) {
+        params.append('search', filters.search);
+    }
+
     if (filters.alcoholType?.length) {
         const typesToSend = new Set<string>();
 
@@ -31,6 +36,10 @@ export const fetchFilteredCocktails = (filters: any = {}) => {
 
     if (filters.alcoholLevel) params.append('alcohol_level', filters.alcoholLevel.toLowerCase());
     if (filters.sweetnessLevel) params.append('sweetness_level', filters.sweetnessLevel.toLowerCase());
+
+
+    if (filters.vibe) params.append('vibe', filters.vibe.toLowerCase());
+
     if (filters.price && Array.isArray(filters.price)) {
         params.append('min_price', filters.price[0].toString());
         params.append('max_price', filters.price[1].toString());
