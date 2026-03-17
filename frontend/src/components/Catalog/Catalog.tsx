@@ -22,9 +22,10 @@ interface Props {
     setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
     cocktails: any[];
     ingredients: any[];
+    summary?: any;
 }
 
-export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails, ingredients }) => {
+export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails, ingredients, summary }) => {
 
     const getIngredientsForCocktail = (cocktail: Cocktail): string[] => {
         // Перевірка на існування масиву інгредієнтів
@@ -105,7 +106,7 @@ export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails,
     return (
         <div className="catalog">
             <div className="catalog__header">
-                <h1 className="catalog__title">{cocktailsCount} cocktails found</h1>
+                <h1 className="catalog__title">{(summary?.general_count ?? cocktails.length)} cocktails found</h1>
 
                 <div className="catalog__controls">
                     <button className="catalog__sortBy">

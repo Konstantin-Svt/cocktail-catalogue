@@ -35,7 +35,6 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
     useEffect(() => {
         const getSummary = async () => {
             const data = await fetchCocktailsSummary(filters);
-            console.log("DEBUG: Summary Data:", data);
             setSummary(data);
         };
         getSummary();
