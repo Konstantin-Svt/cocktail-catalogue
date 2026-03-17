@@ -72,7 +72,7 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
 
     return (
         <div className="grid">
-            <aside style={{ gridColumn: 'span 3' }}>
+            <aside className="mainPage__filters">
                 <AlcoFilters
                     onFilterChange={setActiveFilters}
                     filters={activeFilters}
@@ -82,7 +82,7 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
                 />
             </aside>
 
-            <section style={{ gridColumn: 'span 9' }}>
+            <section className="mainPage__catalog">
                 {isFiltering ? (
                     <div className="filtering-status">Оновлюємо список...</div>
                 ) : (

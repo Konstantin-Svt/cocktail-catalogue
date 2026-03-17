@@ -38,12 +38,12 @@ export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails,
 
         return ingredients
             .filter(ing => cocktail.ingredients?.includes(ing.id))
-            .map(ing => ing.name || ""); // Додано fallback для імені
+            .map(ing => ing.name || "");
     };
 
-    // 2. Основна логіка фільтрації
+
     const filteredCocktails = useMemo(() => {
-        // Додаємо перевірку, чи взагалі прийшли коктейлі
+
         if (!cocktails || !Array.isArray(cocktails)) return [];
 
         return cocktails.filter(cocktail => {
@@ -51,12 +51,12 @@ export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails,
 
             const avgPrice = parseFloat(cocktail.average_price || "0");
 
-            // 1. Фільтр: Тип алкоголю (Чекбокси)
+
             const matchesType = alcoholType.length === 0 ||
                 alcoholType.some(type => {
                     const searchStr = type.toLowerCase();
 
-                    // Використовуємо || "" щоб уникнути помилок на null значеннях
+         
                     const name = (cocktail.name || "").toLowerCase();
                     const description = (cocktail.description || "").toLowerCase();
 
@@ -70,18 +70,16 @@ export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails,
                     return inBasicInfo || inIngredients;
                 });
 
-            // 2. Фільтр: Міцність (Радіо)
+
             const matchesLevel = !alcoholLevel ||
                 (cocktail.alcohol_level || "").toLowerCase() === alcoholLevel.toLowerCase();
 
-            // 3. Фільтр: Ціна (Слайдер)
+
             const matchesPrice = avgPrice >= price[0] && avgPrice <= price[1];
 
-            // 4. Фільтр: Солодкість (Радіо)
             const matchesSweetness = !sweetnessLevel ||
                 (cocktail.sweetness_level || "").toLowerCase() === sweetnessLevel.toLowerCase();
 
-            // 5. Фільтр: Вайб (Радіо)
             const matchesVibe = !vibe || (cocktail.vibes && Array.isArray(cocktail.vibes) && cocktail.vibes.some((v: any) => {
                 const vibeName = typeof v === 'string' ? v : v.name;
                 return vibeName?.toLowerCase() === vibe.toLowerCase();
