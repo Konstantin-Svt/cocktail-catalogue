@@ -5,7 +5,6 @@ from cocktail.views import (
     CocktailViewSet,
     VibeViewSet,
     IngredientViewSet,
-    SummaryAPIView,
 )
 
 router = DefaultRouter()
@@ -14,7 +13,6 @@ router.register("vibes", VibeViewSet)
 router.register("ingredients", IngredientViewSet)
 
 urlpatterns = [
-    path("cocktails/summary/", SummaryAPIView.as_view(), name="summary"),
     path("", include(router.urls)),
 ]
 app_name = "cocktail"

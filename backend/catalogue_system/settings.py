@@ -116,7 +116,7 @@ else:
         }
     }
     if os.environ.get("POSTGRES_SSLMODE", "disabled").lower() in ("require", "1", "true"):
-        DATABASES.update(
+        DATABASES["default"].update(
             {
                 "OPTIONS": {
                     "sslmode": "require",
@@ -191,8 +191,7 @@ AWS_S3_ADDRESSING_STYLE = "path"
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
 
-ANALYTICS_PROJECT_ID = os.environ.get("ANALYTICS_PROJECT_ID")
-ANALYTICS_DATASET_NAME = os.environ.get("ANALYTICS_DATASET_NAME")
+ANALYTICS_DATASET_ID = os.environ.get("ANALYTICS_DATASET_ID")
 
 if not DEBUG:
     STORAGES = {
