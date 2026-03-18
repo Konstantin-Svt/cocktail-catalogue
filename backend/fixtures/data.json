@@ -1,0 +1,781 @@
+[
+{
+  "model": "cocktail.cocktail",
+  "pk": 1,
+  "fields": {
+    "name": "White Ukrainian",
+    "description": "Big drink for big man",
+    "average_price": "13.37",
+    "alcohol_level": "strong",
+    "sweetness_level": "dry",
+    "preparation": "Mix Vodka with Beer",
+    "preparation_time": 5,
+    "image": "cocktails/white-ukrainian-27da6897-4341-4289-8d1a-6a1768e5c44f.jpg",
+    "created_at": "2026-03-08T00:39:08.521",
+    "vibes": [
+      1
+    ],
+    "similar_cocktails": [
+      2,
+      3,
+      4
+    ]
+  }
+},
+{
+  "model": "cocktail.cocktail",
+  "pk": 2,
+  "fields": {
+    "name": "Mojito",
+    "description": "",
+    "average_price": "30.00",
+    "alcohol_level": "medium",
+    "sweetness_level": "medium",
+    "preparation": "",
+    "preparation_time": 5,
+    "image": "cocktails/mojito-3cfbc554-f67c-4874-9d82-695055e767be.jpeg",
+    "created_at": "2026-03-09T15:37:42.844",
+    "vibes": [
+      2
+    ],
+    "similar_cocktails": [
+      1,
+      3
+    ]
+  }
+},
+{
+  "model": "cocktail.cocktail",
+  "pk": 3,
+  "fields": {
+    "name": "Brown Derbie",
+    "description": "Run",
+    "average_price": "35.00",
+    "alcohol_level": "medium",
+    "sweetness_level": "medium",
+    "preparation": "",
+    "preparation_time": 5,
+    "image": "cocktails/brown-derbie-2dd7fe3f-150f-432a-b5de-2339366babd4.jpeg",
+    "created_at": "2026-03-09T19:59:22.443",
+    "vibes": [
+      3,
+      6
+    ],
+    "similar_cocktails": [
+      1,
+      2
+    ]
+  }
+},
+{
+  "model": "cocktail.cocktail",
+  "pk": 4,
+  "fields": {
+    "name": "Blood Mary",
+    "description": "",
+    "average_price": "15.00",
+    "alcohol_level": "strong",
+    "sweetness_level": "dry",
+    "preparation": "",
+    "preparation_time": 10,
+    "image": "cocktails/blood-mary-00e80f5f-db20-49db-b4a6-689d751ed739.jpg",
+    "created_at": "2026-03-12T01:45:50.751",
+    "vibes": [
+      3,
+      4,
+      6
+    ],
+    "similar_cocktails": [
+      1
+    ]
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 1,
+  "fields": {
+    "name": "vodka",
+    "category": "alcohol",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 2,
+  "fields": {
+    "name": "beer",
+    "category": "alcohol",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 3,
+  "fields": {
+    "name": "zeltser",
+    "category": "mixer",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 4,
+  "fields": {
+    "name": "white rum",
+    "category": "alcohol",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 5,
+  "fields": {
+    "name": "mint leaves",
+    "category": "garnish",
+    "unit": "piece"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 6,
+  "fields": {
+    "name": "bourbon",
+    "category": "alcohol",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 7,
+  "fields": {
+    "name": "orange juice",
+    "category": "mixer",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 8,
+  "fields": {
+    "name": "grapefruit slice",
+    "category": "garnish",
+    "unit": "piece"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 9,
+  "fields": {
+    "name": "coca-cola",
+    "category": "mixer",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 10,
+  "fields": {
+    "name": "black rum",
+    "category": "alcohol",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 11,
+  "fields": {
+    "name": "wine",
+    "category": "alcohol",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 12,
+  "fields": {
+    "name": "tomato juice",
+    "category": "mixer",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 1,
+  "fields": {
+    "ingredient": 1,
+    "cocktail": 1,
+    "amount": 50
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 2,
+  "fields": {
+    "ingredient": 2,
+    "cocktail": 1,
+    "amount": 100
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 3,
+  "fields": {
+    "ingredient": 3,
+    "cocktail": 1,
+    "amount": 100
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 4,
+  "fields": {
+    "ingredient": 4,
+    "cocktail": 2,
+    "amount": 60
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 5,
+  "fields": {
+    "ingredient": 5,
+    "cocktail": 2,
+    "amount": 2
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 6,
+  "fields": {
+    "ingredient": 6,
+    "cocktail": 3,
+    "amount": 50
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 7,
+  "fields": {
+    "ingredient": 7,
+    "cocktail": 3,
+    "amount": 100
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 8,
+  "fields": {
+    "ingredient": 8,
+    "cocktail": 3,
+    "amount": 1
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 9,
+  "fields": {
+    "ingredient": 9,
+    "cocktail": 3,
+    "amount": 100
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 10,
+  "fields": {
+    "ingredient": 1,
+    "cocktail": 4,
+    "amount": 50
+  }
+},
+{
+  "model": "cocktail.cocktailingredients",
+  "pk": 11,
+  "fields": {
+    "ingredient": 12,
+    "cocktail": 4,
+    "amount": 100
+  }
+},
+{
+  "model": "cocktail.vibe",
+  "pk": 1,
+  "fields": {
+    "name": "winter"
+  }
+},
+{
+  "model": "cocktail.vibe",
+  "pk": 2,
+  "fields": {
+    "name": "beach"
+  }
+},
+{
+  "model": "cocktail.vibe",
+  "pk": 3,
+  "fields": {
+    "name": "party"
+  }
+},
+{
+  "model": "cocktail.vibe",
+  "pk": 4,
+  "fields": {
+    "name": "romantic"
+  }
+},
+{
+  "model": "cocktail.vibe",
+  "pk": 5,
+  "fields": {
+    "name": "tropical"
+  }
+},
+{
+  "model": "cocktail.vibe",
+  "pk": 6,
+  "fields": {
+    "name": "classic"
+  }
+},
+{
+  "model": "cocktail.vibe",
+  "pk": 7,
+  "fields": {
+    "name": "summer"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 1,
+  "fields": {
+    "name": "Can add log entry",
+    "content_type": 1,
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 2,
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": 1,
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 3,
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": 1,
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 4,
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": 1,
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 5,
+  "fields": {
+    "name": "Can add permission",
+    "content_type": 3,
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 6,
+  "fields": {
+    "name": "Can change permission",
+    "content_type": 3,
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 7,
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": 3,
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 8,
+  "fields": {
+    "name": "Can view permission",
+    "content_type": 3,
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 9,
+  "fields": {
+    "name": "Can add group",
+    "content_type": 2,
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 10,
+  "fields": {
+    "name": "Can change group",
+    "content_type": 2,
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 11,
+  "fields": {
+    "name": "Can delete group",
+    "content_type": 2,
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 12,
+  "fields": {
+    "name": "Can view group",
+    "content_type": 2,
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 13,
+  "fields": {
+    "name": "Can add user",
+    "content_type": 4,
+    "codename": "add_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 14,
+  "fields": {
+    "name": "Can change user",
+    "content_type": 4,
+    "codename": "change_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 15,
+  "fields": {
+    "name": "Can delete user",
+    "content_type": 4,
+    "codename": "delete_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 16,
+  "fields": {
+    "name": "Can view user",
+    "content_type": 4,
+    "codename": "view_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 17,
+  "fields": {
+    "name": "Can add content type",
+    "content_type": 5,
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 18,
+  "fields": {
+    "name": "Can change content type",
+    "content_type": 5,
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 19,
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": 5,
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 20,
+  "fields": {
+    "name": "Can view content type",
+    "content_type": 5,
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 21,
+  "fields": {
+    "name": "Can add session",
+    "content_type": 6,
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 22,
+  "fields": {
+    "name": "Can change session",
+    "content_type": 6,
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 23,
+  "fields": {
+    "name": "Can delete session",
+    "content_type": 6,
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 24,
+  "fields": {
+    "name": "Can view session",
+    "content_type": 6,
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 25,
+  "fields": {
+    "name": "Can add ingredient",
+    "content_type": 9,
+    "codename": "add_ingredient"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 26,
+  "fields": {
+    "name": "Can change ingredient",
+    "content_type": 9,
+    "codename": "change_ingredient"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 27,
+  "fields": {
+    "name": "Can delete ingredient",
+    "content_type": 9,
+    "codename": "delete_ingredient"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 28,
+  "fields": {
+    "name": "Can view ingredient",
+    "content_type": 9,
+    "codename": "view_ingredient"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 29,
+  "fields": {
+    "name": "Can add tag",
+    "content_type": 10,
+    "codename": "add_tag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 30,
+  "fields": {
+    "name": "Can change tag",
+    "content_type": 10,
+    "codename": "change_tag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 31,
+  "fields": {
+    "name": "Can delete tag",
+    "content_type": 10,
+    "codename": "delete_tag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 32,
+  "fields": {
+    "name": "Can view tag",
+    "content_type": 10,
+    "codename": "view_tag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 33,
+  "fields": {
+    "name": "Can add cocktail",
+    "content_type": 7,
+    "codename": "add_cocktail"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 34,
+  "fields": {
+    "name": "Can change cocktail",
+    "content_type": 7,
+    "codename": "change_cocktail"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 35,
+  "fields": {
+    "name": "Can delete cocktail",
+    "content_type": 7,
+    "codename": "delete_cocktail"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 36,
+  "fields": {
+    "name": "Can view cocktail",
+    "content_type": 7,
+    "codename": "view_cocktail"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 37,
+  "fields": {
+    "name": "Can add cocktail ingredients",
+    "content_type": 8,
+    "codename": "add_cocktailingredients"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 38,
+  "fields": {
+    "name": "Can change cocktail ingredients",
+    "content_type": 8,
+    "codename": "change_cocktailingredients"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 39,
+  "fields": {
+    "name": "Can delete cocktail ingredients",
+    "content_type": 8,
+    "codename": "delete_cocktailingredients"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 40,
+  "fields": {
+    "name": "Can view cocktail ingredients",
+    "content_type": 8,
+    "codename": "view_cocktailingredients"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 41,
+  "fields": {
+    "name": "Can add vibe",
+    "content_type": 10,
+    "codename": "add_vibe"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 42,
+  "fields": {
+    "name": "Can change vibe",
+    "content_type": 10,
+    "codename": "change_vibe"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 43,
+  "fields": {
+    "name": "Can delete vibe",
+    "content_type": 10,
+    "codename": "delete_vibe"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 44,
+  "fields": {
+    "name": "Can view vibe",
+    "content_type": 10,
+    "codename": "view_vibe"
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$rO7EjZcuONMJ6goJnR2cTx$FxYo0cLMqg9n8KCakh/Xzlja7KdBrPuoF9//O+UoQy4=",
+    "last_login": "2026-03-13T00:03:53.902",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "admin@admin.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-03-08T00:34:55.727",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$me8kXPwwKfUhIAkFW2VM7R$GKFUGnB3J8pW9j7HMfDPJbJZcqN77h2dzOCj8SFXgME=",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "administrator",
+    "first_name": "",
+    "last_name": "",
+    "email": "admin2@admin.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-03-13T00:07:26.661",
+    "groups": [],
+    "user_permissions": []
+  }
+}
+]

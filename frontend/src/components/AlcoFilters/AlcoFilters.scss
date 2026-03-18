@@ -1,0 +1,217 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.alcoFilters {
+    border: 1px solid rgba(228, 231, 238, 1);
+    border-radius: 8px;
+    &__section {
+    flex-direction: column;
+        display: flex;
+        justify-content: space-between;
+        padding: 16px;
+        &:not(:last-child) {
+            border-bottom: 1px solid rgba(228, 231, 238, 1);
+            }
+        &:first-child {
+            flex-direction: row; 
+        }
+    }
+}
+.reset__icon {
+        display: inline-block; 
+        width: 16px;
+        height: 16px;
+        background-size: contain; 
+            vertical-align: middle;
+        background-image: url(../../public/img/reset_filter.svg);
+        background-repeat: no-repeat;
+}
+.reset__text {
+    color: rgba(126, 47, 78, 1);
+    text-decoration: none;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.filter-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 16px;
+    color: #362c2c;
+}
+
+.type__filters {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.filter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    cursor: pointer;
+    &__radio {
+        box-sizing: border-box;
+        appearance: none;
+        -webkit-appearance: none;
+        display: grid;
+        place-content: center;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #E0E0E0;
+        border-radius: 50%;
+        outline: none;
+        cursor: pointer;
+
+        place-content: center;
+        transition: border-color 0.2s ease;
+    
+        &:hover {
+            border-color: black;
+        }
+&:checked {
+    border-color: rgba(126, 47, 78, 1); 
+
+    &::before {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: rgba(126, 47, 78, 1); 
+        justify-self: center;
+        align-self: center;
+    }
+}
+    }
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__checkbox {
+        display: none; 
+        border: rgba(217, 217, 217, 1);
+        &:checked+.filter-item__custom {
+            background-color: rgba(126, 47, 78, 1);
+
+            &::after {
+                display: block;
+            }
+
+          
+        }
+    }
+
+    &__custom {
+        width: 18px;
+        height: 18px;
+        border: 1.5px solid rgba(217, 217, 217, 1);
+        border-radius: 4px;
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            display: none;
+            left: 5px;
+            top: 1px;
+            width: 4px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+    }
+
+    &__name {
+        font-size: 14px;
+        color: #362c2c;
+    }
+
+    &__quantity {
+        font-size: 14px;
+        color: rgba(150, 150, 150, 1); 
+    }
+}
+
+.price-range {
+    width: 100%;
+    max-width: 280px;
+    padding: 10px 0;
+}
+
+.price-range__title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.price-range__display {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+.range-slider-root {
+    position: relative;
+    width: 100%;
+    height: 4px;
+    background: #f0f0f0;
+    /* Світло-сіра основа */
+    border-radius: 2px;
+}
+
+.range-slider-track {
+    position: absolute;
+    height: 100%;
+    background-color: #8B2E40;
+    /* Бордовий колір лінії */
+    border-radius: 2px;
+    z-index: 1;
+}
+
+.range-input {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    top: 0;
+    left: 0;
+    background: none;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+    z-index: 2;
+    margin: 0;
+}
+
+/* Стиль кружечка для Chrome/Safari */
+.range-input::-webkit-slider-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #8B2E40;
+    border: none;
+    cursor: pointer;
+    pointer-events: auto;
+    /* Дозволяє тягнути кружечок */
+    -webkit-appearance: none;
+}
+
+/* Стиль кружечка для Firefox */
+.range-input::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: #f0f0f0;
+    border: none;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+/* Щоб повзунки не перекривали один одного некоректно */
+.range-input:focus {
+    z-index: 5;
+}

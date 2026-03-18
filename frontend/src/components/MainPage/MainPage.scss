@@ -1,0 +1,24 @@
+* {
+    font-family: "Manrope", sans-serif;
+    font-weight: 500;
+}
+.mainPage {
+    padding-top: 32px;
+&__filters {
+        grid-column: span 12; // На мобільних (360px+) на всю ширину
+        margin-bottom: 24px;
+
+        @media (min-width: 1024px) {
+            grid-column: span 3; // На десктопі 3 колонки
+            margin-bottom: 0;
+        }
+    }
+
+    &__catalog {
+        grid-column: span 12;
+
+        @media (min-width: 1024px) {
+            grid-column: span 9; // На десктопі 9 колонок
+        }
+    }
+}
