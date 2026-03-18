@@ -50,6 +50,7 @@ class CocktailListSerializer(serializers.ModelSerializer):
             "image",
             "average_price",
             "alcohol_level",
+            "alcohol_promille",
             "sweetness_level",
             "preparation_time",
             "vibes",

@@ -55,9 +55,10 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "storages",
-    # apps
-    "cocktail",
 ]
+
+APPS_WITH_ANALYTICS = ["cocktail", "analytics"]
+INSTALLED_APPS += APPS_WITH_ANALYTICS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -102,6 +103,8 @@ if DEBUG:
         }
     }
 else:
+    from dotenv import load_dotenv
+    load_dotenv()
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -112,15 +115,15 @@ else:
             "HOST": os.environ.get("POSTGRES_HOST", "db"),
         }
     }
-if os.environ.get("POSTGRES_SSLMODE", "disabled").lower() in ("require", "1", "true"):
-    DATABASES.update(
-        {
-            "OPTIONS": {
-                "sslmode": "require",
-                "channel_binding": "require",
-            },
-        }
-    )
+    if os.environ.get("POSTGRES_SSLMODE", "disabled").lower() in ("require", "1", "true"):
+        DATABASES.update(
+            {
+                "OPTIONS": {
+                    "sslmode": "require",
+                    "channel_binding": "require",
+                },
+            }
+        )
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -188,7 +191,10 @@ AWS_S3_ADDRESSING_STYLE = "path"
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
 
-if AWS_ACCESS_KEY_ID:
+ANALYTICS_PROJECT_ID = os.environ.get("ANALYTICS_PROJECT_ID")
+ANALYTICS_DATASET_NAME = os.environ.get("ANALYTICS_DATASET_NAME")
+
+if not DEBUG:
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
