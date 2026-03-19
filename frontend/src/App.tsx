@@ -8,7 +8,9 @@ import { Routes, Route } from 'react-router-dom';
 
 export const App = () => {
     const [searchQuery, setSearchQuery] = useState("");
-    const [isVerified, setIsVerified] = useState(false);
+    const [isVerified, setIsVerified] = useState(() => {
+        return localStorage.getItem('ageVerified') === 'true';
+});
 
     return (
         <div className="app">
