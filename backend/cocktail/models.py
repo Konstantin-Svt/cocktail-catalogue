@@ -29,6 +29,7 @@ class Cocktail(models.Model):
     alcohol_level = models.CharField(
         choices=AlcoholLevel.choices, max_length=60
     )
+    alcohol_promille = models.PositiveIntegerField(default=0)
     sweetness_level = models.CharField(
         choices=SweetnessLevel.choices, max_length=60
     )

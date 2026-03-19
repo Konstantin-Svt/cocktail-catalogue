@@ -22,7 +22,9 @@ class IngredientForCocktailSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="ingredient.name")
     category = serializers.CharField(source="ingredient.category")
     unit = serializers.CharField(source="ingredient.unit")
-    alternative = serializers.StringRelatedField(source="alternative_ingredient")
+    alternative = serializers.StringRelatedField(
+        source="alternative_ingredient"
+    )
 
     class Meta:
         model = CocktailIngredients
@@ -50,6 +52,7 @@ class CocktailListSerializer(serializers.ModelSerializer):
             "image",
             "average_price",
             "alcohol_level",
+            "alcohol_promille",
             "sweetness_level",
             "preparation_time",
             "vibes",
