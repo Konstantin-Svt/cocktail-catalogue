@@ -17,15 +17,15 @@ const AgeVerification: React.FC<AgeVerificationProps> = ({ onVerified }) => {
         }
     }, []);
 
-    const handleConfirm = async () => {
-        await sendAgeVerification(true);
+    const handleConfirm = () => {
+        sendAgeVerification(true);
         onVerified();
         localStorage.setItem('ageVerified', 'true');
         setIsVisible(false);
     };
 
-    const handleReject = async () => {
-        await sendAgeVerification(false);
+    const handleReject = () => {
+        sendAgeVerification(false);
         window.location.href = 'https://www.google.com';
     };
 
