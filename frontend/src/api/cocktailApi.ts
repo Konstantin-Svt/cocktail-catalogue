@@ -1,64 +1,38 @@
-const DEFAULT_URL = 'https://cocktail-catalogue.onrender.com/api';
+import { FilterState } from "../components/AlcoFilters/AlcoFilters";
 
-export const BASE_URL = (import.meta as any).env?.VITE_API_URL || DEFAULT_URL;
 
-const ALCOHOL_SYNONYMS: Record<string, string[]> = {
-    'whiskey': ['whiskey', 'bourbon', 'scotch', 'rye', 'whisky'],
-    'rum': ['rum', 'dark rum', 'white rum', 'spiced rum'],
-    'gin': ['gin', 'dry gin'],
-    'vodka': ['vodka']
-};
-
-export const fetchCocktails = () => fetch(`${BASE_URL}/cocktails/`).then(res => res.json());
-export const fetchIngredients = () => fetch(`${BASE_URL}/ingredients/`).then(res => res.json());
-export const fetchVibes = () => fetch(`${BASE_URL}/vibes/`).then(res => res.json());
-export const fetchFilteredCocktails = (filters: any = {}) => {
+export const fetchCocktails = async (filters: FilterState, page: number = 1) => {
     const params = new URLSearchParams();
 
 
-    if (filters.search) {
-        params.append('search', filters.search);
-    }
-
     if (filters.alcoholType?.length) {
-        const typesToSend = new Set<string>();
-
-        filters.alcoholType.forEach((type: string) => {
-            const lowerType = type.toLowerCase();
-            if (ALCOHOL_SYNONYMS[lowerType]) {
-                ALCOHOL_SYNONYMS[lowerType].forEach(syn => typesToSend.add(syn));
-            } else {
-                typesToSend.add(lowerType);
-            }
-        });
-
-        params.append('alcohol_type', Array.from(typesToSend).join(','));
+        filters.alcoholType.forEach((t: string) =>
+            params.append('ingredients', t.toLowerCase())
+        );
     }
+
 
     if (filters.alcoholLevel) params.append('alcohol_level', filters.alcoholLevel.toLowerCase());
     if (filters.sweetnessLevel) params.append('sweetness_level', filters.sweetnessLevel.toLowerCase());
+    if (filters.vibe) params.append('vibes', filters.vibe.toLowerCase());
+    if (filters.search) params.append('search', filters.search);
 
 
-    if (filters.vibe) params.append('vibe', filters.vibe.toLowerCase());
+    params.append('min_price', filters.price[0].toString());
+    params.append('max_price', filters.price[1].toString());
 
-    if (filters.price && Array.isArray(filters.price)) {
-        params.append('min_price', filters.price[0].toString());
-        params.append('max_price', filters.price[1].toString());
+
+    params.append('page', page.toString());
+    params.append('page_size', '12');
+
+    const BASE_URL = 'https://cocktail-catalogue-dev.onrender.com/api';
+
+
+    const response = await fetch(`${BASE_URL}/cocktails/?${params.toString()}`);
+
+    if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
 
-    return fetch(`${BASE_URL}/cocktails/?${params.toString()}`)
-        .then(res => res.json())
-        .then(data => Array.isArray(data) ? data : data.results || []);
-};
-
-export const fetchFilterCounts = (filters: any = {}) => {
-    return fetchFilteredCocktails(filters);
-};
-export const fetchCocktailsSummary = (filters: any = {}) => {
-    const params = new URLSearchParams();
-    if (filters.search) params.append('search', filters.search);
-    if (filters.vibe) params.append('vibe', filters.vibe);
-
-    return fetch(`${BASE_URL}/cocktails/summary/?${params.toString()}`)
-        .then(res => res.json());
+    return response.json();
 };
