@@ -1,5 +1,8 @@
 import { FilterState } from "../components/AlcoFilters/AlcoFilters";
 
+const DEFAULT_URL = 'https://cocktail-catalogue.onrender.com/api';
+export const BASE_URL = (import.meta as any).env?.VITE_API_URL || DEFAULT_URL;
+
 
 export const fetchCocktails = async (filters: FilterState, page: number = 1) => {
     const params = new URLSearchParams();
@@ -24,9 +27,6 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
 
     params.append('page', page.toString());
     params.append('page_size', '12');
-    const DEFAULT_URL = 'https://cocktail-catalogue.onrender.com/api';
-
-    const BASE_URL = (import.meta as any).env?.VITE_API_URL || DEFAULT_URL;
 
 
     const response = await fetch(`${BASE_URL}/cocktails/?${params.toString()}`);
