@@ -15,7 +15,7 @@ class Event(models.Model):
 
     event_name = models.CharField(max_length=100, choices=EventName.choices)
     timestamp = models.DateTimeField(auto_now_add=True)
-    anonymous_user_id = models.IntegerField(null=True, blank=True)
+    anonymous_user_id = models.CharField(max_length=255)
     session_id = models.ForeignKey(
         "Session", on_delete=models.SET_NULL, null=True, blank=True
     )
@@ -33,7 +33,7 @@ class Event(models.Model):
 
 
 class Session(models.Model):
-    anonymous_user_id = models.IntegerField()
+    anonymous_user_id = models.CharField(max_length=255)
     session_start = models.DateTimeField(auto_now_add=True)
     session_end = models.DateTimeField(default=timezone.now)
     device_type = models.CharField(max_length=255, null=True, blank=True)

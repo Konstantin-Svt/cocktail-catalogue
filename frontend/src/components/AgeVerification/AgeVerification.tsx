@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './AgeVerification.scss';
+import { sendAgeVerification, } from '../../api/cocktailApi';
 
-const AgeVerification: React.FC = () => {
+interface AgeVerificationProps {
+    onVerified: () => void;
+}
+
+const AgeVerification: React.FC<AgeVerificationProps> = ({ onVerified }) => {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
@@ -12,12 +17,15 @@ const AgeVerification: React.FC = () => {
         }
     }, []);
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
+        await sendAgeVerification(true);
+        onVerified();
         localStorage.setItem('ageVerified', 'true');
         setIsVisible(false);
     };
 
-    const handleReject = () => {
+    const handleReject = async () => {
+        await sendAgeVerification(false);
         window.location.href = 'https://www.google.com';
     };
 

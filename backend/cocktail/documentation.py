@@ -5,14 +5,14 @@ from catalogue_system.pagination import StandardResultsSetPagination
 cocktail_filters_documentation = extend_schema(
     parameters=[
         OpenApiParameter(
-            name="page", type=int, description="Page number for pagination"
+            name="page", type=int, description="Page number for pagination."
         ),
         OpenApiParameter(
             name="page_size",
             type=int,
             description=f"Page size for pagination. To adjust a "
             f"number of items shown per one page. "
-            f"Max is {StandardResultsSetPagination.max_page_size}",
+            f"Max is {StandardResultsSetPagination.max_page_size}.",
         ),
         OpenApiParameter(
             name="search",

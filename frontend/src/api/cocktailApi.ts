@@ -62,3 +62,15 @@ export const fetchCocktailsSummary = (filters: any = {}) => {
     return fetch(`${BASE_URL}/cocktails/summary/?${params.toString()}`)
         .then(res => res.json());
 };
+export const sendAgeVerification = async (ageVerified: boolean) => {
+    await fetch(`${BASE_URL}/analytics`, {
+        method: `POST`,
+        credentials: `include`,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            age_confirmed: ageVerified,
+        })
+    })
+};

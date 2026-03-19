@@ -182,7 +182,7 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
             "sweetness_level_count": sweetness_count,
             "vibes_count": vibes_count,
         }
-
+        print(request.anon_id)
         res.data.update(summary)
         return res
 

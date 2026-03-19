@@ -8,16 +8,20 @@ import { Routes, Route } from 'react-router-dom';
 
 export const App = () => {
     const [searchQuery, setSearchQuery] = useState("");
+    const [isVerified, setIsVerified] = useState(false);
 
     return (
         <div className="app">
-            <AgeVerification />
+            <AgeVerification onVerified={() => setIsVerified(true)} />
             <Header searchValue={searchQuery} onSearchChange={setSearchQuery} />
-            <Routes>
-                <Route path="/" element={<MainPage searchQuery={searchQuery}/>} />
-                <Route path="/product/:id" element={<ProductCard />} />
-                <Route path="/catalog" element={<MainPage searchQuery={searchQuery}/>} />
-            </Routes>
+
+            {isVerified && (
+                <Routes>
+                    <Route path="/" element={<MainPage searchQuery={searchQuery}/>} />
+                    <Route path="/product/:id" element={<ProductCard />} />
+                    <Route path="/catalog" element={<MainPage searchQuery={searchQuery}/>} />
+                </Routes>
+            )}
         </div>
 )
 }
