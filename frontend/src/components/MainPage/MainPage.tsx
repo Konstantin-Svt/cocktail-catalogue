@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { AlcoFilters } from '../AlcoFilters/AlcoFilters';
 import { Catalog } from '../Catalog/Catalog';
 import './MainPage.scss';
-import { fetchIngredients, fetchVibes, fetchFilteredCocktails } from '../../api/cocktailApi';
+import { fetchCocktails } from '../../api/cocktailApi';
 
 export interface FilterState {
     alcoholType: string[];
@@ -28,38 +28,13 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
     });
 
     const [cocktails, setCocktails] = useState<any[]>([]);
-    const [fullCocktails, setFullCocktails] = useState<any[]>([]);
-    const [ingredients, setIngredients] = useState<any[]>([]);
-    const [vibes, setVibes] = useState<any[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const [initialLoading, setInitialLoading] = useState(true);
-    const [isFiltering, setIsFiltering] = useState(false);     
+    const [isFiltering, setIsFiltering] = useState(false);
 
 
-    useEffect(() => {
+    const [serverData, setServerData] = useState<any>(null);
 
-        Promise.all([fetchIngredients(), fetchVibes(), fetchFilteredCocktails({})])
-            .then(([iData, vData, cData]) => {
-                setIngredients(iData);
-                setVibes(vData);
-                setFullCocktails(cData); 
-                setInitialLoading(false);
-            })
-            .catch(err => {
-                console.error("Помилка статики:", err);
-                setInitialLoading(false);
-            });
-    }, []);
-
-
-    useEffect(() => {
-        setIsFiltering(true);
-        fetchFilteredCocktails(activeFilters)
-            .then(data => {
-                setCocktails(data);
-                setIsFiltering(false);
-            })
-            .catch(() => setIsFiltering(false));
-    }, [activeFilters]);
 
     useEffect(() => {
         setActiveFilters(prev => ({
@@ -67,8 +42,36 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
             search: searchQuery
         }));
     }, [searchQuery]);
-    
-    if (initialLoading) return <div className="loader">Завантаження додатка...</div>;
+
+    useEffect(() => {
+        const loadData = async () => {
+            setIsFiltering(true);
+            try {
+
+                const data = await fetchCocktails(activeFilters, currentPage);
+                console.log("Data from server:", data);
+
+                if (data && data.results) {
+                    setCocktails(data.results);
+                    setServerData(data); 
+                } else {
+                    setCocktails([]);
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+                setCocktails([]);
+            } finally {
+                setInitialLoading(false);
+                setIsFiltering(false);
+            }
+        };
+
+        loadData();
+    }, [activeFilters, currentPage]); 
+
+    if (initialLoading) {
+        return <div className="loader">Завантаження коктейлів...</div>;
+    }
 
     return (
         <div className="grid">
@@ -76,9 +79,7 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
                 <AlcoFilters
                     onFilterChange={setActiveFilters}
                     filters={activeFilters}
-                    cocktails={fullCocktails}
-                    ingredients={ingredients}
-                    setCocktails={setCocktails}
+                    summary={serverData}
                 />
             </aside>
 
@@ -87,10 +88,11 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
                     <div className="filtering-status">Оновлюємо список...</div>
                 ) : (
                     <Catalog
-                        activeFilters={activeFilters}
-                        setFilters={setActiveFilters}
-                        cocktails={cocktails}
-                        ingredients={ingredients}
+                            activeFilters={activeFilters}
+                            setFilters={setActiveFilters}
+                            cocktails={cocktails}
+                            ingredients={[]}
+                            summary={serverData}
                     />
                 )}
             </section>
