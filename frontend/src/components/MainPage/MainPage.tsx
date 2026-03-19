@@ -37,10 +37,12 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
 
 
     useEffect(() => {
-        setActiveFilters(prev => ({
-            ...prev,
-            search: searchQuery
-        }));
+        if (searchQuery !== activeFilters.search) {
+            setActiveFilters(prev => ({
+                ...prev,
+                search: searchQuery
+            }));
+        }
     }, [searchQuery]);
 
     useEffect(() => {
@@ -67,7 +69,14 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
         };
 
         loadData();
-    }, [activeFilters, currentPage]); 
+    }, [activeFilters.alcoholType,
+        activeFilters.alcoholLevel,
+        activeFilters.price[0],
+        activeFilters.price[1],
+        activeFilters.sweetnessLevel,
+        activeFilters.vibe,
+        activeFilters.search,
+        currentPage]); 
 
     if (initialLoading) {
         return <div className="loader">Завантаження коктейлів...</div>;
