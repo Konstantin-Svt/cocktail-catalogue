@@ -9,7 +9,13 @@ from rest_framework.exceptions import ValidationError
 
 from catalogue_system.pagination import StandardResultsSetPagination
 from cocktail.documentation import cocktail_filters_documentation
-from cocktail.models import Cocktail, CocktailIngredients, Vibe, Ingredient
+from cocktail.models import (
+    Cocktail,
+    CocktailIngredients,
+    Vibe,
+    Ingredient,
+    SimilarCocktails,
+)
 from cocktail.serializers import (
     CocktailListSerializer,
     CocktailDetailSerializer,
@@ -28,7 +34,9 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
             )
         )
     if q_params.get("vibes"):
-        conditions.append(Q(cocktails__vibes__name__in=q_params.getlist("vibes")))
+        conditions.append(
+            Q(cocktails__vibes__name__in=q_params.getlist("vibes"))
+        )
     if q_params.get("ingredients"):
         conditions.append(
             Q(cocktails__ingredients__name__in=q_params.getlist("ingredients"))
@@ -39,7 +47,11 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
         )
     if q_params.get("sweetness_level"):
         conditions.append(
-            Q(cocktails__sweetness_level__in=q_params.getlist("sweetness_level"))
+            Q(
+                cocktails__sweetness_level__in=q_params.getlist(
+                    "sweetness_level"
+                )
+            )
         )
     if q_params.get("min_price"):
         if not q_params.get("min_price").isdigit():
@@ -84,7 +96,7 @@ def apply_queryset_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
 
 
 class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Cocktail.objects.prefetch_related("vibes")
+    queryset = Cocktail.objects.prefetch_related("vibes").order_by("name")
     pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
@@ -108,7 +120,9 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
                     queryset=CocktailIngredients.objects.select_related(
                         "ingredient", "alternative_ingredient"
                     ),
-                )
+                ),
+                "similar_cocktails__vibes",
+                "similar_cocktails__ingredients",
             )
 
     @cocktail_filters_documentation

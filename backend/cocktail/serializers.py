@@ -66,6 +66,7 @@ class CocktailDetailSerializer(CocktailListSerializer):
         many=True, read_only=True, source="through_ingredients"
     )
     vibes = VibeSerializer(many=True, read_only=True)
+    similar_cocktails = CocktailListSerializer(many=True, read_only=True)
 
     class Meta(CocktailListSerializer.Meta):
         fields = CocktailListSerializer.Meta.fields + (
