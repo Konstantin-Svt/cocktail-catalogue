@@ -1,3 +1,7 @@
-app_name = "analytics"
+from django.urls import path
 
-urlpatterns = []
+from analytics.views import EventCreate
+
+urlpatterns = [path("events/", EventCreate.as_view(), name="event-create"), ]
+
+app_name = "analytics"

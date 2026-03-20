@@ -37,14 +37,15 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
 
     return response.json();
 };
-export const sendAgeVerification = async (ageVerified: boolean) => {
-    await fetch(`${BASE_URL}/analytics`, {
+export const sendAgeVerification = (ageVerified: boolean) => {
+    fetch(`${BASE_URL}/analytics/events`, {
         method: `POST`,
         credentials: `include`,
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+            event_name: `age_confirmation`,
             age_confirmed: ageVerified,
         })
     })

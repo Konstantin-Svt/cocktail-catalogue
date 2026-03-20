@@ -30,6 +30,9 @@ urlpatterns = (
     [
         path("admin/", admin.site.urls),
         path("api/", include("cocktail.urls", namespace="cocktail")),
+        path(
+            "api/analytics/", include("analytics.urls", namespace="analytics")
+        ),
         path("api/docs/", SpectacularAPIView.as_view(), name="schema"),
         path(
             "api/docs/swagger/",

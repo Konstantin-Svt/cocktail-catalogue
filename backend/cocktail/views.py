@@ -3,12 +3,19 @@ from functools import reduce
 
 from django.db.models import Prefetch, Q, QuerySet
 from django.db.models.aggregates import Count
+from django.http import QueryDict
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 
 from catalogue_system.pagination import StandardResultsSetPagination
 from cocktail.documentation import cocktail_filters_documentation
-from cocktail.models import Cocktail, CocktailIngredients, Vibe, Ingredient
+from cocktail.models import (
+    Cocktail,
+    CocktailIngredients,
+    Vibe,
+    Ingredient,
+    SimilarCocktails,
+)
 from cocktail.serializers import (
     CocktailListSerializer,
     CocktailDetailSerializer,
@@ -17,7 +24,7 @@ from cocktail.serializers import (
 )
 
 
-def apply_annotate_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
+def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
     conditions = []
     if q_params.get("search"):
         conditions.append(
@@ -28,30 +35,22 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
         )
     if q_params.get("vibes"):
         conditions.append(
-            Q(cocktails__vibes__name__in=q_params["vibes"].lower().split(","))
+            Q(cocktails__vibes__name__in=q_params.getlist("vibes"))
         )
     if q_params.get("ingredients"):
         conditions.append(
-            Q(
-                cocktails__ingredients__name__in=q_params["ingredients"]
-                .lower()
-                .split(",")
-            )
+            Q(cocktails__ingredients__name__in=q_params.getlist("ingredients"))
         )
     if q_params.get("alcohol_level"):
         conditions.append(
-            Q(
-                cocktails__alcohol_level__in=q_params["alcohol_level"]
-                .lower()
-                .split(",")
-            )
+            Q(cocktails__alcohol_level__in=q_params.getlist("alcohol_level"))
         )
     if q_params.get("sweetness_level"):
         conditions.append(
             Q(
-                cocktails__sweetness_level__in=q_params["sweetness_level"]
-                .lower()
-                .split(",")
+                cocktails__sweetness_level__in=q_params.getlist(
+                    "sweetness_level"
+                )
             )
         )
     if q_params.get("min_price"):
@@ -70,7 +69,7 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
     return base_qs.annotate(cocktail_count=Count("cocktails", filter=filters))
 
 
-def apply_queryset_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
+def apply_queryset_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
     qs = base_qs
     if q_params.get("search"):
         qs = qs.filter(
@@ -78,19 +77,13 @@ def apply_queryset_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
             | Q(description__icontains=q_params["search"])
         )
     if q_params.get("vibes"):
-        qs = qs.filter(vibes__name__in=q_params["vibes"].lower().split(","))
+        qs = qs.filter(vibes__name__in=q_params.getlist("vibes"))
     if q_params.get("ingredients"):
-        qs = qs.filter(
-            ingredients__name__in=q_params["ingredients"].lower().split(",")
-        )
+        qs = qs.filter(ingredients__name__in=q_params.getlist("ingredients"))
     if q_params.get("alcohol_level"):
-        qs = qs.filter(
-            alcohol_level__in=q_params["alcohol_level"].lower().split(",")
-        )
+        qs = qs.filter(alcohol_level__in=q_params.getlist("alcohol_level"))
     if q_params.get("sweetness_level"):
-        qs = qs.filter(
-            sweetness_level__in=q_params["sweetness_level"].lower().split(",")
-        )
+        qs = qs.filter(sweetness_level__in=q_params.getlist("sweetness_level"))
     if q_params.get("min_price"):
         if not q_params.get("min_price").isdigit():
             raise ValidationError("Min price must be an integer")
@@ -103,7 +96,7 @@ def apply_queryset_filters(base_qs: QuerySet, q_params: dict) -> QuerySet:
 
 
 class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Cocktail.objects.prefetch_related("vibes")
+    queryset = Cocktail.objects.prefetch_related("vibes").order_by("name")
     pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
@@ -127,7 +120,9 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
                     queryset=CocktailIngredients.objects.select_related(
                         "ingredient", "alternative_ingredient"
                     ),
-                )
+                ),
+                "similar_cocktails__vibes",
+                "similar_cocktails__ingredients",
             )
 
     @cocktail_filters_documentation

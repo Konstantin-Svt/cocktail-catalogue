@@ -14,13 +14,13 @@ class Event(models.Model):
         SERVINGS_CHANGED = "servings_changed"
 
     event_name = models.CharField(max_length=100, choices=EventName.choices)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(default=timezone.now)
     anonymous_user_id = models.CharField(max_length=255)
-    session_id = models.ForeignKey(
+    session = models.ForeignKey(
         "Session", on_delete=models.SET_NULL, null=True, blank=True
     )
     page_name = models.CharField(max_length=255, null=True, blank=True)
-    cocktail_id = models.ForeignKey(
+    cocktail = models.ForeignKey(
         "cocktail.Cocktail", on_delete=models.SET_NULL, null=True, blank=True
     )
     search_text = models.TextField(null=True, blank=True)
@@ -31,10 +31,16 @@ class Event(models.Model):
     age_confirmed = models.BooleanField(null=True, blank=True)
     position = models.PositiveIntegerField(null=True, blank=True)
 
+    def __str__(self):
+        return self.event_name
+
 
 class Session(models.Model):
     anonymous_user_id = models.CharField(max_length=255)
-    session_start = models.DateTimeField(auto_now_add=True)
+    session_start = models.DateTimeField(default=timezone.now)
     session_end = models.DateTimeField(default=timezone.now)
     device_type = models.CharField(max_length=255, null=True, blank=True)
     browser = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"Session of {self.anonymous_user_id}"

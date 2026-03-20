@@ -1,3 +1,21 @@
-from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import generics, status
+from rest_framework.response import Response
 
-# Create your views here.
+from analytics.models import Event
+from analytics.serializers import EventCreateSerializer
+from analytics.services import create_event_from_frontend
+
+
+class EventCreate(generics.CreateAPIView):
+    queryset = Event.objects.all()
+    serializer_class = EventCreateSerializer
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        super().post(request, *args, **kwargs)
+        return Response(status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        serializer.is_valid(raise_exception=True)
+        create_event_from_frontend(serializer, self.request)
