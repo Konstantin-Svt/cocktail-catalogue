@@ -9,6 +9,14 @@
             height: 20px;
             width: 20px;
         }
+        &__img-filters {
+            background-image: url(../../public/img/Filters.svg);
+            height: 20px;
+            width: 20px;
+            background-repeat: no-repeat;
+            align-items: center;
+            justify-content: center;
+        }
     &__title {
         margin-bottom: 24px;
 
@@ -18,7 +26,15 @@
             color: #362c2c;
         }
     }
+    &__buttons {
+        display: flex;
+        gap: 12px;
 
+
+        @media (max-width: 600px) {
+            gap: 8px;
+        }
+    }
     &__sortBy {
         background-color: rgba(255, 255, 255, 1);
         cursor: pointer;
@@ -29,6 +45,21 @@
         align-items: center;
         border-radius: 16px;
         border: 1px solid rgba(228, 231, 238, 1);
+        text-decoration: none;
+        color: inherit; 
+        display: flex;
+        @media (max-width:500px) {
+            width: 190px;
+            flex: 1;
+        }
+        &--mobile-only {
+            display: none;
+            
+        @media (max-width: 500px) {        
+            display: flex;
+            flex: 1;
+            }
+        }
         &-text {
             font-size: 14px;
             font-weight: 500;
@@ -53,15 +84,25 @@
         display: flex;
         align-items: center;
         gap: 15px;
+         @media (max-width: 500px) {
+            flex-direction: column;
+            justify-content: left;
+        }
     }
     &__chip {
+        justify-content: start;
         margin-left: 15px;
+    }
+    &__chips {
+        display: flex;
+        justify-content: left;
     }
 }
 
 .chip {
     display: inline-flex;
     align-items: center;
+    justify-content: left;
     padding: 8px 16px;
     border: 1px solid #a37d8d;
     border-radius: 20px;

@@ -2,20 +2,7 @@ import { CatalogCard } from '../CatalogCard/CatalogCard';
 import './Catalog.scss';
 import React, { useMemo } from 'react';
 import { FilterState } from '../MainPage/MainPage';
-
-interface Cocktail {
-    id: number;
-    name: string;
-    description: string;
-    average_price: string;
-    alcohol_level: string;
-    sweetness_level: string;
-    preparation: string;
-    preparation_time: number;
-    image: string;
-    vibes: any[];
-    ingredients: any[];
-}
+import { Link } from 'react-router-dom';
 
 interface Props {
     activeFilters: FilterState;
@@ -29,20 +16,20 @@ export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails,
 
     const getIngredientsNames = (cocktail: any): string[] => {
         if (!cocktail.ingredients) return [];
-        // Якщо інгредієнти приходять об'єктами {id, name, ...}
+
         if (typeof cocktail.ingredients[0] === 'object') {
             return cocktail.ingredients.map((ing: any) => ing.name);
         }
-        // Якщо просто масив рядків
+
         return cocktail.ingredients;
     };
 
-    // ВАЖЛИВО: Просто використовуємо дані від сервера
+
     const displayCocktails = useMemo(() => {
         return Array.isArray(cocktails) ? cocktails : [];
     }, [cocktails]);
 
-    // Використовуємо count з сервера (як на твоєму скріншоті)
+ 
     const totalCount = summary?.general_count ?? displayCocktails.length;
 
     const removeType = (type: string) => {
@@ -62,11 +49,20 @@ export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails,
                 <h1 className="catalog__title">{totalCount} cocktails found</h1>
 
                 <div className="catalog__controls">
-                    <button className="catalog__sortBy">
-                        <div className="catalog__img"></div>
-                        <div className="catalog__sortBy-text">Sort by: Popular</div>
-                        <div className="catalog__img2"></div>
-                    </button>
+                    <div className="catalog__buttons">
+                        <button className="catalog__sortBy">
+                            <span className="catalog__icon catalog__icon--pop1"></span>
+                            <span className="catalog__sortBy-text">Sort</span>
+                            <span className="catalog__icon catalog__icon--pop2"></span>
+                        </button>
+
+                        {/* Ця кнопка буде видима тільки на мобілці */}
+                        <Link to="/filters" className="catalog__sortBy catalog__sortBy--mobile-only">
+                            <span className="catalog__icon catalog__icon--filters"></span>
+                            <span className="catalog__sortBy-text">Filters</span>
+                        </Link>
+                    </div>
+
 
                     <div className="catalog__chips">
                         {/* Типи алкоголю */}

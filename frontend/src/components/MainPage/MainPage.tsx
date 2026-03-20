@@ -15,24 +15,16 @@ export interface FilterState {
 
 interface MainPageProps {
     searchQuery: string;
+    activeFilters: FilterState;
+    setActiveFilters: React.Dispatch<React.SetStateAction<FilterState>>;
 }
 
-export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
-    const [activeFilters, setActiveFilters] = useState<FilterState>({
-        alcoholType: [],
-        alcoholLevel: '',
-        price: [0, 180],
-        sweetnessLevel: '',
-        vibe: '',
-        search: '',
-    });
+export const MainPage: React.FC<MainPageProps> = ({ searchQuery, activeFilters, setActiveFilters }) => {
 
     const [cocktails, setCocktails] = useState<any[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [initialLoading, setInitialLoading] = useState(true);
     const [isFiltering, setIsFiltering] = useState(false);
-
-
     const [serverData, setServerData] = useState<any>(null);
 
 
@@ -43,19 +35,18 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
                 search: searchQuery
             }));
         }
-    }, [searchQuery]);
+    }, [searchQuery, activeFilters.search, setActiveFilters]);
 
+    // Завантаження даних
     useEffect(() => {
         const loadData = async () => {
             setIsFiltering(true);
             try {
-
                 const data = await fetchCocktails(activeFilters, currentPage);
-                console.log("Data from server:", data);
 
                 if (data && data.results) {
                     setCocktails(data.results);
-                    setServerData(data); 
+                    setServerData(data);
                 } else {
                     setCocktails([]);
                 }
@@ -69,14 +60,15 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
         };
 
         loadData();
-    }, [activeFilters.alcoholType,
+    }, [
+        activeFilters.alcoholType,
         activeFilters.alcoholLevel,
-        activeFilters.price[0],
-        activeFilters.price[1],
+        activeFilters.price,
         activeFilters.sweetnessLevel,
         activeFilters.vibe,
         activeFilters.search,
-        currentPage]); 
+        currentPage
+    ]);
 
     if (initialLoading) {
         return <div className="loader">Завантаження коктейлів...</div>;

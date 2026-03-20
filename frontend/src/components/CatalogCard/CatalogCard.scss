@@ -87,3 +87,30 @@
         text-decoration: none;
     }
 }
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+
+    &--green {
+        background-color: #4cd964;
+    }
+    &--yellow {
+        background-color: #ffcc00;
+    }
+    &--red {
+        background-color: #ff3b30;
+    }
+    &--gray {
+        background-color: #8e8e93;
+    }
+}
+.divider {
+    width: 1px;
+    height: 16px;
+    background-color: #e4e7ee;
+    margin: 0 10px;
+}
