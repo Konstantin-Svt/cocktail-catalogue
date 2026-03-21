@@ -7,7 +7,11 @@ from django.http import QueryDict
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 
-from analytics.services import create_page_view_event
+from analytics.services import (
+    create_page_view_event,
+    create_card_view_events,
+    create_filter_applied_events,
+)
 from catalogue_system.pagination import StandardResultsSetPagination
 from cocktail.documentation import cocktail_filters_documentation
 from cocktail.models import (
@@ -67,7 +71,9 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
         )
 
     filters = reduce(operator.and_, conditions, Q())
-    return base_qs.annotate(cocktail_count=Count("cocktails", filter=filters, distinct=True))
+    return base_qs.annotate(
+        cocktail_count=Count("cocktails", filter=filters, distinct=True)
+    )
 
 
 def apply_queryset_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
@@ -182,14 +188,16 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
             "vibes_count": vibes_count,
         }
 
-        create_page_view_event("search", request)
+        analytic_session = create_page_view_event(request, "search")
+        create_filter_applied_events(request, res, analytic_session)
+        create_card_view_events(request, res, analytic_session)
 
         res.data.update(summary)
         return res
 
     def retrieve(self, request, *args, **kwargs):
         res = super().retrieve(request, *args, **kwargs)
-        create_page_view_event("cocktail_page", request)
+        create_page_view_event(request, "cocktail_page")
         return res
 
 

@@ -13,6 +13,10 @@ class EventCreate(generics.CreateAPIView):
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):
+        """
+        Endpoint for all kinds of analytics events sent from the frontend.
+        Does not return anything even if an event is registered successfully.
+        """
         super().post(request, *args, **kwargs)
         return Response(status=status.HTTP_201_CREATED)
 
