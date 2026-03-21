@@ -37,16 +37,13 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
 
     return response.json();
 };
-export const sendAgeVerification = (ageVerified: boolean) => {
-    fetch(`${BASE_URL}/analytics/events`, {
+export const sendAnalyticsEvent = (payload: Record<string, unknown>) => {
+    fetch(`${BASE_URL}/analytics/events/`, {
         method: `POST`,
         credentials: `include`,
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            event_name: `age_confirmation`,
-            age_confirmed: ageVerified,
-        })
+        body: JSON.stringify(payload)
     })
 };

@@ -7,6 +7,7 @@ from django.http import QueryDict
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 
+from analytics.services import create_page_view_event
 from catalogue_system.pagination import StandardResultsSetPagination
 from cocktail.documentation import cocktail_filters_documentation
 from cocktail.models import (
@@ -14,7 +15,6 @@ from cocktail.models import (
     CocktailIngredients,
     Vibe,
     Ingredient,
-    SimilarCocktails,
 )
 from cocktail.serializers import (
     CocktailListSerializer,
@@ -65,8 +65,9 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
         conditions.append(
             Q(cocktails__average_price__lte=q_params["max_price"])
         )
+
     filters = reduce(operator.and_, conditions, Q())
-    return base_qs.annotate(cocktail_count=Count("cocktails", filter=filters))
+    return base_qs.annotate(cocktail_count=Count("cocktails", filter=filters, distinct=True))
 
 
 def apply_queryset_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
@@ -96,7 +97,7 @@ def apply_queryset_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
 
 
 class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Cocktail.objects.prefetch_related("vibes").order_by("name")
+    queryset = Cocktail.objects.prefetch_related("vibes")
     pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
@@ -109,9 +110,12 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
         qs = self.queryset
 
         if self.action == "list":
-            return apply_queryset_filters(
-                qs, self.request.query_params
-            ).prefetch_related("ingredients")
+            return (
+                apply_queryset_filters(qs, self.request.query_params)
+                .prefetch_related("ingredients")
+                .order_by("name")
+                .distinct()
+            )
 
         if self.action == "retrieve":
             return qs.prefetch_related(
@@ -178,7 +182,14 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
             "vibes_count": vibes_count,
         }
 
+        create_page_view_event("search", request)
+
         res.data.update(summary)
+        return res
+
+    def retrieve(self, request, *args, **kwargs):
+        res = super().retrieve(request, *args, **kwargs)
+        create_page_view_event("cocktail_page", request)
         return res
 
 

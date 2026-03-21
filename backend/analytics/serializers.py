@@ -10,11 +10,12 @@ class EventCreateSerializer(serializers.ModelSerializer):
             "event_name",
             "age_confirmed",
             "servings_number",
+            "previous_filters",
         )
         required_fields = ("event_name",)
 
     def validate(self, data):
-        if data["event_name"] not in ("age_confirmation", "servings_changed"):
+        if data["event_name"] not in ("age_confirmation", "servings_changed", "filters_reset"):
             raise serializers.ValidationError(
                 {"event_name": "Invalid event name"}
             )
@@ -31,6 +32,13 @@ class EventCreateSerializer(serializers.ModelSerializer):
         ):
             raise serializers.ValidationError(
                 {"age_confirmed": "Invalid age confirmation"}
+            )
+
+        if data["event_name"] == "filters_reset" and not isinstance(
+            data["previous_filters"], str
+        ):
+            raise serializers.ValidationError(
+                {"filters_reset": "Invalid previous filters"}
             )
 
         return data
