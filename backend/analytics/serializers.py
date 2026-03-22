@@ -15,7 +15,11 @@ class EventCreateSerializer(serializers.ModelSerializer):
         required_fields = ("event_name",)
 
     def validate(self, data):
-        if data["event_name"] not in ("age_confirmation", "servings_changed", "filters_reset"):
+        if data["event_name"] not in (
+            "age_confirmation",
+            "servings_changed",
+            "filters_reset",
+        ):
             raise serializers.ValidationError(
                 {"event_name": "Invalid event name"}
             )

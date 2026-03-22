@@ -69,7 +69,9 @@ def create_event_from_frontend(
     return event_create_executor(data, request)
 
 
-def create_page_view_event(request: Request, page_name: str, session: Session = None) -> Session:
+def create_page_view_event(
+    request: Request, page_name: str, session: Session = None
+) -> Session:
     q_params = request.query_params.copy()
     data = {
         "event_name": "page_view",
