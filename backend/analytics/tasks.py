@@ -50,6 +50,10 @@ def migrate_data_to_bigquery() -> None:
         )
 
         for table in tables["tablename"]:
+            bq_table = table.removeprefix(f"{appname}_")
+            if appname != "analytics":
+                client.delete_table(f"{dataset_id}.{bq_table}", not_found_ok=True)
+
             dtype = None
             if table == "analytics_event":
                 dtype = EVENT_DTYPE_SCHEMA
@@ -61,26 +65,20 @@ def migrate_data_to_bigquery() -> None:
                 dtype=dtype,
             )
 
-            first_chunk = True
-            bq_table = table.removeprefix(f"{appname}_")
             print(f"Uploading {table}")
-
             for chunk in df_iter:
                 client.load_table_from_dataframe(
                     chunk,
                     f"{dataset_id}.{bq_table}",
                     job_config=bigquery.LoadJobConfig(
                         write_disposition=(
-                            bigquery.WriteDisposition.WRITE_TRUNCATE
-                            if first_chunk and appname != "analytics"
-                            else bigquery.WriteDisposition.WRITE_APPEND
+                            bigquery.WriteDisposition.WRITE_APPEND
                         ),
                         schema_update_options=[
                             bigquery.SchemaUpdateOption.ALLOW_FIELD_ADDITION
                         ],
                     ),
                 ).result()
-                first_chunk = False
 
             if appname == "analytics":
                 clear_analytics_table(table)
