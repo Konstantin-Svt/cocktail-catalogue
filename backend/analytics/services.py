@@ -151,3 +151,14 @@ def create_card_view_events(
 
     session = event_create_executor(bulk_data, request, session, bulk=True)
     return session
+
+
+def create_cocktail_page_open_event(
+    request: Request, response: Response, session: Session = None
+) -> Session:
+    data = {
+        "event_name": "cocktail_page_open",
+        "cocktail_id": response.data["id"]
+    }
+    session = event_create_executor(data, request, session)
+    return session

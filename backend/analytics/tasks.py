@@ -1,6 +1,8 @@
 import pandas
 import pyarrow
+from celery import shared_task
 from django.conf import settings
+from google.api_core.exceptions import GoogleAPIError
 from google.cloud import bigquery
 from django.db import connection
 
@@ -31,28 +33,34 @@ ENGINE = connection
 
 
 def clear_analytics_table(analytics_table: str) -> None:
-    with ENGINE.cursor() as cursor:
-        cursor.execute(f"DELETE FROM public.{analytics_table}")
+    if "analytics" in analytics_table:
+        with ENGINE.cursor() as cursor:
+            cursor.execute(f"DELETE FROM public.{analytics_table}")
 
 
-def migrate_data_to_bigquery() -> None:
+@shared_task(
+    bind=True, retry_kwargs={"max_retries": 3}, autoretry_for=(GoogleAPIError,)
+)
+def migrate_data_to_bigquery(self) -> None:
     dataset_id = f"{settings.ANALYTICS_DATASET_ID}"
     client = bigquery.Client()
     for appname in settings.APPS_WITH_ANALYTICS:
         tables = pandas.read_sql(
             f"""
-            SELECT tablename
-            FROM pg_tables
-            WHERE schemaname='public'
-            AND tablename LIKE '{appname}%%'
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema='public'
+            AND table_name LIKE '{appname}%%'
             """,
             ENGINE,
         )
 
-        for table in tables["tablename"]:
+        for table in tables["table_name"]:
             bq_table = table.removeprefix(f"{appname}_")
             if appname != "analytics":
-                client.delete_table(f"{dataset_id}.{bq_table}", not_found_ok=True)
+                client.delete_table(
+                    f"{dataset_id}.{bq_table}", not_found_ok=True
+                )
 
             dtype = None
             if table == "analytics_event":

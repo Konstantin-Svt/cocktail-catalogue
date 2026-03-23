@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
+
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -174,6 +177,7 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
+
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
@@ -194,6 +198,22 @@ AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
 
 ANALYTICS_DATASET_ID = os.environ.get("ANALYTICS_DATASET_ID")
+
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
+
+if "celery" in sys.argv:
+    if ANALYTICS_DATASET_ID and os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+        CELERY_BEAT_SCHEDULE = {
+            "migrate-analytics-data-to-bigquery-daily": {
+                "task": "analytics.tasks.migrate_data_to_bigquery",
+                "schedule": crontab(hour=8, minute=0),
+            }
+        }
+    else:
+        print(
+            "No ANALYTICS_DATASET_ID and/or GOOGLE_APPLICATION_CREDENTIALS, "
+            "Celery_beat will not send analytics data to BigQuery."
+        )
 
 if not DEBUG:
     STORAGES = {

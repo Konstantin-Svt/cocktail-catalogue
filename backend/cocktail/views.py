@@ -11,6 +11,7 @@ from analytics.services import (
     create_page_view_event,
     create_card_view_events,
     create_filter_applied_events,
+    create_cocktail_page_open_event,
 )
 from catalogue_system.pagination import StandardResultsSetPagination
 from cocktail.documentation import cocktail_filters_documentation
@@ -103,7 +104,7 @@ def apply_queryset_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
 
 
 class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Cocktail.objects.prefetch_related("vibes")
+    queryset = Cocktail.objects.all()
     pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
@@ -114,11 +115,18 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_queryset(self):
         qs = self.queryset
-
         if self.action == "list":
             return (
                 apply_queryset_filters(qs, self.request.query_params)
-                .prefetch_related("ingredients")
+                .prefetch_related(
+                    Prefetch("vibes"),
+                    Prefetch(
+                        "through_ingredients",
+                        queryset=CocktailIngredients.objects.select_related(
+                            "ingredient"
+                        ),
+                    ),
+                )
                 .order_by("name")
                 .distinct()
             )
@@ -131,8 +139,18 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
                         "ingredient", "alternative_ingredient"
                     ),
                 ),
-                "similar_cocktails__vibes",
-                "similar_cocktails__ingredients",
+                Prefetch(
+                    "similar_cocktails",
+                    queryset=Cocktail.objects.prefetch_related(
+                        Prefetch("vibes", to_attr="prefetched_vibes"),
+                        Prefetch(
+                            "through_ingredients",
+                            queryset=CocktailIngredients.objects.select_related(
+                                "ingredient",
+                            ),
+                        ),
+                    ),
+                ),
             )
 
     @cocktail_filters_documentation
@@ -197,7 +215,8 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         res = super().retrieve(request, *args, **kwargs)
-        create_page_view_event(request, "cocktail_page")
+        analytic_session = create_page_view_event(request, "cocktail_page")
+        create_cocktail_page_open_event(request, res, analytic_session)
         return res
 
 
