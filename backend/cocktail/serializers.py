@@ -80,6 +80,8 @@ class CocktailDetailSerializer(CocktailListSerializer):
         fields = CocktailListSerializer.Meta.fields + (
             "description",
             "preparation",
+            "alcohol_scale",
+            "sweetness_scale",
             "similar_cocktails",
         )
         read_only_fields = fields

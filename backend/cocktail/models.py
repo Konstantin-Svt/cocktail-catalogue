@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.text import slugify
 
@@ -30,8 +31,14 @@ class Cocktail(models.Model):
         choices=AlcoholLevel.choices, max_length=60
     )
     alcohol_promille = models.PositiveIntegerField(default=0)
+    alcohol_scale = models.PositiveIntegerField(
+        default=0, validators=[MinValueValidator(0), MaxValueValidator(10)]
+    )
     sweetness_level = models.CharField(
         choices=SweetnessLevel.choices, max_length=60
+    )
+    sweetness_scale = models.PositiveIntegerField(
+        default=0, validators=[MinValueValidator(0), MaxValueValidator(10)]
     )
     preparation = models.TextField(blank=True)
     preparation_time = models.PositiveIntegerField(default=5)
