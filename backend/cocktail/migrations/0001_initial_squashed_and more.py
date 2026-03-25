@@ -26,6 +26,7 @@ def copy_similar_cocktails(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
+
     replaces = []
 
     dependencies = [
