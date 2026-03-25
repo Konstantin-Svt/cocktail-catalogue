@@ -1,80 +1,221 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import data from '../../../../backend/fixtures/data.json';
 import './ProductCard.scss';
-
-interface CocktailItem {
-    pk: number;
-    model: string;
-    fields: {
-        name: string;
-        average_price: string;
-        image: string;
-        description: string;
-        alcohol_level: string;
-    };
-}
+import { fetchCocktailById } from '../../api/cocktailApi';
+import {CatalogCard} from '../CatalogCard/CatalogCard';
 
 export const ProductCard: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const cocktails = data as unknown as CocktailItem[];
-    const cocktail = cocktails.find(item => item.pk === Number(id));
+    const [cocktail, setCocktail] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [servings, setServings] = useState(1);
+    const [unit, setUnit] = useState<'ml' | 'oz' | 'cl'>('ml');
 
-    if (!cocktail) return <div className="error">Cocktail not found</div>;
+    const convertAmount = (amountInMl: number) => {
+        const baseAmount = amountInMl * servings;
 
-    const { name, image, description, average_price, alcohol_level } = cocktail.fields;
+        switch (unit) {
+            case 'oz':
 
+                return `${(baseAmount * 0.0338).toFixed(1)} oz`;
+            case 'cl':
+
+                return `${(baseAmount / 10).toFixed(1)} cl`;
+            default:
+                return `${baseAmount} ml`;
+        }
+    };
+    const calculateDrinks = (ingredients: any[]) => {
+
+        const alcoholVolume = ingredients
+            .filter(ing => ing.category === 'alcohol')
+            .reduce((acc, ing) => acc + ing.amount, 0);
+        return (alcoholVolume / 45).toFixed(1);
+    };
+    useEffect(() => {
+        if (!id) return;
+
+        const loadData = async () => {
+            try {
+                const data = await fetchCocktailById(id);
+                setCocktail(data);
+            } catch (err) {
+                console.error("Failed to fetch cocktail:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
+    }, [id]);
+
+    
+    if (loading) return <div className="loader">Завантаження...</div>;
+    if (!cocktail) return <div className="error">Коктейль не знайдено</div>;
     return (
-        <div className="product-card">
-            <div className="container">
-                <Link to="/" className="product-card__back">
-                    ← Back to cocktails
-                </Link>
-
-                <div className="product-card__main">
-                    <div className="product-card__image-block">
-                        <img src={image} alt={name} className="product-card__img" />
+        <div className="product-page">
+            <div className="grid">
+                <div className="product-page__back">
+                    <Link to="/" className='product-page__back-text'>← Back to cocktails</Link>
+                </div>
+                <div className="product-page__cocktail">
+                    <div className="cocktail__img"> 
+                        <img src={cocktail.image} alt={cocktail.name} />
                     </div>
-
-                    <div className="product-card__info-block">
-                        <h1 className="product-card__title">{name}</h1>
-
-                        <div className="product-card__meta">
-                            <span className="rating">⭐ 4.8</span>
-                            <span className="price">${average_price}</span>
-                            <span className="time">⏱ 5 min</span>
+                    <div className="cocktail__info">
+                        <div className="cocktail__nav">
+                            <div className="cocktail__title">{cocktail.name}</div>
+                            
+                            <div className="cocktail__button cocktail__button--save"></div>
+                            <div className="cocktail__button cocktail__button--share"></div>
                         </div>
-
-                        <div className="product-card__section">
-                            <h3>Description</h3>
-                            <p>{description}</p>
+                        <div className="cocktail__rates">
+                            <div className="cocktail__rate">★ 4.8</div>
+                            <div className="cocktail__rate">$ {Math.round(cocktail.average_price)}</div>
+                            <div className="cocktail__rate">🕒 {cocktail.preparation_time || 5} min</div>
                         </div>
-
-                        <div className="product-card__section">
-                            <h3>Drink details</h3>
-                            <div className="product-card__details-grid">
-                                <div className="detail-box">
-                                    <span className="value">168</span>
-                                    <span className="label">kcal</span>
-                                </div>
-                                <div className="detail-box">
-                                    <span className="value">1.4</span>
-                                    <span className="label">drinks</span>
-                                </div>
-                                <div className="detail-box">
-                                    <span className="value">{alcohol_level}</span>
-                                    <span className="label">alc./vol</span>
-                                </div>
-                            </div>
+                        <div className="cocktail__description">
+                            <h2 className='cocktail__description-title'>Description</h2>
+                            <span className='cocktail__description-text'>{cocktail.description}</span>
                         </div>
-
-                        <div className="product-card__section">
-                            <h3>Allergens</h3>
-                            <p>None</p>
+                        <h2 className='cocktail__details-title'>Drink details</h2>
+                        <div className="cocktail__details">
+                            <div className="cocktail__detail">{cocktail.ingredients ? calculateDrinks(cocktail.ingredients) : '0.0'}</div>
+                            <div className="cocktail__detail">{cocktail.alcohol_level}</div>
                         </div>
                     </div>
                 </div>
+                <div className="making__header">
+                    <h2 className='making__title'>How to make</h2>
+                    <div className="making__controls">
+                        <div className="making__measure">
+                            <button className={`making__size ${unit === 'oz' ? 'active' : ''}`} onClick={() => setUnit('oz')}>oz</button>
+                            <button className={`making__size ${unit === 'ml' ? 'active' : ''}`} onClick={() => setUnit('ml')}>ml</button>
+                            <button className={`making__size ${unit === 'cl' ? 'active' : ''}`} onClick={() => setUnit('cl')}>cl</button>
+                        </div>
+                        <div className="making__serves">
+                            <button className='making__button' onClick={() => setServings(Math.max(1, servings - 1))}>-</button>
+                            <span className="making__serves-text">{servings} serving</span>
+                            <button className='making__button' onClick={() => setServings(servings + 1)}>+</button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. Блок самої картки (Інгредієнти + Приготування) */}
+                <div className="making__card">
+                    <div className="making__ingredients">
+                        <h3 className="making__subtitle">Ingredients</h3>
+                        <ul className="ingredients__list">
+                            {cocktail.ingredients.map((ing: any) => (
+                                <li key={ing.id} className="ingredients__item">
+                                    <div className="ingredients__name-wrapper">
+                                        <span className={`ingredients__dot ${ing.category === 'alcohol' ? 'ingredients__dot--active' : ''}`}></span>
+                                        <span className="ingredients__name">{ing.name}</span>
+                                    </div>
+                                    <span className="ingredients__amount">
+                                        {ing.optional
+                                            ? 'optional'
+                                            : convertAmount(ing.amount)
+                                        }
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div className="making__preparation">
+                        <h3 className="making__subtitle">Preparation</h3>
+                        <div className="preparation__list">
+                            {cocktail.preparation.split('.').filter((s: string) => s.trim()).map((step: string, index: number) => (
+                                <div key={index} className="preparation__step">
+                                    <span className="step__number">{index + 1}</span>
+                                    <p className="step__text">{step.trim()}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <div className="making__extra">
+                    <div className="extra-card">
+                        <span className="extra-card__label">Glass</span>
+                        <div className="extra-card__content">
+                            <span className="extra-card__value">{cocktail.glass_type || 'Nothing'}</span>
+                        </div>
+                    </div>
+
+                    <div className="extra-card">
+                        <span className="extra-card__label">Garnish</span>
+                        <div className="extra-card__content">
+                            <span className="extra-card__value">{cocktail.garnish || 'Nothing'}</span>
+                        </div>
+                    </div>
+
+                    <div className="extra-card">
+                        <span className="extra-card__label">Alternative ingredients</span>
+                        <div className="extra-card__content">
+                            <span className="extra-card__value">{cocktail.alternative || 'Nothing'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="guide">
+                    <h2 className="guide__title">Strength & taste guide:</h2>
+                    <div className="guide__container">
+
+                        {/* Шкала міцності (Strength) */}
+                        <div className="guide__item">
+                            <div className="guide__track">
+                                {[...Array(10)].map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className={`guide__segment ${i < (cocktail.alcohol_scale || 7) ? 'active' : ''}`}
+                                    />
+                                ))}
+                            </div>
+                            <div className="guide__labels">
+                                <span className="guide__label">No alcohol</span>
+                                <span className="guide__label">Medium</span>
+                                <span className="guide__label">Boozy</span>
+                            </div>
+                        </div>
+
+                        {/* Шкала смаку (Taste) */}
+                        <div className="guide__item">
+                            <div className="guide__track">
+                                {[...Array(10)].map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className={`guide__segment ${i < (cocktail.sweetness_scale || 8) ? 'active' : ''}`}
+                                    />
+                                ))}
+                            </div>
+                            <div className="guide__labels">
+                                <span className="guide__label">Sweet</span>
+                                <span className="guide__label">Medium</span>
+                                <span className="guide__label">Dry/sour</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                {cocktail.similar_cocktails && cocktail.similar_cocktails.length > 0 && (
+                    <div className="similar">
+                        <h2 className="similar__title">Similar cocktails:</h2>
+                        <div className="similar__grid">
+                            {cocktail.similar_cocktails.map((similar: any) => (
+                                <div key={similar.id} className="similar__item">
+                                    <CatalogCard
+                                        id={similar.id}
+                                        data={similar}
+                                        ingredients={similar.ingredients?.map((ing: any) =>
+                                            typeof ing === 'string' ? ing : ing.name
+                                        ) || []}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
-    );
+    )
 };

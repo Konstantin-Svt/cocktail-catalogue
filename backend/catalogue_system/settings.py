@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
+
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -55,9 +58,10 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "storages",
-    # apps
-    "cocktail",
 ]
+
+APPS_WITH_ANALYTICS = ["cocktail", "analytics"]
+INSTALLED_APPS += APPS_WITH_ANALYTICS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -70,6 +74,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "analytics.middleware.AnonymousUserCookieMiddleware",
 ]
 
 ROOT_URLCONF = "catalogue_system.urls"
@@ -102,6 +107,8 @@ if DEBUG:
         }
     }
 else:
+    from dotenv import load_dotenv
+    load_dotenv()
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -112,15 +119,15 @@ else:
             "HOST": os.environ.get("POSTGRES_HOST", "db"),
         }
     }
-if os.environ.get("POSTGRES_SSLMODE", "disabled").lower() in ("require", "1", "true"):
-    DATABASES.update(
-        {
-            "OPTIONS": {
-                "sslmode": "require",
-                "channel_binding": "require",
-            },
-        }
-    )
+    if os.environ.get("POSTGRES_SSLMODE", "disabled").lower() in ("require", "1", "true"):
+        DATABASES["default"].update(
+            {
+                "OPTIONS": {
+                    "sslmode": "require",
+                    "channel_binding": "require",
+                },
+            }
+        )
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -170,7 +177,9 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
+
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
@@ -188,7 +197,25 @@ AWS_S3_ADDRESSING_STYLE = "path"
 AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
 
-if AWS_ACCESS_KEY_ID:
+ANALYTICS_DATASET_ID = os.environ.get("ANALYTICS_DATASET_ID")
+
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
+
+if "celery" in sys.argv:
+    if ANALYTICS_DATASET_ID and os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
+        CELERY_BEAT_SCHEDULE = {
+            "migrate-analytics-data-to-bigquery-daily": {
+                "task": "analytics.tasks.migrate_data_to_bigquery",
+                "schedule": crontab(hour=8, minute=0),
+            }
+        }
+    else:
+        print(
+            "No ANALYTICS_DATASET_ID and/or GOOGLE_APPLICATION_CREDENTIALS, "
+            "Celery_beat will not send analytics data to BigQuery."
+        )
+
+if not DEBUG:
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",

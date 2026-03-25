@@ -22,6 +22,15 @@ interface Props {
 export const CatalogCard: React.FC<Props> = ({ data, ingredients, id }) => {
 
     const price = Math.round(Number(data.average_price));
+    const getAlcoholStatusClass = (levelStr: string) => {
+
+        const level = levelStr;
+
+        if (level === 'Non-alcoholic') return 'dot--gray';
+        if (level === 'low') return 'dot--green';
+        if (level === 'medium') return 'dot--yellow';
+        return 'dot--red';
+    };
     return (
         <article className="cocktail-card">
             <Link to={`/product/${id}`} className="cocktail-card__link">
@@ -54,7 +63,7 @@ export const CatalogCard: React.FC<Props> = ({ data, ingredients, id }) => {
                     <div className="divider"></div>
 
                     <div className="cocktail-card__info">
-                        <span className="dot"></span>
+                        <span className={`dot ${getAlcoholStatusClass(data.alcohol_level)}`}></span>
                         <span className="text">{data.alcohol_level}</span>
                     </div>
 

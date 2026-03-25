@@ -22,7 +22,9 @@ class IngredientForCocktailSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="ingredient.name")
     category = serializers.CharField(source="ingredient.category")
     unit = serializers.CharField(source="ingredient.unit")
-    alternative = serializers.StringRelatedField(source="alternative_ingredient")
+    alternative = serializers.StringRelatedField(
+        source="alternative_ingredient"
+    )
 
     class Meta:
         model = CocktailIngredients
@@ -41,6 +43,12 @@ class IngredientForCocktailSerializer(serializers.ModelSerializer):
 class CocktailListSerializer(serializers.ModelSerializer):
     vibes = serializers.StringRelatedField(many=True, read_only=True)
     ingredients = serializers.StringRelatedField(many=True, read_only=True)
+    alcohol_level = serializers.CharField(
+        read_only=True,
+    )
+    sweetness_level = serializers.CharField(
+        read_only=True,
+    )
 
     class Meta:
         model = Cocktail
@@ -50,6 +58,7 @@ class CocktailListSerializer(serializers.ModelSerializer):
             "image",
             "average_price",
             "alcohol_level",
+            "alcohol_promille",
             "sweetness_level",
             "preparation_time",
             "vibes",
@@ -62,11 +71,15 @@ class CocktailDetailSerializer(CocktailListSerializer):
     ingredients = IngredientForCocktailSerializer(
         many=True, read_only=True, source="through_ingredients"
     )
+    similar_cocktails = CocktailListSerializer(many=True, read_only=True)
     vibes = VibeSerializer(many=True, read_only=True)
 
     class Meta(CocktailListSerializer.Meta):
         fields = CocktailListSerializer.Meta.fields + (
             "description",
             "preparation",
+            "alcohol_scale",
+            "sweetness_scale",
             "similar_cocktails",
         )
+        read_only_fields = fields

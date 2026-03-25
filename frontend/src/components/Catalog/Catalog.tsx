@@ -2,20 +2,7 @@ import { CatalogCard } from '../CatalogCard/CatalogCard';
 import './Catalog.scss';
 import React, { useMemo } from 'react';
 import { FilterState } from '../MainPage/MainPage';
-
-interface Cocktail {
-    id: number;
-    name: string;
-    description: string;
-    average_price: string;
-    alcohol_level: string;
-    sweetness_level: string;
-    preparation: string;
-    preparation_time: number;
-    image: string;
-    vibes: any[]; // зазвичай масив об'єктів або ID
-    ingredients: any[]; // зазвичай масив ID або об'єктів
-}
+import { Link } from 'react-router-dom';
 
 interface Props {
     activeFilters: FilterState;
@@ -27,70 +14,23 @@ interface Props {
 
 export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails, ingredients, summary }) => {
 
-    const getIngredientsForCocktail = (cocktail: Cocktail): string[] => {
-        // Перевірка на існування масиву інгредієнтів
-        if (!cocktail.ingredients || !Array.isArray(cocktail.ingredients)) {
-            return [];
+    const getIngredientsNames = (cocktail: any): string[] => {
+        if (!cocktail.ingredients) return [];
+
+        if (typeof cocktail.ingredients[0] === 'object') {
+            return cocktail.ingredients.map((ing: any) => ing.name);
         }
 
-        if (typeof cocktail.ingredients[0] === 'string') {
-            return cocktail.ingredients as unknown as string[];
-        }
-
-        return ingredients
-            .filter(ing => cocktail.ingredients?.includes(ing.id))
-            .map(ing => ing.name || "");
+        return cocktail.ingredients;
     };
 
 
-    const filteredCocktails = useMemo(() => {
+    const displayCocktails = useMemo(() => {
+        return Array.isArray(cocktails) ? cocktails : [];
+    }, [cocktails]);
 
-        if (!cocktails || !Array.isArray(cocktails)) return [];
-
-        return cocktails.filter(cocktail => {
-            const { alcoholType, alcoholLevel, price, sweetnessLevel, vibe } = activeFilters;
-
-            const avgPrice = parseFloat(cocktail.average_price || "0");
-
-
-            const matchesType = alcoholType.length === 0 ||
-                alcoholType.some(type => {
-                    const searchStr = type.toLowerCase();
-
-         
-                    const name = (cocktail.name || "").toLowerCase();
-                    const description = (cocktail.description || "").toLowerCase();
-
-                    const inBasicInfo = name.includes(searchStr) || description.includes(searchStr);
-
-                    const cocktailIngredients = getIngredientsForCocktail(cocktail);
-                    const inIngredients = cocktailIngredients.some(ingName =>
-                        (ingName || "").toLowerCase().includes(searchStr)
-                    );
-
-                    return inBasicInfo || inIngredients;
-                });
-
-
-            const matchesLevel = !alcoholLevel ||
-                (cocktail.alcohol_level || "").toLowerCase() === alcoholLevel.toLowerCase();
-
-
-            const matchesPrice = avgPrice >= price[0] && avgPrice <= price[1];
-
-            const matchesSweetness = !sweetnessLevel ||
-                (cocktail.sweetness_level || "").toLowerCase() === sweetnessLevel.toLowerCase();
-
-            const matchesVibe = !vibe || (cocktail.vibes && Array.isArray(cocktail.vibes) && cocktail.vibes.some((v: any) => {
-                const vibeName = typeof v === 'string' ? v : v.name;
-                return vibeName?.toLowerCase() === vibe.toLowerCase();
-            }));
-
-            return matchesType && matchesLevel && matchesPrice && matchesSweetness && matchesVibe;
-        });
-    }, [activeFilters, cocktails, ingredients]);
-
-    const cocktailsCount = filteredCocktails.length;
+ 
+    const totalCount = summary?.general_count ?? displayCocktails.length;
 
     const removeType = (type: string) => {
         setFilters(prev => ({
@@ -106,14 +46,23 @@ export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails,
     return (
         <div className="catalog">
             <div className="catalog__header">
-                <h1 className="catalog__title">{(summary?.general_count ?? cocktails.length)} cocktails found</h1>
+                <h1 className="catalog__title">{totalCount} cocktails found</h1>
 
                 <div className="catalog__controls">
-                    <button className="catalog__sortBy">
-                        <div className="catalog__img"></div>
-                        <div className="catalog__sortBy-text">Sort by: Popular</div>
-                        <div className="catalog__img2"></div>
-                    </button>
+                    <div className="catalog__buttons">
+                        <button className="catalog__sortBy">
+                            <span className="catalog__icon catalog__icon--pop1"></span>
+                            <span className="catalog__sortBy-text">Sort</span>
+                            <span className="catalog__icon catalog__icon--pop2"></span>
+                        </button>
+
+                        {/* Ця кнопка буде видима тільки на мобілці */}
+                        <Link to="/filters" className="catalog__sortBy catalog__sortBy--mobile-only">
+                            <span className="catalog__icon catalog__icon--filters"></span>
+                            <span className="catalog__sortBy-text">Filters</span>
+                        </Link>
+                    </div>
+
 
                     <div className="catalog__chips">
                         {/* Типи алкоголю */}
@@ -159,13 +108,13 @@ export const Catalog: React.FC<Props> = ({ activeFilters, setFilters, cocktails,
             </div>
 
             <div className="catalog__list">
-                {filteredCocktails.length > 0 ? (
-                    filteredCocktails.map((cocktail) => (
+                {displayCocktails.length > 0 ? (
+                    displayCocktails.map((cocktail) => (
                         <CatalogCard
                             id={cocktail.id}
                             key={cocktail.id}
                             data={cocktail}
-                            ingredients={getIngredientsForCocktail(cocktail)}
+                            ingredients={getIngredientsNames(cocktail)}
                         />
                     ))
                 ) : (

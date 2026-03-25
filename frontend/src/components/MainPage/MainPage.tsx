@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AlcoFilters } from '../AlcoFilters/AlcoFilters';
 import { Catalog } from '../Catalog/Catalog';
 import './MainPage.scss';
-import { fetchIngredients, fetchVibes, fetchFilteredCocktails } from '../../api/cocktailApi';
+import { fetchCocktails } from '../../api/cocktailApi';
 
 export interface FilterState {
     alcoholType: string[];
@@ -15,84 +15,57 @@ export interface FilterState {
 
 interface MainPageProps {
     searchQuery: string;
+    activeFilters: FilterState;
+    setActiveFilters: React.Dispatch<React.SetStateAction<FilterState>>;
+    serverData: any;
+    isLoading: boolean;
 }
 
-export const MainPage: React.FC<MainPageProps> = ({ searchQuery }) => {
-    const [activeFilters, setActiveFilters] = useState<FilterState>({
-        alcoholType: [],
-        alcoholLevel: '',
-        price: [0, 180],
-        sweetnessLevel: '',
-        vibe: '',
-        search: '',
-    });
-
-    const [cocktails, setCocktails] = useState<any[]>([]);
-    const [fullCocktails, setFullCocktails] = useState<any[]>([]);
-    const [ingredients, setIngredients] = useState<any[]>([]);
-    const [vibes, setVibes] = useState<any[]>([]);
-    const [initialLoading, setInitialLoading] = useState(true);
-    const [isFiltering, setIsFiltering] = useState(false);     
-
+export const MainPage: React.FC<MainPageProps> = ({ searchQuery, activeFilters, setActiveFilters, serverData, isLoading }) => {
 
     useEffect(() => {
-
-        Promise.all([fetchIngredients(), fetchVibes(), fetchFilteredCocktails({})])
-            .then(([iData, vData, cData]) => {
-                setIngredients(iData);
-                setVibes(vData);
-                setFullCocktails(cData); 
-                setInitialLoading(false);
-            })
-            .catch(err => {
-                console.error("Помилка статики:", err);
-                setInitialLoading(false);
-            });
-    }, []);
-
-
-    useEffect(() => {
-        setIsFiltering(true);
-        fetchFilteredCocktails(activeFilters)
-            .then(data => {
-                setCocktails(data);
-                setIsFiltering(false);
-            })
-            .catch(() => setIsFiltering(false));
-    }, [activeFilters]);
-
-    useEffect(() => {
-        setActiveFilters(prev => ({
-            ...prev,
-            search: searchQuery
-        }));
-    }, [searchQuery]);
+        if (searchQuery !== activeFilters.search) {
+            setActiveFilters(prev => ({
+                ...prev,
+                search: searchQuery
+            }));
+        }
+    }, [searchQuery, setActiveFilters]);
     
-    if (initialLoading) return <div className="loader">Завантаження додатка...</div>;
+    const cocktails = useMemo(() => {
+        if (!serverData) return [];
+        return Array.isArray(serverData)
+            ? serverData
+            : (serverData.results || serverData.cocktails || []);
+    }, [serverData]);
 
+    if (isLoading && !serverData) {
+        return <div className="loader">Завантаження коктейлів...</div>;
+    }
+
+    if (!isLoading && cocktails.length === 0) {
+        return <div>Коктейлів не знайдено за цими фільтрами.</div>;
+    }
     return (
         <div className="grid">
             <aside className="mainPage__filters">
                 <AlcoFilters
                     onFilterChange={setActiveFilters}
                     filters={activeFilters}
-                    cocktails={fullCocktails}
-                    ingredients={ingredients}
-                    setCocktails={setCocktails}
+                    summary={serverData}
                 />
             </aside>
 
             <section className="mainPage__catalog">
-                {isFiltering ? (
-                    <div className="filtering-status">Оновлюємо список...</div>
-                ) : (
-                    <Catalog
-                        activeFilters={activeFilters}
-                        setFilters={setActiveFilters}
-                        cocktails={cocktails}
-                        ingredients={ingredients}
-                    />
-                )}
+                {isLoading && <div className="filtering-status">Оновлюємо список...</div>}
+
+                <Catalog
+                    activeFilters={activeFilters}
+                    setFilters={setActiveFilters}
+                    cocktails={cocktails}
+                    ingredients={[]}
+                    summary={serverData}
+                />
             </section>
         </div>
     );

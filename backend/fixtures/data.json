@@ -3,22 +3,18 @@
   "model": "cocktail.cocktail",
   "pk": 1,
   "fields": {
-    "name": "White Ukrainian",
-    "description": "Big drink for big man",
-    "average_price": "13.37",
-    "alcohol_level": "strong",
-    "sweetness_level": "dry",
-    "preparation": "Mix Vodka with Beer",
+    "name": "White Rob Roy",
+    "description": "White Rob Roy altogether lighter and whiter version of the classic Scotch Manhattan is delicious and comparable to what the White Negroni did for the classic Negroni.",
+    "average_price": "13.40",
+    "alcohol_promille": 26,
+    "alcohol_scale": 9,
+    "sweetness_scale": 1,
+    "preparation": "Select and pre-chill a COUPE GLASS.\r\nPrepare garnish of skewered Luxardo Maraschino Cherry.\r\nSTIR all ingredients with ice.\r\nFINE STRAIN into chilled glass.\r\nGarnish with skewered cherry.",
     "preparation_time": 5,
-    "image": "cocktails/white-ukrainian-27da6897-4341-4289-8d1a-6a1768e5c44f.jpg",
+    "image": "cocktails/white-ukrainian-4ffa9009-5f35-4c1e-8e68-b1319352feec.jpg",
     "created_at": "2026-03-08T00:39:08.521",
     "vibes": [
-      1
-    ],
-    "similar_cocktails": [
-      2,
-      3,
-      4
+      6
     ]
   }
 },
@@ -27,20 +23,17 @@
   "pk": 2,
   "fields": {
     "name": "Mojito",
-    "description": "",
+    "description": "When well made, this Cuban cousin of the Mint Julep - Mojito, is one of the world's greatest and most refreshing cocktails.",
     "average_price": "30.00",
-    "alcohol_level": "medium",
-    "sweetness_level": "medium",
-    "preparation": "",
-    "preparation_time": 5,
-    "image": "cocktails/mojito-3cfbc554-f67c-4874-9d82-695055e767be.jpeg",
+    "alcohol_promille": 17,
+    "alcohol_scale": 5,
+    "sweetness_scale": 6,
+    "preparation": "Select and pre-chill a COLLINS GLASS.\r\nPrepare garnish of mint sprigs.\r\nADD first 4 ingredients to glass and two-thirds fill with crushed ice.\r\nCHURN (stir) with bar spoon.\r\nFill glass with more crushed ice.\r\nTOP with soda.\r\nGarnish with mint sprigs bouquet.",
+    "preparation_time": 10,
+    "image": "cocktails/mojito-729a449c-c60c-4eb1-8123-b69a573b174f.jpeg",
     "created_at": "2026-03-09T15:37:42.844",
     "vibes": [
       2
-    ],
-    "similar_cocktails": [
-      1,
-      3
     ]
   }
 },
@@ -48,46 +41,60 @@
   "model": "cocktail.cocktail",
   "pk": 3,
   "fields": {
-    "name": "Brown Derbie",
-    "description": "Run",
+    "name": "Brown Derby",
+    "description": "Said to have been created in the 1930s by a bartender at the Vendôme Café which sat at 6666 Sunset Boulevard in Hollywood, California. The Vendôme was opened in May 1933 by William \"Billy\" Wilkerson, a real estate developer who also owned The Hollywood Reporter, the offices of which were a block away.\r\n\r\nAlthough created at the Vendôme, this cocktail is named after another fashionable Hollywood restaurant of the era, the Brown Derby at 1628 North Vine Street. Due to its proximity to the movie studios, this branch of the Brown Derby was more famous than the original, smaller branch at 3427 Wilshire Boulevard, famous for being housed in a building shaped like a man's derby hat.\r\n\r\nA Brown Derby is a maple syrup-sweetened development on the earlier honey-sweetened De Rigueur Cocktail. The misguided belief that the Brown Derby should be sweetened with honey stems from a recipe in George Buzza Jr.'s, 1933",
     "average_price": "35.00",
-    "alcohol_level": "medium",
-    "sweetness_level": "medium",
-    "preparation": "",
-    "preparation_time": 5,
-    "image": "cocktails/brown-derbie-2dd7fe3f-150f-432a-b5de-2339366babd4.jpeg",
+    "alcohol_promille": 18,
+    "alcohol_scale": 6,
+    "sweetness_scale": 5,
+    "preparation": "Select and pre-chill a COUPE GLASS.\r\nPrepare garnish of grapefruit zest twist.\r\nSHAKE all ingredients with ice.\r\nFINE STRAIN into chilled glass.\r\nEXPRESS grapefruit zest twist over cocktail and use as garnish.",
+    "preparation_time": 7,
+    "image": "cocktails/brown-derbie-b5a61387-444e-4f91-8cb3-adcab8df6aa7.jpeg",
     "created_at": "2026-03-09T19:59:22.443",
     "vibes": [
       3,
       6
-    ],
-    "similar_cocktails": [
-      1,
-      2
     ]
   }
 },
 {
-  "model": "cocktail.cocktail",
+  "model": "cocktail.similarcocktails",
+  "pk": 1,
+  "fields": {
+    "from_cocktail": 1,
+    "to_cocktail": 2
+  }
+},
+{
+  "model": "cocktail.similarcocktails",
+  "pk": 2,
+  "fields": {
+    "from_cocktail": 1,
+    "to_cocktail": 3
+  }
+},
+{
+  "model": "cocktail.similarcocktails",
   "pk": 4,
   "fields": {
-    "name": "Blood Mary",
-    "description": "",
-    "average_price": "15.00",
-    "alcohol_level": "strong",
-    "sweetness_level": "dry",
-    "preparation": "",
-    "preparation_time": 10,
-    "image": "cocktails/blood-mary-00e80f5f-db20-49db-b4a6-689d751ed739.jpg",
-    "created_at": "2026-03-12T01:45:50.751",
-    "vibes": [
-      3,
-      4,
-      6
-    ],
-    "similar_cocktails": [
-      1
-    ]
+    "from_cocktail": 3,
+    "to_cocktail": 1
+  }
+},
+{
+  "model": "cocktail.similarcocktails",
+  "pk": 5,
+  "fields": {
+    "from_cocktail": 2,
+    "to_cocktail": 3
+  }
+},
+{
+  "model": "cocktail.similarcocktails",
+  "pk": 6,
+  "fields": {
+    "from_cocktail": 3,
+    "to_cocktail": 2
   }
 },
 {
@@ -121,7 +128,7 @@
   "model": "cocktail.ingredient",
   "pk": 4,
   "fields": {
-    "name": "white rum",
+    "name": "rum",
     "category": "alcohol",
     "unit": "ml"
   }
@@ -166,7 +173,7 @@
   "model": "cocktail.ingredient",
   "pk": 9,
   "fields": {
-    "name": "coca-cola",
+    "name": "lime juice",
     "category": "mixer",
     "unit": "ml"
   }
@@ -175,8 +182,8 @@
   "model": "cocktail.ingredient",
   "pk": 10,
   "fields": {
-    "name": "black rum",
-    "category": "alcohol",
+    "name": "lemon juice",
+    "category": "mixer",
     "unit": "ml"
   }
 },
@@ -184,8 +191,8 @@
   "model": "cocktail.ingredient",
   "pk": 11,
   "fields": {
-    "name": "wine",
-    "category": "alcohol",
+    "name": "maple syrup",
+    "category": "mixer",
     "unit": "ml"
   }
 },
@@ -193,27 +200,49 @@
   "model": "cocktail.ingredient",
   "pk": 12,
   "fields": {
-    "name": "tomato juice",
-    "category": "mixer",
+    "name": "whisky",
+    "category": "alcohol",
     "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 13,
+  "fields": {
+    "name": "vermouth",
+    "category": "alcohol",
+    "unit": "ml"
+  }
+},
+{
+  "model": "cocktail.ingredient",
+  "pk": 14,
+  "fields": {
+    "name": "cherry",
+    "category": "garnish",
+    "unit": "piece"
   }
 },
 {
   "model": "cocktail.cocktailingredients",
   "pk": 1,
   "fields": {
-    "ingredient": 1,
+    "ingredient": 12,
+    "alternative_ingredient": 6,
     "cocktail": 1,
-    "amount": 50
+    "amount": 50,
+    "optional": false
   }
 },
 {
   "model": "cocktail.cocktailingredients",
   "pk": 2,
   "fields": {
-    "ingredient": 2,
+    "ingredient": 13,
+    "alternative_ingredient": null,
     "cocktail": 1,
-    "amount": 100
+    "amount": 100,
+    "optional": false
   }
 },
 {
@@ -221,8 +250,10 @@
   "pk": 3,
   "fields": {
     "ingredient": 3,
+    "alternative_ingredient": null,
     "cocktail": 1,
-    "amount": 100
+    "amount": 50,
+    "optional": false
   }
 },
 {
@@ -230,8 +261,10 @@
   "pk": 4,
   "fields": {
     "ingredient": 4,
+    "alternative_ingredient": 6,
     "cocktail": 2,
-    "amount": 60
+    "amount": 60,
+    "optional": false
   }
 },
 {
@@ -239,8 +272,10 @@
   "pk": 5,
   "fields": {
     "ingredient": 5,
+    "alternative_ingredient": null,
     "cocktail": 2,
-    "amount": 2
+    "amount": 2,
+    "optional": false
   }
 },
 {
@@ -248,8 +283,10 @@
   "pk": 6,
   "fields": {
     "ingredient": 6,
+    "alternative_ingredient": 4,
     "cocktail": 3,
-    "amount": 50
+    "amount": 50,
+    "optional": false
   }
 },
 {
@@ -257,8 +294,10 @@
   "pk": 7,
   "fields": {
     "ingredient": 7,
+    "alternative_ingredient": null,
     "cocktail": 3,
-    "amount": 100
+    "amount": 100,
+    "optional": false
   }
 },
 {
@@ -266,8 +305,10 @@
   "pk": 8,
   "fields": {
     "ingredient": 8,
+    "alternative_ingredient": null,
     "cocktail": 3,
-    "amount": 1
+    "amount": 1,
+    "optional": false
   }
 },
 {
@@ -275,33 +316,43 @@
   "pk": 9,
   "fields": {
     "ingredient": 9,
-    "cocktail": 3,
-    "amount": 100
+    "alternative_ingredient": 10,
+    "cocktail": 2,
+    "amount": 15,
+    "optional": false
   }
 },
 {
   "model": "cocktail.cocktailingredients",
   "pk": 10,
   "fields": {
-    "ingredient": 1,
-    "cocktail": 4,
-    "amount": 50
+    "ingredient": 3,
+    "alternative_ingredient": null,
+    "cocktail": 2,
+    "amount": 30,
+    "optional": false
   }
 },
 {
   "model": "cocktail.cocktailingredients",
   "pk": 11,
   "fields": {
-    "ingredient": 12,
-    "cocktail": 4,
-    "amount": 100
+    "ingredient": 11,
+    "alternative_ingredient": null,
+    "cocktail": 3,
+    "amount": 15,
+    "optional": false
   }
 },
 {
-  "model": "cocktail.vibe",
-  "pk": 1,
+  "model": "cocktail.cocktailingredients",
+  "pk": 12,
   "fields": {
-    "name": "winter"
+    "ingredient": 14,
+    "alternative_ingredient": null,
+    "cocktail": 1,
+    "amount": 1,
+    "optional": false
   }
 },
 {
@@ -743,11 +794,119 @@
   }
 },
 {
+  "model": "auth.permission",
+  "pk": 45,
+  "fields": {
+    "name": "Can add similar cocktails",
+    "content_type": 11,
+    "codename": "add_similarcocktails"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 46,
+  "fields": {
+    "name": "Can change similar cocktails",
+    "content_type": 11,
+    "codename": "change_similarcocktails"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 47,
+  "fields": {
+    "name": "Can delete similar cocktails",
+    "content_type": 11,
+    "codename": "delete_similarcocktails"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 48,
+  "fields": {
+    "name": "Can view similar cocktails",
+    "content_type": 11,
+    "codename": "view_similarcocktails"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 49,
+  "fields": {
+    "name": "Can add session",
+    "content_type": 13,
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 50,
+  "fields": {
+    "name": "Can change session",
+    "content_type": 13,
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 51,
+  "fields": {
+    "name": "Can delete session",
+    "content_type": 13,
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 52,
+  "fields": {
+    "name": "Can view session",
+    "content_type": 13,
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 53,
+  "fields": {
+    "name": "Can add event",
+    "content_type": 12,
+    "codename": "add_event"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 54,
+  "fields": {
+    "name": "Can change event",
+    "content_type": 12,
+    "codename": "change_event"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 55,
+  "fields": {
+    "name": "Can delete event",
+    "content_type": 12,
+    "codename": "delete_event"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 56,
+  "fields": {
+    "name": "Can view event",
+    "content_type": 12,
+    "codename": "view_event"
+  }
+},
+{
   "model": "auth.user",
   "pk": 1,
   "fields": {
-    "password": "pbkdf2_sha256$1200000$rO7EjZcuONMJ6goJnR2cTx$FxYo0cLMqg9n8KCakh/Xzlja7KdBrPuoF9//O+UoQy4=",
-    "last_login": "2026-03-13T00:03:53.902",
+    "password": "pbkdf2_sha256$1200000$ebTHZvWH17TIwV8gqYJifR$oikyaHP9nN5b+6HILnimzIYx1uJ88aMrwBDVe/EIg64=",
+    "last_login": "2026-03-13T00:01:21.735",
     "is_superuser": true,
     "username": "admin",
     "first_name": "",
@@ -765,7 +924,7 @@
   "pk": 2,
   "fields": {
     "password": "pbkdf2_sha256$1200000$me8kXPwwKfUhIAkFW2VM7R$GKFUGnB3J8pW9j7HMfDPJbJZcqN77h2dzOCj8SFXgME=",
-    "last_login": null,
+    "last_login": "2026-03-21T22:11:58.272",
     "is_superuser": true,
     "username": "administrator",
     "first_name": "",
@@ -773,7 +932,7 @@
     "email": "admin2@admin.com",
     "is_staff": true,
     "is_active": true,
-    "date_joined": "2026-03-13T00:07:26.661",
+    "date_joined": "2026-03-08T00:34:55.727",
     "groups": [],
     "user_permissions": []
   }

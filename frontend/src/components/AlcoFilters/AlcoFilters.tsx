@@ -1,10 +1,8 @@
 import './AlcoFilters.scss';
 import React, { useEffect, useMemo } from 'react';
-import { fetchCocktailsSummary, fetchFilteredCocktails } from '../../api/cocktailApi';
+import { sendAnalyticsEvent, } from '../../api/cocktailApi';
 
-
-
-interface FilterState {
+export interface FilterState {
     alcoholType: string[];
     alcoholLevel: string;
     price: [number, number];
@@ -16,60 +14,24 @@ interface FilterState {
 interface Props {
     onFilterChange: React.Dispatch<React.SetStateAction<FilterState>>;
     filters: FilterState;
-    cocktails: any[];
-    allCocktails?: any[]; 
-    ingredients: any[];
-    setCocktails: (data: any[]) => void;
+    summary: any;
 }
 
-export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktails, allCocktails, setCocktails }) => {
+export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, summary }) => {
     const [tempPrice, setTempPrice] = React.useState<[number, number]>(filters.price);
-    const [summary, setSummary] = React.useState<any>(null);
-
     const priceTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-    const sourceForCounts = allCocktails || cocktails;
+
     useEffect(() => {
         setTempPrice(filters.price);
     }, [filters.price]);
 
-    useEffect(() => {
-        const getSummary = async () => {
-            const data = await fetchCocktailsSummary(filters);
-            setSummary(data);
-        };
-        getSummary();
-    }, [filters]);
-
-    useEffect(() => {
-        const controller = new AbortController();
-
-        const fetchData = async () => {
-            try {
-                const data = await fetchFilteredCocktails(filters);
-                setCocktails(data);
-            } catch (error: any) {
-                if (error.name !== 'AbortError') console.error(error);
-            }
-        };
-
-        const timeoutId = setTimeout(fetchData, 300);
-        return () => {
-            clearTimeout(timeoutId);
-            controller.abort();
-        };
-    }, [filters, setCocktails]);
-
-    
-
-
     const alcoholTypes = useMemo(() => {
         if (!summary?.ingredients_count) return [];
         return Object.entries(summary.ingredients_count).map(([key, count]) => ({
-            name: key.charAt(0).toUpperCase() + key.slice(1),
+            name: key,
             count: count as number
         }));
     }, [summary]);
-
 
     const alcoholLevels = useMemo(() => {
         if (!summary?.alcohol_level_count) return [];
@@ -100,6 +62,10 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
 
     const handleReset = (e: React.MouseEvent) => {
         e.preventDefault();
+        sendAnalyticsEvent({
+            event_name: `filters_reset`,
+            previous_filters: JSON.stringify(filters)
+        });
         onFilterChange({
             alcoholType: [],
             alcoholLevel: '',
@@ -111,30 +77,27 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
     };
 
     const handleCheckbox = (name: string) => {
-        const newTypes = filters.alcoholType.includes(name)
-            ? filters.alcoholType.filter(t => t !== name)
-            : [...filters.alcoholType, name];
+        const val = name.toLowerCase();
+        const newTypes = filters.alcoholType.includes(val)
+            ? filters.alcoholType.filter(t => t !== val)
+            : [...filters.alcoholType, val];
         onFilterChange({ ...filters, alcoholType: newTypes });
     };
 
     const handleRadio = (key: keyof FilterState, value: string) => {
-        const newValue = filters[key] === value ? '' : value;
+        const val = value.toLowerCase();
+        const newValue = filters[key] === val ? '' : val;
         onFilterChange({ ...filters, [key]: newValue });
     };
 
     const handlePrice = (val: number, isMin: boolean) => {
-
         const newPrice = (isMin
             ? [Math.min(val, tempPrice[1]), tempPrice[1]]
             : [tempPrice[0], Math.max(val, tempPrice[0])]) as [number, number];
 
         setTempPrice(newPrice);
 
-
-        if (priceTimeoutRef.current) {
-            clearTimeout(priceTimeoutRef.current);
-        }
-
+        if (priceTimeoutRef.current) clearTimeout(priceTimeoutRef.current);
         priceTimeoutRef.current = setTimeout(() => {
             onFilterChange(prev => ({ ...prev, price: newPrice }));
         }, 800);
@@ -163,20 +126,26 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, cocktail
                     <div className="alcoFilters__section-type">
                         <div className="type__title">Alcohol Type</div>
                         <div className="type__filters">
-                            {alcoholTypes.map((type) => (
-                                <label key={type.name} className="filter-item">
-                                    <div className="filter-item__left">
-                                        <input type="checkbox"
-                                            className="filter-item__checkbox"
-                                            checked={filters.alcoholType.some(t => t.toLowerCase() === type.name.toLowerCase())}
-                                            onChange={() => handleCheckbox(type.name.toLowerCase())}
-                                        />
-                                        <span className="filter-item__custom"></span>
-                                        <span className="filter-item__name">{type.name}</span>
-                                    </div>
-                                    <span className="filter-item__quantity">{summary?.alcohol_types?.[type.name.toLowerCase()] ?? type.count}</span>
-                                </label>
-                            ))}
+                            {alcoholTypes.map((type) => {
+                                const typeNameLower = type.name.toLowerCase();
+                                const isChecked = filters.alcoholType.includes(typeNameLower);
+
+                                return (
+                                    <label key={type.name} className="filter-item">
+                                        <div className="filter-item__left">
+                                            <input
+                                                type="checkbox"
+                                                className="filter-item__checkbox"
+                                                checked={isChecked}
+                                                onChange={() => handleCheckbox(typeNameLower)}
+                                            />
+                                            <span className="filter-item__custom"></span>
+                                            <span className="filter-item__name">{type.name}</span>
+                                        </div>
+                                        <span className="filter-item__quantity">{type.count}</span>
+                                    </label>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
