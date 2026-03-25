@@ -17,16 +17,11 @@ interface MainPageProps {
     searchQuery: string;
     activeFilters: FilterState;
     setActiveFilters: React.Dispatch<React.SetStateAction<FilterState>>;
+    serverData: any; 
+    isLoading: boolean;
 }
 
-export const MainPage: React.FC<MainPageProps> = ({ searchQuery, activeFilters, setActiveFilters }) => {
-
-    const [cocktails, setCocktails] = useState<any[]>([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [initialLoading, setInitialLoading] = useState(true);
-    const [isFiltering, setIsFiltering] = useState(false);
-    const [serverData, setServerData] = useState<any>(null);
-
+export const MainPage: React.FC<MainPageProps> = ({ searchQuery, activeFilters, setActiveFilters, serverData, isLoading }) => {
 
     useEffect(() => {
         if (searchQuery !== activeFilters.search) {
@@ -37,40 +32,9 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery, activeFilters, 
         }
     }, [searchQuery, activeFilters.search, setActiveFilters]);
 
-    // Завантаження даних
-    useEffect(() => {
-        const loadData = async () => {
-            setIsFiltering(true);
-            try {
-                const data = await fetchCocktails(activeFilters, currentPage);
+    const cocktails = serverData?.results || serverData?.cocktails || [];
 
-                if (data && data.results) {
-                    setCocktails(data.results);
-                    setServerData(data);
-                } else {
-                    setCocktails([]);
-                }
-            } catch (err) {
-                console.error("Fetch error:", err);
-                setCocktails([]);
-            } finally {
-                setInitialLoading(false);
-                setIsFiltering(false);
-            }
-        };
-
-        loadData();
-    }, [
-        activeFilters.alcoholType,
-        activeFilters.alcoholLevel,
-        activeFilters.price,
-        activeFilters.sweetnessLevel,
-        activeFilters.vibe,
-        activeFilters.search,
-        currentPage
-    ]);
-
-    if (initialLoading) {
+    if (isLoading && !serverData) {
         return <div className="loader">Завантаження коктейлів...</div>;
     }
 
@@ -85,7 +49,7 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery, activeFilters, 
             </aside>
 
             <section className="mainPage__catalog">
-                {isFiltering ? (
+                {isLoading ? (
                     <div className="filtering-status">Оновлюємо список...</div>
                 ) : (
                     <Catalog

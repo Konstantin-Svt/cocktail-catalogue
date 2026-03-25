@@ -37,6 +37,7 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
 
     return response.json();
 };
+
 export const sendAgeVerification = (ageVerified: boolean) => {
     fetch(`${BASE_URL}/analytics/events`, {
         method: `POST`,
@@ -49,4 +50,14 @@ export const sendAgeVerification = (ageVerified: boolean) => {
             age_confirmed: ageVerified,
         })
     })
+};
+
+export const fetchCocktailById = async (id: string) => {
+    const response = await fetch(`${BASE_URL}/cocktails/${id}/`);
+
+    if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
 };

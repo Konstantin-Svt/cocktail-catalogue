@@ -9,6 +9,7 @@ import { AlcoFilters, FilterState } from "./components/AlcoFilters/AlcoFilters";
 import { fetchCocktails } from "./api/cocktailApi";
 
 export const App = () => {
+    const [isLoading, setIsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [isVerified, setIsVerified] = useState(() => {
         return localStorage.getItem('ageVerified') === 'true';
@@ -29,22 +30,29 @@ export const App = () => {
             searchQuery={searchQuery}
             activeFilters={activeFilters}
             setActiveFilters={setActiveFilters}
+            serverData={serverData} 
+            isLoading={isLoading}
         />
     );
 
 
     useEffect(() => {
-        const updateCount = async () => {
+        const loadInitialData = async () => {
+            setIsLoading(true);
             try {
                 const data = await fetchCocktails(activeFilters, 1);
                 setServerData(data);
                 setTotalFound(data?.general_count || 0);
             } catch (err) {
-                console.error("Counter update failed", err);
+                console.error("Data fetch failed:", err);
+            } finally {
+                setIsLoading(false);
             }
         };
-        updateCount();
+
+        loadInitialData();
     }, [activeFilters]);
+    
     return (
         <div className="app">
             <AgeVerification onVerified={() => setIsVerified(true)} />
