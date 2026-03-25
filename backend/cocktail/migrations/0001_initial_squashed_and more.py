@@ -26,7 +26,7 @@ def copy_similar_cocktails(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    replaces = [('cocktail', '0001_initial'), ('cocktail', '0002_alter_ingredient_options_and_more_squashed'), ('cocktail', '0003_remove_similarcocktails_prevent_self_similarity_and_more'), ('cocktail', '0004_cocktail_alcohol_promille'), ('cocktail', '0005_cocktail_alcohol_scale_cocktail_sweetness_scale'), ('cocktail', '0006_remove_cocktail_alcohol_level_and_more')]
+    replaces = []
 
     dependencies = [
     ]
