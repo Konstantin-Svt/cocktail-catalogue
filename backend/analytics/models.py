@@ -20,12 +20,15 @@ class Event(models.Model):
         "Session", on_delete=models.SET_NULL, null=True, blank=True
     )
     page_name = models.CharField(max_length=255, null=True, blank=True)
+    page_url = models.TextField(null=True, blank=True)
     cocktail = models.ForeignKey(
         "cocktail.Cocktail", on_delete=models.SET_NULL, null=True, blank=True
     )
     search_text = models.TextField(null=True, blank=True)
+    filters_applied = models.BooleanField(null=True, blank=True)
     filter_type = models.CharField(max_length=100, null=True, blank=True)
     filter_value = models.CharField(max_length=255, null=True, blank=True)
+    previous_filters = models.TextField(null=True, blank=True)
     results_count = models.PositiveIntegerField(null=True, blank=True)
     servings_number = models.PositiveIntegerField(null=True, blank=True)
     age_confirmed = models.BooleanField(null=True, blank=True)

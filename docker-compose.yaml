@@ -26,3 +26,28 @@ services:
       - "5432"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
+  redis:
+    depends_on:
+      - app
+    image: redis:5.0.3-alpine
+    restart: unless-stopped
+    expose:
+      - "6379"
+
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - app
+      - redis
+      - db
+    restart: unless-stopped
+    command: sh -c "python -m celery -A catalogue_system worker -B -l INFO --schedule /tmp/celery-schedule"
+    environment:
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-false}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      ANALYTICS_DATASET_ID: ${ANALYTICS_DATASET_ID}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}

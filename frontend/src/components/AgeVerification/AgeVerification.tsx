@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './AgeVerification.scss';
-import { sendAgeVerification, } from '../../api/cocktailApi';
+import { sendAnalyticsEvent, } from '../../api/cocktailApi';
 
 interface AgeVerificationProps {
     onVerified: () => void;
@@ -18,14 +18,20 @@ const AgeVerification: React.FC<AgeVerificationProps> = ({ onVerified }) => {
     }, []);
 
     const handleConfirm = () => {
-        sendAgeVerification(true);
+        sendAnalyticsEvent({
+            event_name: `age_confirmation`,
+            age_confirmed: true,
+        });
         onVerified();
         localStorage.setItem('ageVerified', 'true');
         setIsVisible(false);
     };
 
     const handleReject = () => {
-        sendAgeVerification(false);
+        sendAnalyticsEvent({
+            event_name: `age_confirmation`,
+            age_confirmed: false,
+        });
         window.location.href = 'https://www.google.com';
     };
 

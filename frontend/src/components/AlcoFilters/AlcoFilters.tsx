@@ -1,5 +1,6 @@
 import './AlcoFilters.scss';
 import React, { useEffect, useMemo } from 'react';
+import { sendAnalyticsEvent, } from '../../api/cocktailApi';
 
 export interface FilterState {
     alcoholType: string[];
@@ -61,6 +62,10 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, summary 
 
     const handleReset = (e: React.MouseEvent) => {
         e.preventDefault();
+        sendAnalyticsEvent({
+            event_name: `filters_reset`,
+            previous_filters: JSON.stringify(filters)
+        });
         onFilterChange({
             alcoholType: [],
             alcoholLevel: '',
