@@ -9,9 +9,7 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
 
 
     if (filters.alcoholType?.length) {
-        filters.alcoholType.forEach((t: string) =>
-            params.append('ingredients', t.toLowerCase())
-        );
+        params.append('ingredients', filters.alcoholType.join(',').toLowerCase());
     }
 
 
@@ -29,7 +27,7 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
     params.append('page_size', '12');
 
 
-    const response = await fetch(`${BASE_URL}/cocktails/?${params.toString()}`);
+    const response = await fetch(`${BASE_URL}/cocktails?${params.toString()}`);
 
     if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -37,6 +35,17 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
 
     return response.json();
 };
+
+export const fetchCocktailById = async (id: string) => {
+    const response = await fetch(`${BASE_URL}/cocktails/${id}/`);
+
+    if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+    }
+
+    return response.json();
+};
+
 export const sendAnalyticsEvent = (payload: Record<string, unknown>) => {
     fetch(`${BASE_URL}/analytics/events/`, {
         method: `POST`,
@@ -47,3 +56,4 @@ export const sendAnalyticsEvent = (payload: Record<string, unknown>) => {
         body: JSON.stringify(payload)
     })
 };
+

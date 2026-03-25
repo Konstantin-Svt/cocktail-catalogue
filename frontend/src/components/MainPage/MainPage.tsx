@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AlcoFilters } from '../AlcoFilters/AlcoFilters';
 import { Catalog } from '../Catalog/Catalog';
 import './MainPage.scss';
@@ -17,7 +17,7 @@ interface MainPageProps {
     searchQuery: string;
     activeFilters: FilterState;
     setActiveFilters: React.Dispatch<React.SetStateAction<FilterState>>;
-    serverData: any; 
+    serverData: any;
     isLoading: boolean;
 }
 
@@ -30,14 +30,22 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery, activeFilters, 
                 search: searchQuery
             }));
         }
-    }, [searchQuery, activeFilters.search, setActiveFilters]);
-
-    const cocktails = serverData?.results || serverData?.cocktails || [];
+    }, [searchQuery, setActiveFilters]);
+    
+    const cocktails = useMemo(() => {
+        if (!serverData) return [];
+        return Array.isArray(serverData)
+            ? serverData
+            : (serverData.results || serverData.cocktails || []);
+    }, [serverData]);
 
     if (isLoading && !serverData) {
         return <div className="loader">Завантаження коктейлів...</div>;
     }
 
+    if (!isLoading && cocktails.length === 0) {
+        return <div>Коктейлів не знайдено за цими фільтрами.</div>;
+    }
     return (
         <div className="grid">
             <aside className="mainPage__filters">
@@ -49,17 +57,15 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery, activeFilters, 
             </aside>
 
             <section className="mainPage__catalog">
-                {isLoading ? (
-                    <div className="filtering-status">Оновлюємо список...</div>
-                ) : (
-                    <Catalog
-                            activeFilters={activeFilters}
-                            setFilters={setActiveFilters}
-                            cocktails={cocktails}
-                            ingredients={[]}
-                            summary={serverData}
-                    />
-                )}
+                {isLoading && <div className="filtering-status">Оновлюємо список...</div>}
+
+                <Catalog
+                    activeFilters={activeFilters}
+                    setFilters={setActiveFilters}
+                    cocktails={cocktails}
+                    ingredients={[]}
+                    summary={serverData}
+                />
             </section>
         </div>
     );

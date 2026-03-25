@@ -30,7 +30,7 @@ export const App = () => {
             searchQuery={searchQuery}
             activeFilters={activeFilters}
             setActiveFilters={setActiveFilters}
-            serverData={serverData} 
+            serverData={serverData}
             isLoading={isLoading}
         />
     );
@@ -52,7 +52,7 @@ export const App = () => {
 
         loadInitialData();
     }, [activeFilters]);
-    
+
     return (
         <div className="app">
             <AgeVerification onVerified={() => setIsVerified(true)} />

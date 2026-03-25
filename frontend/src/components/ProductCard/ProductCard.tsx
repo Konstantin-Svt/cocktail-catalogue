@@ -49,6 +49,7 @@ export const ProductCard: React.FC = () => {
         loadData();
     }, [id]);
 
+    
     if (loading) return <div className="loader">Завантаження...</div>;
     if (!cocktail) return <div className="error">Коктейль не знайдено</div>;
     return (
