@@ -1,5 +1,6 @@
 import os
 import uuid
+from collections import namedtuple
 
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -13,29 +14,25 @@ def create_cocktail_image_path(instance, filename):
 
 
 class Cocktail(models.Model):
-    class AlcoholLevel(models.TextChoices):
-        NON_ALCOHOLIC = "non-alcoholic"
-        LOW = "low"
-        MEDIUM = "medium"
-        STRONG = "strong"
-
-    class SweetnessLevel(models.TextChoices):
-        DRY = "dry"
-        MEDIUM = "medium"
-        SWEET = "sweet"
+    Level = namedtuple("Level", ["min_v", "max_v", "name"])
+    ALCOHOL_SCALE_MAP = [
+        Level(0, 0, "non-alcoholic"),
+        Level(1, 3, "low"),
+        Level(4, 7, "medium"),
+        Level(8, 10, "strong"),
+    ]
+    SWEETNESS_SCALE_MAP = [
+        Level(0, 3, "dry"),
+        Level(4, 7, "medium"),
+        Level(8, 10, "sweet"),
+    ]
 
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     average_price = models.DecimalField(max_digits=10, decimal_places=2)
-    alcohol_level = models.CharField(
-        choices=AlcoholLevel.choices, max_length=60
-    )
     alcohol_promille = models.PositiveIntegerField(default=0)
     alcohol_scale = models.PositiveIntegerField(
         default=0, validators=[MinValueValidator(0), MaxValueValidator(10)]
-    )
-    sweetness_level = models.CharField(
-        choices=SweetnessLevel.choices, max_length=60
     )
     sweetness_scale = models.PositiveIntegerField(
         default=0, validators=[MinValueValidator(0), MaxValueValidator(10)]

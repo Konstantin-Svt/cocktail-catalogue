@@ -20,6 +20,9 @@ class EventCreate(generics.CreateAPIView):
         super().post(request, *args, **kwargs)
         return Response(status=status.HTTP_201_CREATED)
 
+    def head(self, request):
+        return Response()
+
     def perform_create(self, serializer):
         serializer.is_valid(raise_exception=True)
         create_event_from_frontend(serializer, self.request)
