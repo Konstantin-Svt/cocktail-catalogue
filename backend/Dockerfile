@@ -25,5 +25,4 @@ USER django-user
 CMD sh -c "python manage.py collectstatic --noinput && \
            python manage.py wait_for_db && \
            python manage.py migrate && \
-           gunicorn --access-logfile - --error-logfile - \
-           --bind 0.0.0.0:${PORT:-8000} --workers 1 --threads 10 catalogue_system.wsgi:application"
+           python manage.py runserver 0.0.0.0:$PORT"
