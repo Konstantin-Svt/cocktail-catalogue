@@ -41,8 +41,14 @@ class IngredientForCocktailSerializer(serializers.ModelSerializer):
 
 
 class CocktailListSerializer(serializers.ModelSerializer):
-    vibes = serializers.SerializerMethodField()
-    ingredients = serializers.SerializerMethodField()
+    vibes = serializers.StringRelatedField(many=True, read_only=True)
+    ingredients = serializers.StringRelatedField(many=True, read_only=True)
+    alcohol_level = serializers.CharField(
+        read_only=True,
+    )
+    sweetness_level = serializers.CharField(
+        read_only=True,
+    )
 
     class Meta:
         model = Cocktail
@@ -60,21 +66,13 @@ class CocktailListSerializer(serializers.ModelSerializer):
         )
         read_only_fields = fields
 
-    def get_vibes(self, obj):
-        return [str(vibe) for vibe in getattr(obj, "prefetched_vibes", [])]
-
-    def get_ingredients(self, obj):
-        return [
-            str(through_obj.ingredient)
-            for through_obj in obj.through_ingredients.all()
-        ]
-
 
 class CocktailDetailSerializer(CocktailListSerializer):
     ingredients = IngredientForCocktailSerializer(
         many=True, read_only=True, source="through_ingredients"
     )
     similar_cocktails = CocktailListSerializer(many=True, read_only=True)
+    vibes = VibeSerializer(many=True, read_only=True)
 
     class Meta(CocktailListSerializer.Meta):
         fields = CocktailListSerializer.Meta.fields + (

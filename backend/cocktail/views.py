@@ -1,7 +1,15 @@
 import operator
 from functools import reduce
 
-from django.db.models import Prefetch, Q, QuerySet
+from django.db.models import (
+    Prefetch,
+    Q,
+    QuerySet,
+    Case,
+    When,
+    Value,
+    CharField,
+)
 from django.db.models.aggregates import Count
 from django.http import QueryDict
 from rest_framework import viewsets
@@ -104,7 +112,30 @@ def apply_queryset_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
 
 
 class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Cocktail.objects.all()
+    queryset = Cocktail.objects.annotate(
+        alcohol_level=Case(
+            *[
+                When(
+                    alcohol_scale__lte=level.max_v,
+                    alcohol_scale__gte=level.min_v,
+                    then=Value(level.name),
+                )
+                for level in Cocktail.ALCOHOL_SCALE_MAP
+            ],
+            output_field=CharField(),
+        ),
+        sweetness_level=Case(
+            *[
+                When(
+                    sweetness_scale__lte=level.max_v,
+                    sweetness_scale__gte=level.min_v,
+                    then=Value(level.name),
+                )
+                for level in Cocktail.SWEETNESS_SCALE_MAP
+            ],
+            output_field=CharField(),
+        ),
+    ).prefetch_related("vibes")
     pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
@@ -118,15 +149,7 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == "list":
             return (
                 apply_queryset_filters(qs, self.request.query_params)
-                .prefetch_related(
-                    Prefetch("vibes"),
-                    Prefetch(
-                        "through_ingredients",
-                        queryset=CocktailIngredients.objects.select_related(
-                            "ingredient"
-                        ),
-                    ),
-                )
+                .prefetch_related("ingredients")
                 .order_by("name")
                 .distinct()
             )
@@ -139,18 +162,8 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
                         "ingredient", "alternative_ingredient"
                     ),
                 ),
-                Prefetch(
-                    "similar_cocktails",
-                    queryset=Cocktail.objects.prefetch_related(
-                        Prefetch("vibes", to_attr="prefetched_vibes"),
-                        Prefetch(
-                            "through_ingredients",
-                            queryset=CocktailIngredients.objects.select_related(
-                                "ingredient",
-                            ),
-                        ),
-                    ),
-                ),
+                "similar_cocktails__vibes",
+                "similar_cocktails__ingredients",
             )
 
     @cocktail_filters_documentation
@@ -164,13 +177,15 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
             category=Ingredient.Category.ALCOHOL
         )
         cocktails_enums = {
-            f"{alcohol}_alcohol": Count("id", filter=Q(alcohol_level=alcohol))
-            for alcohol in Cocktail.AlcoholLevel.values
-        } | {
-            f"{sweetness}_sweetness": Count(
-                "id", filter=Q(sweetness_level=sweetness)
+            f"{alcohol.name}_alcohol": Count(
+                "id", filter=Q(alcohol_level=alcohol.name)
             )
-            for sweetness in Cocktail.SweetnessLevel.values
+            for alcohol in Cocktail.ALCOHOL_SCALE_MAP
+        } | {
+            f"{sweetness.name}_sweetness": Count(
+                "id", filter=Q(sweetness_level=sweetness.name)
+            )
+            for sweetness in Cocktail.SWEETNESS_SCALE_MAP
         }
 
         filtered_cocktails = base_cocktails.aggregate(**cocktails_enums)
@@ -214,6 +229,7 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
         return res
 
     def retrieve(self, request, *args, **kwargs):
+        print(Cocktail.ALCOHOL_SCALE_MAP[:-1])
         res = super().retrieve(request, *args, **kwargs)
         analytic_session = create_page_view_event(request, "cocktail_page")
         create_cocktail_page_open_event(request, res, analytic_session)

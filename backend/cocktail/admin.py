@@ -44,4 +44,4 @@ class CocktailAdmin(admin.ModelAdmin):
     inlines = [CocktailIngredientsInline, SimilarCocktailsInline]
     search_fields = ["name", "description"]
     autocomplete_fields = ("ingredients", "vibes", "similar_cocktails")
-    list_display = ("name", "alcohol_level", "sweetness_level")
+    list_display = ("name", "alcohol_scale", "sweetness_scale")
