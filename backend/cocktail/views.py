@@ -229,7 +229,6 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
         return res
 
     def retrieve(self, request, *args, **kwargs):
-        print(Cocktail.ALCOHOL_SCALE_MAP[:-1])
         res = super().retrieve(request, *args, **kwargs)
         analytic_session = create_page_view_event(request, "cocktail_page")
         create_cocktail_page_open_event(request, res, analytic_session)
