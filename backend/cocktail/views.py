@@ -55,17 +55,23 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
             Q(cocktails__ingredients__name__in=q_params.getlist("ingredients"))
         )
     if q_params.get("alcohol_level"):
-        conditions.append(
-            Q(cocktails__alcohol_level__in=q_params.getlist("alcohol_level"))
-        )
-    if q_params.get("sweetness_level"):
-        conditions.append(
-            Q(
-                cocktails__sweetness_level__in=q_params.getlist(
-                    "sweetness_level"
+        alcohol_q = Q()
+        for level in Cocktail.ALCOHOL_SCALE_MAP:
+            if level.name in q_params.getlist("alcohol_level"):
+                alcohol_q |= Q(
+                    cocktails__alcohol_scale__gte=level.min_v,
+                    cocktails__alcohol_scale__lte=level.max_v,
                 )
-            )
-        )
+        conditions.append(alcohol_q)
+    if q_params.get("sweetness_level"):
+        sweet_q = Q()
+        for level in Cocktail.SWEETNESS_SCALE_MAP:
+            if level.name in q_params.getlist("sweetness_level"):
+                sweet_q |= Q(
+                    cocktails__sweetness_scale__gte=level.min_v,
+                    cocktails__sweetness_scale__lte=level.max_v,
+                )
+        conditions.append(sweet_q)
     if q_params.get("min_price"):
         if not q_params.get("min_price").isdigit():
             raise ValidationError("Min price must be an integer")
@@ -229,7 +235,6 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
         return res
 
     def retrieve(self, request, *args, **kwargs):
-        print(Cocktail.ALCOHOL_SCALE_MAP[:-1])
         res = super().retrieve(request, *args, **kwargs)
         analytic_session = create_page_view_event(request, "cocktail_page")
         create_cocktail_page_open_event(request, res, analytic_session)
