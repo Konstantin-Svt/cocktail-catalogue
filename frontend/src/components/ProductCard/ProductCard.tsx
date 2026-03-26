@@ -31,14 +31,6 @@ export const ProductCard: React.FC = () => {
                 return `${totalAmount} ml`;
         }
     };
-
-    const calculateDrinks = (ingredients: any[]) => {
-
-        const alcoholVolume = ingredients
-            .filter(ing => ing.category === 'alcohol')
-            .reduce((acc, ing) => acc + ing.amount, 0);
-        return (alcoholVolume / 45).toFixed(1);
-    };
     useEffect(() => {
         if (!id) return;
 
@@ -56,22 +48,30 @@ export const ProductCard: React.FC = () => {
         loadData();
     }, [id]);
 
-    const mainIngredients = cocktail.ingredients.filter((ing: any) => ing.category !== 'garnish');
+    if (loading) return <div className="loader">Завантаження...</div>;
+    if (!cocktail) return <div className="error">Коктейль не знайдено</div>;
 
+    const ingredients = cocktail.ingredients || [];
+    const mainIngredients = ingredients.filter((ing: any) => ing.category !== 'garnish');
 
-    const garnishIngredients = cocktail.ingredients
+    const garnishIngredients = ingredients
         .filter((ing: any) => ing.category === 'garnish')
         .map((ing: any) => ing.name)
         .join(', ');
 
-
-    const alternativeIngredients = cocktail.ingredients
+    const alternativeIngredients = ingredients
         .filter((ing: any) => ing.alternative)
         .map((ing: any) => `${ing.name} → ${ing.alternative}`)
         .join(', ');
 
-    if (loading) return <div className="loader">Завантаження...</div>;
-    if (!cocktail) return <div className="error">Коктейль не знайдено</div>;
+    const calculateDrinks = (ingredients: any[]) => {
+
+        const alcoholVolume = ingredients
+            .filter(ing => ing.category === 'alcohol')
+            .reduce((acc, ing) => acc + ing.amount, 0);
+        return (alcoholVolume / 45).toFixed(1);
+    };
+    
     return (
         <div className="product-page">
             <div className="grid">

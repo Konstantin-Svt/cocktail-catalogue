@@ -34,19 +34,19 @@ export const CatalogCard: React.FC<Props> = ({ data, ingredients, id }) => {
     return (
         <article className="cocktail-card">
             <Link to={`/product/${id}`} className="cocktail-card__link">
-            <div className="cocktail-card__image">
+                <div className="cocktail-card__image">
                     <img src={data.image} alt={data.name} className="cocktail-card__image-img" />
-            </div>
+                </div>
             </Link>
             <div className="cocktail-card__content">
-            <div className="cocktail-card__header">
+                <div className="cocktail-card__header">
                     <Link to={`/product/${id}`} className="cocktail-card__link">
                         <h3 className="cocktail-card__name">{data.name}</h3>
                     </Link>
                     <div className="cocktail-card__rating">
                         <span className="star">★</span> 4.6
                     </div>
-            </div>
+                </div>
                 <div className="cocktail-card__ingredients">
                     {ingredients.map((ing, index) => (
                         <span key={index} className="cocktail-card__tag">
