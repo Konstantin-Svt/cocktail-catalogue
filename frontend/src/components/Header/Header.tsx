@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './Header.scss';
 import { useEffect, useRef, useState } from 'react';
 
@@ -42,8 +43,9 @@ export const Header: React.FC<HeaderProps> = ({ searchValue, onSearchChange }) =
         <header className="header">
             <div 
             className="header__left">
-                <button className='header__button'>
-                </button>
+                <Link to='/'>
+                    <button className='header__button'></button>
+                </Link>
                 </div>
             <div 
             className="header__right"> 
