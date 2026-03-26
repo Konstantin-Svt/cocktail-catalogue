@@ -11,20 +11,27 @@ export const ProductCard: React.FC = () => {
     const [servings, setServings] = useState(1);
     const [unit, setUnit] = useState<'ml' | 'oz' | 'cl'>('ml');
 
-    const convertAmount = (amountInMl: number) => {
-        const baseAmount = amountInMl * servings;
+    const convertAmount = (amount: number, backendUnit: string) => {
+        const totalAmount = amount * servings;
+        const lowUnit = backendUnit?.toLowerCase();
+
+        const fluidUnits = ['ml', 'oz', 'cl'];
+
+        if (!fluidUnits.includes(lowUnit)) {
+            return `${totalAmount} ${backendUnit}`;
+        }
+
 
         switch (unit) {
             case 'oz':
-
-                return `${(baseAmount * 0.0338).toFixed(1)} oz`;
+                return `${(totalAmount * 0.0338).toFixed(1)} oz`;
             case 'cl':
-
-                return `${(baseAmount / 10).toFixed(1)} cl`;
+                return `${(totalAmount / 10).toFixed(1)} cl`;
             default:
-                return `${baseAmount} ml`;
+                return `${totalAmount} ml`;
         }
     };
+
     const calculateDrinks = (ingredients: any[]) => {
 
         const alcoholVolume = ingredients
@@ -49,7 +56,20 @@ export const ProductCard: React.FC = () => {
         loadData();
     }, [id]);
 
-    
+    const mainIngredients = cocktail.ingredients.filter((ing: any) => ing.category !== 'garnish');
+
+
+    const garnishIngredients = cocktail.ingredients
+        .filter((ing: any) => ing.category === 'garnish')
+        .map((ing: any) => ing.name)
+        .join(', ');
+
+
+    const alternativeIngredients = cocktail.ingredients
+        .filter((ing: any) => ing.alternative)
+        .map((ing: any) => `${ing.name} → ${ing.alternative}`)
+        .join(', ');
+
     if (loading) return <div className="loader">Завантаження...</div>;
     if (!cocktail) return <div className="error">Коктейль не знайдено</div>;
     return (
@@ -106,7 +126,7 @@ export const ProductCard: React.FC = () => {
                     <div className="making__ingredients">
                         <h3 className="making__subtitle">Ingredients</h3>
                         <ul className="ingredients__list">
-                            {cocktail.ingredients.map((ing: any) => (
+                            {mainIngredients.map((ing: any) => (
                                 <li key={ing.id} className="ingredients__item">
                                     <div className="ingredients__name-wrapper">
                                         <span className={`ingredients__dot ${ing.category === 'alcohol' ? 'ingredients__dot--active' : ''}`}></span>
@@ -115,7 +135,7 @@ export const ProductCard: React.FC = () => {
                                     <span className="ingredients__amount">
                                         {ing.optional
                                             ? 'optional'
-                                            : convertAmount(ing.amount)
+                                            : convertAmount(ing.amount, ing.unit)
                                         }
                                     </span>
                                 </li>
@@ -146,14 +166,14 @@ export const ProductCard: React.FC = () => {
                     <div className="extra-card">
                         <span className="extra-card__label">Garnish</span>
                         <div className="extra-card__content">
-                            <span className="extra-card__value">{cocktail.garnish || 'Nothing'}</span>
+                            <span className="extra-card__value">{garnishIngredients || cocktail.garnish || 'Nothing'}</span>
                         </div>
                     </div>
 
                     <div className="extra-card">
                         <span className="extra-card__label">Alternative ingredients</span>
                         <div className="extra-card__content">
-                            <span className="extra-card__value">{cocktail.alternative || 'Nothing'}</span>
+                            <span className="extra-card__value">{alternativeIngredients || cocktail.alternative || 'Nothing'}</span>
                         </div>
                     </div>
                 </div>
@@ -189,9 +209,9 @@ export const ProductCard: React.FC = () => {
                                 ))}
                             </div>
                             <div className="guide__labels">
-                                <span className="guide__label">Sweet</span>
-                                <span className="guide__label">Medium</span>
                                 <span className="guide__label">Dry/sour</span>
+                                <span className="guide__label">Medium</span>
+                                <span className="guide__label">Sweet</span>
                             </div>
                         </div>
 

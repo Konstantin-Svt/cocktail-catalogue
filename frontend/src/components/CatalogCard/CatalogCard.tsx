@@ -26,7 +26,7 @@ export const CatalogCard: React.FC<Props> = ({ data, ingredients, id }) => {
 
         const level = levelStr;
 
-        if (level === 'Non-alcoholic') return 'dot--gray';
+        if (level === 'non-alcoholic') return 'dot--gray';
         if (level === 'low') return 'dot--green';
         if (level === 'medium') return 'dot--yellow';
         return 'dot--red';

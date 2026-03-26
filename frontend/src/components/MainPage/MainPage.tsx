@@ -43,9 +43,6 @@ export const MainPage: React.FC<MainPageProps> = ({ searchQuery, activeFilters, 
         return <div className="loader">Завантаження коктейлів...</div>;
     }
 
-    if (!isLoading && cocktails.length === 0) {
-        return <div>Коктейлів не знайдено за цими фільтрами.</div>;
-    }
     return (
         <div className="grid">
             <aside className="mainPage__filters">
