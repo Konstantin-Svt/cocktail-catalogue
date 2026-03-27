@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './ProductCard.scss';
-import { fetchCocktailById } from '../../api/cocktailApi';
+import { fetchCocktailById, sendAnalyticsEvent } from '../../api/cocktailApi';
 import {CatalogCard} from '../CatalogCard/CatalogCard';
 
 export const ProductCard: React.FC = () => {
@@ -10,6 +10,18 @@ export const ProductCard: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [servings, setServings] = useState(1);
     const [unit, setUnit] = useState<'ml' | 'oz' | 'cl'>('ml');
+    const [isFirstRender, setIsFirstRender] = useState(true);
+
+    useEffect(() => {
+        if (isFirstRender) {
+            setIsFirstRender(false);
+            return;
+        }
+        sendAnalyticsEvent({
+            event_name: "servings_changed",
+            servings_number: servings,
+        });
+    }, [servings]);
 
     const convertAmount = (amount: number, backendUnit: string) => {
         const totalAmount = amount * servings;

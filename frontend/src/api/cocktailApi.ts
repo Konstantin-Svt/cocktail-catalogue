@@ -47,13 +47,16 @@ export const fetchCocktailById = async (id: string) => {
 };
 
 export const sendAnalyticsEvent = (payload: Record<string, unknown>) => {
-    fetch(`${BASE_URL}/analytics/events/`, {
-        method: `POST`,
-        credentials: `include`,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-    })
+    try {
+        fetch(`${BASE_URL}/analytics/events/`, {
+            method: `POST`,
+            credentials: `include`,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        });
+    } catch (error) {
+        console.error("Analytics error:", error);
+    }
 };
-
