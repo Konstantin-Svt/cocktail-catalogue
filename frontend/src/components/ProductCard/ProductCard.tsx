@@ -4,6 +4,8 @@ import './ProductCard.scss';
 import { fetchCocktailById, sendAnalyticsEvent } from '../../api/cocktailApi';
 import {CatalogCard} from '../CatalogCard/CatalogCard';
 
+type Tab = 'ingredients' | 'preparation';
+
 export const ProductCard: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [cocktail, setCocktail] = useState<any>(null);
@@ -11,6 +13,7 @@ export const ProductCard: React.FC = () => {
     const [servings, setServings] = useState(1);
     const [unit, setUnit] = useState<'ml' | 'oz' | 'cl'>('ml');
     const [isFirstRender, setIsFirstRender] = useState(true);
+    const [activeTab, setActiveTab] = useState<Tab>('ingredients');
 
     useEffect(() => {
         if (isFirstRender) {
@@ -135,7 +138,24 @@ export const ProductCard: React.FC = () => {
 
                 {/* 2. Блок самої картки (Інгредієнти + Приготування) */}
                 <div className="making__card">
-                    <div className="making__ingredients">
+                    {/* Таби відображатимуться лише на мобілці через CSS */}
+                    <div className="making__mobile-tabs">
+                        <button
+                            className={`making__tab ${activeTab === 'ingredients' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('ingredients')}
+                        >
+                            Ingredients
+                        </button>
+                        <button
+                            className={`making__tab ${activeTab === 'preparation' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('preparation')}
+                        >
+                            Preparation
+                        </button>
+                    </div>
+
+                    {/* Додаємо динамічні класи залежно від activeTab */}
+                    <div className={`making__ingredients ${activeTab === 'ingredients' ? 'is-active' : 'is-hidden'}`}>
                         <h3 className="making__subtitle">Ingredients</h3>
                         <ul className="ingredients__list">
                             {mainIngredients.map((ing: any) => (
@@ -145,17 +165,14 @@ export const ProductCard: React.FC = () => {
                                         <span className="ingredients__name">{ing.name}</span>
                                     </div>
                                     <span className="ingredients__amount">
-                                        {ing.optional
-                                            ? 'optional'
-                                            : convertAmount(ing.amount, ing.unit)
-                                        }
+                                        {ing.optional ? 'optional' : convertAmount(ing.amount, ing.unit)}
                                     </span>
                                 </li>
                             ))}
                         </ul>
                     </div>
 
-                    <div className="making__preparation">
+                    <div className={`making__preparation ${activeTab === 'preparation' ? 'is-active' : 'is-hidden'}`}>
                         <h3 className="making__subtitle">Preparation</h3>
                         <div className="preparation__list">
                             {cocktail.preparation.split('.').filter((s: string) => s.trim()).map((step: string, index: number) => (
