@@ -5,9 +5,10 @@ import { useEffect, useRef, useState } from 'react';
 interface HeaderProps {
     searchValue: string;
     onSearchChange: (val: string) => void;
+    isDisabled?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ searchValue, onSearchChange }) => {
+export const Header: React.FC<HeaderProps> = ({ searchValue, onSearchChange, isDisabled }) => {
     const [localValue, setLocalValue] = useState(searchValue);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
@@ -60,7 +61,8 @@ export const Header: React.FC<HeaderProps> = ({ searchValue, onSearchChange }) =
                     value={localValue}
                     onChange={(e) => setLocalValue(e.target.value)}
                     autoFocus={isSearchOpen}
-                    onBlur={() => !localValue && setIsSearchOpen(false)}/>
+                    onBlur={() => !localValue && setIsSearchOpen(false)}
+                    disabled={isDisabled}/>
                 <button className="header__search-btn" onClick={toggleSearch} type="button" /> 
             </div>
 

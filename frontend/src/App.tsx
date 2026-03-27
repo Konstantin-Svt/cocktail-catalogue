@@ -4,7 +4,7 @@ import { Header } from "./components/Header/Header";
 import { MainPage } from "./components/MainPage/MainPage";
 import { ProductCard } from "./components/ProductCard/ProductCard";
 import './styles/grid.scss';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AlcoFilters, FilterState } from "./components/AlcoFilters/AlcoFilters";
 import { fetchCocktails } from "./api/cocktailApi";
 
@@ -52,11 +52,13 @@ export const App = () => {
 
         loadInitialData();
     }, [activeFilters]);
-
+    
+    const location = useLocation();
+    const isProductPage = location.pathname.startsWith('/product/');
     return (
         <div className="app">
             <AgeVerification onVerified={() => setIsVerified(true)} />
-            <Header searchValue={searchQuery} onSearchChange={setSearchQuery} />
+            <Header searchValue={searchQuery} onSearchChange={setSearchQuery} isDisabled={isProductPage} />
 
             {isVerified && (
                 <Routes>
