@@ -30,6 +30,9 @@ class Cocktail(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     average_price = models.DecimalField(max_digits=10, decimal_places=2)
+    average_rate = models.DecimalField(
+        max_digits=3, decimal_places=2, default=5
+    )
     alcohol_promille = models.PositiveIntegerField(default=0)
     alcohol_scale = models.PositiveIntegerField(
         default=0, validators=[MinValueValidator(0), MaxValueValidator(10)]
@@ -56,6 +59,42 @@ class Cocktail(models.Model):
     similar_cocktails = models.ManyToManyField(
         "self", blank=True, through="SimilarCocktails", symmetrical=True
     )
+
+    def calculate_similar_cocktails(self):
+        ingredient_ids = Ingredient.objects.filter(
+            category__in=[
+                Ingredient.Category.ALCOHOL,
+                Ingredient.Category.MIXER,
+            ],
+            cocktails__id=self.pk,
+        ).values_list("id", flat=True)
+        similar_ids = tuple(
+            Cocktail.objects.exclude(id=self.pk)
+            .filter(ingredients__id__in=ingredient_ids)
+            .distinct()
+            .values_list("id", flat=True)
+        )
+        SimilarCocktails.objects.filter(
+            (
+                models.Q(to_cocktail_id=self.pk)
+                & ~models.Q(from_cocktail_id__in=similar_ids)
+            )
+            | (
+                models.Q(from_cocktail_id=self.pk)
+                & ~models.Q(to_cocktail_id__in=similar_ids)
+            )
+        ).delete()
+        relations = [
+            SimilarCocktails(from_cocktail_id=self.pk, to_cocktail_id=cid)
+            for cid in similar_ids
+        ] + [
+            SimilarCocktails(from_cocktail_id=cid, to_cocktail_id=self.pk)
+            for cid in similar_ids
+        ]
+        if relations:
+            SimilarCocktails.objects.bulk_create(
+                relations, ignore_conflicts=True
+            )
 
     def __str__(self):
         return self.name
@@ -86,6 +125,7 @@ class Ingredient(models.Model):
         ALCOHOL = "alcohol"
         MIXER = "mixer"
         GARNISH = "garnish"
+        GLASS = "glass"
 
     class Unit(models.TextChoices):
         ML = "ml"
@@ -144,6 +184,15 @@ class CocktailIngredients(models.Model):
                 name="prevent_ingredient_&_alt_similarity",
             )
         ]
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.cocktail.calculate_similar_cocktails()
+
+    def delete(self, *args, **kwargs):
+        cocktail = self.cocktail
+        super().delete(*args, **kwargs)
+        cocktail.calculate_similar_cocktails()
 
 
 class Vibe(models.Model):

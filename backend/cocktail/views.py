@@ -15,11 +15,13 @@ from django.http import QueryDict
 from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 
-from analytics.services import (
-    create_page_view_event,
-    create_card_view_events,
-    create_filter_applied_events,
-    create_cocktail_page_open_event,
+from catalogue_system.celery import (
+    request_dict_converter,
+    response_data_dict_converter,
+)
+from analytics.tasks import (
+    cocktail_list_analytics_wrapper,
+    cocktail_detail_analytics_wrapper,
 )
 from catalogue_system.pagination import StandardResultsSetPagination
 from cocktail.documentation import cocktail_filters_documentation
@@ -48,16 +50,20 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
         )
     if q_params.get("vibes"):
         conditions.append(
-            Q(cocktails__vibes__name__in=q_params.getlist("vibes"))
+            Q(cocktails__vibes__name__in=q_params.get("vibes").split(","))
         )
     if q_params.get("ingredients"):
         conditions.append(
-            Q(cocktails__ingredients__name__in=q_params.getlist("ingredients"))
+            Q(
+                cocktails__ingredients__name__in=q_params.get(
+                    "ingredients"
+                ).split(",")
+            )
         )
     if q_params.get("alcohol_level"):
         alcohol_q = Q()
         for level in Cocktail.ALCOHOL_SCALE_MAP:
-            if level.name in q_params.getlist("alcohol_level"):
+            if level.name in q_params.get("alcohol_level").split(","):
                 alcohol_q |= Q(
                     cocktails__alcohol_scale__gte=level.min_v,
                     cocktails__alcohol_scale__lte=level.max_v,
@@ -66,7 +72,7 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
     if q_params.get("sweetness_level"):
         sweet_q = Q()
         for level in Cocktail.SWEETNESS_SCALE_MAP:
-            if level.name in q_params.getlist("sweetness_level"):
+            if level.name in q_params.get("sweetness_level").split(","):
                 sweet_q |= Q(
                     cocktails__sweetness_scale__gte=level.min_v,
                     cocktails__sweetness_scale__lte=level.max_v,
@@ -99,13 +105,19 @@ def apply_queryset_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
             | Q(description__icontains=q_params["search"])
         )
     if q_params.get("vibes"):
-        qs = qs.filter(vibes__name__in=q_params.getlist("vibes"))
+        qs = qs.filter(vibes__name__in=q_params.get("vibes").split(","))
     if q_params.get("ingredients"):
-        qs = qs.filter(ingredients__name__in=q_params.getlist("ingredients"))
+        qs = qs.filter(
+            ingredients__name__in=q_params.get("ingredients").split(",")
+        )
     if q_params.get("alcohol_level"):
-        qs = qs.filter(alcohol_level__in=q_params.getlist("alcohol_level"))
+        qs = qs.filter(
+            alcohol_level__in=q_params.get("alcohol_level").split(",")
+        )
     if q_params.get("sweetness_level"):
-        qs = qs.filter(sweetness_level__in=q_params.getlist("sweetness_level"))
+        qs = qs.filter(
+            sweetness_level__in=q_params.get("sweetness_level").split(",")
+        )
     if q_params.get("min_price"):
         if not q_params.get("min_price").isdigit():
             raise ValidationError("Min price must be an integer")
@@ -227,17 +239,18 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
             "vibes_count": vibes_count,
         }
 
-        analytic_session = create_page_view_event(request, "search")
-        create_filter_applied_events(request, res, analytic_session)
-        create_card_view_events(request, res, analytic_session)
+        request_dict = request_dict_converter(request)
+        response_dict = response_data_dict_converter(res.data)
+        cocktail_list_analytics_wrapper.delay(request_dict, response_dict)
 
         res.data.update(summary)
         return res
 
     def retrieve(self, request, *args, **kwargs):
         res = super().retrieve(request, *args, **kwargs)
-        analytic_session = create_page_view_event(request, "cocktail_page")
-        create_cocktail_page_open_event(request, res, analytic_session)
+        request_dict = request_dict_converter(request)
+        response_dict = response_data_dict_converter(res.data)
+        cocktail_detail_analytics_wrapper.delay(request_dict, response_dict)
         return res
 
 

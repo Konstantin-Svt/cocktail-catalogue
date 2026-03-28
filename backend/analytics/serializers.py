@@ -31,14 +31,14 @@ class EventCreateSerializer(serializers.ModelSerializer):
                 {"servings_number": "Invalid servings number"}
             )
 
-        if data["event_name"] == "age_confirmation" and not isinstance(
+        elif data["event_name"] == "age_confirmation" and not isinstance(
             data["age_confirmed"], bool
         ):
             raise serializers.ValidationError(
                 {"age_confirmed": "Invalid age confirmation"}
             )
 
-        if data["event_name"] == "filters_reset" and not isinstance(
+        elif data["event_name"] == "filters_reset" and not isinstance(
             data["previous_filters"], str
         ):
             raise serializers.ValidationError(
