@@ -6,6 +6,7 @@
     "name": "White Rob Roy",
     "description": "White Rob Roy altogether lighter and whiter version of the classic Scotch Manhattan is delicious and comparable to what the White Negroni did for the classic Negroni.",
     "average_price": "13.40",
+    "average_rate": "5.00",
     "alcohol_promille": 26,
     "alcohol_scale": 9,
     "sweetness_scale": 1,
@@ -25,6 +26,7 @@
     "name": "Mojito",
     "description": "When well made, this Cuban cousin of the Mint Julep - Mojito, is one of the world's greatest and most refreshing cocktails.",
     "average_price": "30.00",
+    "average_rate": "5.00",
     "alcohol_promille": 17,
     "alcohol_scale": 5,
     "sweetness_scale": 6,
@@ -44,6 +46,7 @@
     "name": "Brown Derby",
     "description": "Said to have been created in the 1930s by a bartender at the Vendôme Café which sat at 6666 Sunset Boulevard in Hollywood, California. The Vendôme was opened in May 1933 by William \"Billy\" Wilkerson, a real estate developer who also owned The Hollywood Reporter, the offices of which were a block away.\r\n\r\nAlthough created at the Vendôme, this cocktail is named after another fashionable Hollywood restaurant of the era, the Brown Derby at 1628 North Vine Street. Due to its proximity to the movie studios, this branch of the Brown Derby was more famous than the original, smaller branch at 3427 Wilshire Boulevard, famous for being housed in a building shaped like a man's derby hat.\r\n\r\nA Brown Derby is a maple syrup-sweetened development on the earlier honey-sweetened De Rigueur Cocktail. The misguided belief that the Brown Derby should be sweetened with honey stems from a recipe in George Buzza Jr.'s, 1933",
     "average_price": "35.00",
+    "average_rate": "5.00",
     "alcohol_promille": 18,
     "alcohol_scale": 6,
     "sweetness_scale": 5,
@@ -59,41 +62,17 @@
 },
 {
   "model": "cocktail.similarcocktails",
-  "pk": 1,
+  "pk": 7,
   "fields": {
-    "from_cocktail": 1,
-    "to_cocktail": 2
-  }
-},
-{
-  "model": "cocktail.similarcocktails",
-  "pk": 2,
-  "fields": {
-    "from_cocktail": 1,
-    "to_cocktail": 3
-  }
-},
-{
-  "model": "cocktail.similarcocktails",
-  "pk": 4,
-  "fields": {
-    "from_cocktail": 3,
+    "from_cocktail": 2,
     "to_cocktail": 1
   }
 },
 {
   "model": "cocktail.similarcocktails",
-  "pk": 5,
+  "pk": 8,
   "fields": {
-    "from_cocktail": 2,
-    "to_cocktail": 3
-  }
-},
-{
-  "model": "cocktail.similarcocktails",
-  "pk": 6,
-  "fields": {
-    "from_cocktail": 3,
+    "from_cocktail": 1,
     "to_cocktail": 2
   }
 },
@@ -241,7 +220,7 @@
     "ingredient": 13,
     "alternative_ingredient": null,
     "cocktail": 1,
-    "amount": 100,
+    "amount": 80,
     "optional": false
   }
 },
@@ -252,7 +231,7 @@
     "ingredient": 3,
     "alternative_ingredient": null,
     "cocktail": 1,
-    "amount": 50,
+    "amount": 80,
     "optional": false
   }
 },
@@ -318,7 +297,7 @@
     "ingredient": 9,
     "alternative_ingredient": 10,
     "cocktail": 2,
-    "amount": 15,
+    "amount": 20,
     "optional": false
   }
 },
@@ -340,7 +319,7 @@
     "ingredient": 11,
     "alternative_ingredient": null,
     "cocktail": 3,
-    "amount": 15,
+    "amount": 20,
     "optional": false
   }
 },
@@ -395,6 +374,48 @@
   "pk": 7,
   "fields": {
     "name": "summer"
+  }
+},
+{
+  "model": "user.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$6aX2dWTGQeJR49KxJXjYh0$GNq3IxmYbW+3+h8paZwVgPipHABQ0dyKZxvCWzexs90=",
+    "last_login": "2026-03-28T22:49:59.318",
+    "is_superuser": true,
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-03-28T22:46:08.923",
+    "email": "admin2@admin.com",
+    "first_name": "",
+    "last_name": "",
+    "email_verified": true,
+    "gender": null,
+    "country": null,
+    "groups": [],
+    "user_permissions": [],
+    "favourite_cocktails": []
+  }
+},
+{
+  "model": "user.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$Lo9HAGXWZUAsdSCgX6lgbp$fhlivGVmBa+sdjPm21WbvbbwhsO73RTo/Ia2OFfxFbI=",
+    "last_login": null,
+    "is_superuser": true,
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-03-28T22:46:43.455",
+    "email": "admin@admin.com",
+    "first_name": "",
+    "last_name": "",
+    "email_verified": true,
+    "gender": null,
+    "country": null,
+    "groups": [],
+    "user_permissions": [],
+    "favourite_cocktails": []
   }
 }
 ]
