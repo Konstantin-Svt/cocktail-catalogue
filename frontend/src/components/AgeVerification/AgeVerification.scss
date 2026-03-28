@@ -1,64 +1,107 @@
 .age-modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8); // Темний фон як на макеті
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4); // Легке затемнення
+    backdrop-filter: blur(8px); // Розмиття фону
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 9999;
+    padding: 20px;
 
     &__content {
-        background: #333; // Темно-сірий колір блоку
-        padding: 40px;
-        border-radius: 8px;
+        background: #FFFFFF;
+        width: 100%;
+        max-width: 400px;
+        padding: 40px 30px;
+        border-radius: 24px; // Сильне закруглення як на макеті
         text-align: center;
-        max-width: 500px;
-        color: white;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-        h2 {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
+    &__badge {
+        background: #E63946;
+        color: #fff;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+
+    &__title {
+        color: #5A1F3E; // Твій основний колір (бордовий)
+        font-size: 32px;
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    &__subtitle {
+        font-size: 18px;
+        color: #5A1F3E;
+        margin-bottom: 24px;
+        font-weight: 500;
+    }
+
+    &__description {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.5;
+        margin-bottom: 30px;
 
         p {
-            margin-bottom: 30px;
-            opacity: 0.8;
+            margin-bottom: 10px;
         }
     }
 
     &__buttons {
+        width: 100%;
         display: flex;
-        gap: 20px;
-        justify-content: center;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: 0.3s;
-        }
+    &__btn {
+        width: 100%;
+        padding: 14px;
+        border-radius: 100px; // Pill shape
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
 
-        .btn-confirm {
-            background: #555;
-            color: white;
+        &--confirm {
+            background: #5A1F3E;
+            color: #fff;
 
             &:hover {
-                background: #777;
+                background: darken(#5A1F3E, 5%);
             }
         }
 
-        .btn-reject {
-            background: transparent;
-            color: white;
-            border: 1px solid #555;
+        &--reject {
+            background: #fff;
+            color: #5A1F3E;
+            border: 1px solid #5A1F3E;
 
             &:hover {
-                background: rgba(255, 255, 255, 0.1);
+                background: rgba(90, 31, 62, 0.05);
             }
         }
+    }
+
+    &__footer {
+        font-size: 12px;
+        color: #999;
+        line-height: 1.4;
     }
 }

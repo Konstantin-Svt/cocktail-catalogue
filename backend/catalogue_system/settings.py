@@ -57,10 +57,14 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "storages",
+    # apps
+    "user",
 ]
 
 APPS_WITH_ANALYTICS = ["cocktail", "analytics"]
 INSTALLED_APPS += APPS_WITH_ANALYTICS
+
+AUTH_USER_MODEL = "user.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -180,10 +184,28 @@ SPECTACULAR_SETTINGS = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
+if not CELERY_BROKER_URL:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+if DEBUG:
+    MEDIA_URL = "media/"
+    MEDIA_ROOT = BASE_DIR / "vol/media/"
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    STATIC_ROOT = BASE_DIR / "staticfiles"
 
 AWS_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY")
 AWS_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_KEY")
@@ -198,9 +220,6 @@ AWS_QUERYSTRING_AUTH = False
 
 ANALYTICS_DATASET_ID = os.environ.get("ANALYTICS_DATASET_ID")
 
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
-
-
 if ANALYTICS_DATASET_ID and os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
     CELERY_BEAT_SCHEDULE = {
         "migrate-analytics-data-to-bigquery-daily": {
@@ -213,17 +232,3 @@ else:
         "No ANALYTICS_DATASET_ID and/or GOOGLE_APPLICATION_CREDENTIALS, "
         "Celery_beat will not send analytics data to BigQuery."
     )
-
-if not DEBUG:
-    STORAGES = {
-        "default": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    }
-    STATIC_ROOT = BASE_DIR / "staticfiles"
-else:
-    MEDIA_URL = "media/"
-    MEDIA_ROOT = BASE_DIR / "vol/media/"
