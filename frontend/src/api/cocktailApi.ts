@@ -27,7 +27,7 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
     params.append('page_size', '12');
 
 
-    const response = await fetch(`${BASE_URL}/cocktails?${params.toString()}`, {
+    const response = await fetch(`${BASE_URL}/cocktails/?${params.toString()}`, {
         method: `GET`,
         credentials: `include`,
     });
