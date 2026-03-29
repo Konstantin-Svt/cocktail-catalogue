@@ -1,6 +1,5 @@
+from django import forms
 from django.contrib import admin
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 
 from cocktail.models import (
     Cocktail,
@@ -9,9 +8,6 @@ from cocktail.models import (
     CocktailIngredients,
     SimilarCocktails,
 )
-
-admin.site.unregister(Group)
-admin.site.unregister(get_user_model())
 
 
 @admin.register(Vibe)
@@ -25,8 +21,27 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = ("name", "category", "unit")
 
 
+class CocktailIngredientsForm(forms.ModelForm):
+    class Meta:
+        model = CocktailIngredients
+        fields = "__all__"
+
+    def validate_unique(self):
+        pass
+
+
+class SimilarCocktailsForm(forms.ModelForm):
+    class Meta:
+        model = SimilarCocktails
+        fields = "__all__"
+
+    def validate_unique(self):
+        pass
+
+
 class SimilarCocktailsInline(admin.TabularInline):
     model = SimilarCocktails
+    form = SimilarCocktailsForm
     fk_name = "from_cocktail"
     extra = 1
     autocomplete_fields = ("to_cocktail",)
@@ -34,6 +49,7 @@ class SimilarCocktailsInline(admin.TabularInline):
 
 class CocktailIngredientsInline(admin.TabularInline):
     model = CocktailIngredients
+    form = CocktailIngredientsForm
     fk_name = "cocktail"
     extra = 1
     autocomplete_fields = ("ingredient", "alternative_ingredient")
@@ -41,7 +57,7 @@ class CocktailIngredientsInline(admin.TabularInline):
 
 @admin.register(Cocktail)
 class CocktailAdmin(admin.ModelAdmin):
-    inlines = [CocktailIngredientsInline, SimilarCocktailsInline]
+    inlines = [CocktailIngredientsInline,]
     search_fields = ["name", "description"]
-    autocomplete_fields = ("ingredients", "vibes", "similar_cocktails")
+    autocomplete_fields = ("ingredients", "vibes")
     list_display = ("name", "alcohol_scale", "sweetness_scale")
