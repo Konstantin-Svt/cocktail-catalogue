@@ -9,6 +9,7 @@ import { AlcoFilters, FilterState } from "./components/AlcoFilters/AlcoFilters";
 import { fetchCocktails } from "./api/cocktailApi";
 import { LogIn } from "./components/LogIn/LogIn";
 import { SignUp } from "./components/SignUp/SignUp";
+import { Restore } from "./components/Restore/Restore";
 
 export const App = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -95,6 +96,7 @@ export const App = () => {
                     <Route path="/product/:id" element={<ProductCard />} />
                     <Route path="/LogIn" element={<LogIn />} />
                     <Route path="/SignUp" element={<SignUp />} />
+                    <Route path="/restore" element={<Restore />} />
                 </Routes>
             )}
         </div>
