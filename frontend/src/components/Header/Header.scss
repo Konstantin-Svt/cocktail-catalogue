@@ -7,6 +7,59 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    &__right {
+        display: flex;
+    }
+    &__auths {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    &__auth {
+        border: 1px solid rgba(126, 47, 78, 1);
+        background-color: rgba(126, 47, 78, 1);
+        color: #fff;
+        height: 44px;
+        width: 120px;
+        margin-left: 16px;
+        border-radius: 16px;
+        &:hover {
+            background-color: #fff;
+            color: rgba(126, 47, 78, 1);
+        }
+        @media (max-width: 830px) {
+            display: none;
+        }
+    }
+        &__auth-desktop {
+            display: flex;
+            gap: 10px;
+    
+            @media (max-width: 830px) {
+                display: none; 
+            }
+        }
+    
+        &__auth-mobile {
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            display: none; 
+    
+            @media (max-width: 830px) {
+                display: block;
+            }
+        }
+        &__profile-btn {
+            width: 28px; 
+            height: 28px;
+            background: url('../../public/img/LogIN.svg') no-repeat center;
+            background-size: contain;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            background-color: transparent;
+        }
     &__text {
         font-family: 'Times New Roman', Times, serif;
         font-weight: 700;

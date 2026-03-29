@@ -54,18 +54,33 @@ export const Header: React.FC<HeaderProps> = ({ searchValue, onSearchChange, isD
                 ref={searchRef}
                 className={`header__search-container ${isSearchOpen ? 'header__search-container--open' : ''}`}>
                     <input 
-                    type="text" 
-                    className="header__input" 
-                    placeholder='Search cocktails or ingredients'
-                    maxLength={50}
-                    value={localValue}
-                    onChange={(e) => setLocalValue(e.target.value)}
-                    autoFocus={isSearchOpen}
-                    onBlur={() => !localValue && setIsSearchOpen(false)}
-                    disabled={isDisabled}/>
-                <button className="header__search-btn" onClick={toggleSearch} type="button" /> 
-            </div>
+                        type="text" 
+                        className="header__input" 
+                        placeholder='Search cocktails or ingredients'
+                        maxLength={50}
+                        value={localValue}
+                        onChange={(e) => setLocalValue(e.target.value)}
+                        autoFocus={isSearchOpen}
+                        onBlur={() => !localValue && setIsSearchOpen(false)}
+                        disabled={isDisabled}/>
+                    <button className="header__search-btn" onClick={toggleSearch} type="button" /> 
+                </div>
+                <div className="header__auths">
+                    <div className="header__auth-desktop">
+                        <Link to='/SignUp'>
+                            <button className="header__auth header__signUp">
+                                sign up
+                            </button>
+                        </Link>
+                        <Link to='/LogIn'>
+                            <button className="header__auth header__logIn">Log in</button>
+                        </Link>
+                    </div>
 
+                    <Link to='/LogIn' className="header__auth-mobile">
+                        <button className="header__profile-btn" type="button" />
+                    </Link>
+                </div>
             </div>
         </header>
     )

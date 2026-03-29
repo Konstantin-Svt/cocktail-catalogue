@@ -7,6 +7,8 @@ import './styles/grid.scss';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { AlcoFilters, FilterState } from "./components/AlcoFilters/AlcoFilters";
 import { fetchCocktails } from "./api/cocktailApi";
+import { LogIn } from "./components/LogIn/LogIn";
+import { SignUp } from "./components/SignUp/SignUp";
 
 export const App = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -55,10 +57,18 @@ export const App = () => {
     
     const location = useLocation();
     const isProductPage = location.pathname.startsWith('/product/');
+
+    const isAuthPage = location.pathname === '/SignUp' || location.pathname === '/LogIn';
     return (
         <div className="app">
             <AgeVerification onVerified={() => setIsVerified(true)} />
-            <Header searchValue={searchQuery} onSearchChange={setSearchQuery} isDisabled={isProductPage} />
+            {!isAuthPage && (
+                <Header
+                    searchValue={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    isDisabled={isProductPage}
+                />
+            )}
 
             {isVerified && (
                 <Routes>
@@ -83,6 +93,8 @@ export const App = () => {
                     } />
 
                     <Route path="/product/:id" element={<ProductCard />} />
+                    <Route path="/LogIn" element={<LogIn />} />
+                    <Route path="/SignUp" element={<SignUp />} />
                 </Routes>
             )}
         </div>
