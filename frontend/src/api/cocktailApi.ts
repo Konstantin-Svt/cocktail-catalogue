@@ -27,7 +27,10 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
     params.append('page_size', '12');
 
 
-    const response = await fetch(`${BASE_URL}/cocktails?${params.toString()}`);
+    const response = await fetch(`${BASE_URL}/cocktails/?${params.toString()}`, {
+        method: `GET`,
+        credentials: `include`,
+    });
 
     if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -37,7 +40,10 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
 };
 
 export const fetchCocktailById = async (id: string) => {
-    const response = await fetch(`${BASE_URL}/cocktails/${id}/`);
+    const response = await fetch(`${BASE_URL}/cocktails/${id}/`, {
+        method: `GET`,
+        credentials: `include`,
+    });
 
     if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
