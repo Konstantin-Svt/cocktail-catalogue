@@ -38,7 +38,12 @@ export const App = () => {
         />
     );
 
-
+    useEffect(() => {
+        if (activeFilters.search === '') {
+            setSearchQuery('');
+        }
+    }, [activeFilters.search]);
+    
     useEffect(() => {
         const loadInitialData = async () => {
             setIsLoading(true);
