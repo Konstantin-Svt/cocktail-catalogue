@@ -191,7 +191,7 @@ class EmailVerifyView(APIView):
         )
         response.set_cookie(
             "refresh_token",
-            str(refresh_token.token),
+            str(refresh_token),
             max_age=settings.SIMPLE_JWT[
                 "REFRESH_TOKEN_LIFETIME"
             ].total_seconds(),
