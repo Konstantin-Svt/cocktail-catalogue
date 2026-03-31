@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from celery.schedules import crontab
@@ -111,6 +112,7 @@ if DEBUG:
     }
 else:
     from dotenv import load_dotenv
+
     load_dotenv()
     DATABASES = {
         "default": {
@@ -122,7 +124,11 @@ else:
             "HOST": os.environ.get("POSTGRES_HOST", "db"),
         }
     }
-    if os.environ.get("POSTGRES_SSLMODE", "disabled").lower() in ("require", "1", "true"):
+    if os.environ.get("POSTGRES_SSLMODE", "disabled").lower() in (
+        "require",
+        "1",
+        "true",
+    ):
         DATABASES["default"].update(
             {
                 "OPTIONS": {
@@ -165,6 +171,9 @@ USE_TZ = False
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "user.authentication.JWTHeaderFromCookieAuthentication",
+    ],
 }
 
 SPECTACULAR_SETTINGS = {
@@ -180,6 +189,11 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+}
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -232,3 +246,12 @@ else:
         "No ANALYTICS_DATASET_ID and/or GOOGLE_APPLICATION_CREDENTIALS, "
         "Celery_beat will not send analytics data to BigQuery."
     )
+
+PASSWORD_RESET_TIMEOUT = 86400
+AUTO_VERIFY_EMAIL = os.environ.get("AUTO_VERIFY_EMAIL", DEBUG)
+EMAIL_API_BASE_URL = os.environ.get("EMAIL_API_BASE_URL")
+EMAIL_API_KEY = os.environ.get("EMAIL_API_KEY")
+EMAIL_DOMAIN = os.environ.get("EMAIL_DOMAIN")
+FRONTEND_BASE_URL = os.environ.get(
+    "FRONTEND_BASE_URL", "http://127.0.0.1:5173"
+)

@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser, UserManager
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -58,6 +58,14 @@ class EmailUserManager(UserManager):
             raise ValueError("Superuser must have is_superuser=True.")
 
         return await self._acreate_user(email, password, **extra_fields)
+
+
+class PasswordValidator(RegexValidator):
+    regex = r"^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])[A-Za-z0-9]{10,64}$"
+    message = (
+        "Password must contain at least one uppercase, "
+        "one lowercase, one number and minimum length of 10."
+    )
 
 
 class User(AbstractUser):
