@@ -12,6 +12,7 @@ def send_verification_email(self, user_id) -> int:
     user = get_user_model().objects.get(pk=user_id)
     if settings.AUTO_VERIFY_EMAIL:
         user.email_verified = True
+        user.save(update_fields=["email_verified"])
         return 299
 
     uid = signing.dumps(user_id, salt="email-confirmation-id")
