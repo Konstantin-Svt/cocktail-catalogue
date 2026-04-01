@@ -26,7 +26,7 @@ def create_email_payload(
         button_text = "Reset"
 
     payload = {
-        "from": f"{settings.EMAIL_DOMAIN}",
+        "from": f"Drinkly <{settings.EMAIL_DOMAIN}>",
         "to": user_email,
         "subject": subject,
         "text": f"Hello,\n{intro}\n{link}\nIf you didn't invoke this action "

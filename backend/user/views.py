@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
 from django.core import signing
 from django.db import transaction
 from django.urls import reverse
@@ -16,8 +15,15 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from user.serializers import CreateUserSerializer, ManageUserSerializer
+from user.authentication import EmailVerificationTokenGenerator
+from user.serializers import (
+    CreateUserSerializer,
+    ManageUserSerializer,
+    ResendEmailSerializer,
+)
 from user.tasks import send_verification_email
+
+email_token_generator = EmailVerificationTokenGenerator()
 
 
 class CreateUserView(generics.GenericAPIView):
@@ -37,16 +43,21 @@ class CreateUserView(generics.GenericAPIView):
                 .first()
             )
             if user:
-                if not user.email_verified:
-                    for key, value in serializer.validated_data.items():
-                        if key == "password":
-                            user.set_password(value)
-                        else:
-                            setattr(user, key, value)
-                    user.save()
-                    send_verification_email.delay_on_commit(user.pk)
-                else:
-                    pass
+                if user.email_verified is True:
+                    return Response(
+                        {
+                            "detail": "Verification link has been send to email."
+                        },
+                        status=status.HTTP_201_CREATED,
+                    )
+
+                for key, value in serializer.validated_data.items():
+                    if key == "password":
+                        user.set_password(value)
+                    else:
+                        setattr(user, key, value)
+                user.save()
+                send_verification_email.delay_on_commit(user.pk)
             else:
                 new_user = serializer.save()
                 send_verification_email.delay_on_commit(new_user.pk)
@@ -85,40 +96,47 @@ class TokenObtainCookiePairView(TokenObtainPairView):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
-        else:
-            access_token = serializer.validated_data["access"]
-            refresh_token = serializer.validated_data["refresh"]
-            response = Response(
-                {"detail": "Login was successful."}, status=status.HTTP_200_OK
-            )
-            response.set_cookie(
-                "access_token",
-                access_token,
-                max_age=settings.SIMPLE_JWT[
-                    "ACCESS_TOKEN_LIFETIME"
-                ].total_seconds(),
-                secure=not settings.DEBUG,
-                httponly=True,
-                samesite="Lax" if settings.DEBUG else "None",
-                path="/api/",
-            )
-            response.set_cookie(
-                "refresh_token",
-                refresh_token,
-                max_age=settings.SIMPLE_JWT[
-                    "REFRESH_TOKEN_LIFETIME"
-                ].total_seconds(),
-                secure=not settings.DEBUG,
-                httponly=True,
-                samesite="Lax" if settings.DEBUG else "None",
-                path=str(reverse("user:token_refresh")),
-            )
-            return response
+
+        access_token = serializer.validated_data["access"]
+        refresh_token = serializer.validated_data["refresh"]
+        response = Response(
+            {
+                "detail": "Login was successful.",
+                "access": access_token,
+                "refresh": refresh_token,
+            },
+            status=status.HTTP_200_OK,
+        )
+        response.set_cookie(
+            "access_token",
+            access_token,
+            max_age=settings.SIMPLE_JWT[
+                "ACCESS_TOKEN_LIFETIME"
+            ].total_seconds(),
+            secure=not settings.DEBUG,
+            httponly=True,
+            samesite="Lax" if settings.DEBUG else "None",
+            path="/api/",
+        )
+        response.set_cookie(
+            "refresh_token",
+            refresh_token,
+            max_age=settings.SIMPLE_JWT[
+                "REFRESH_TOKEN_LIFETIME"
+            ].total_seconds(),
+            secure=not settings.DEBUG,
+            httponly=True,
+            samesite="Lax" if settings.DEBUG else "None",
+            path=str(reverse("user:token_refresh")),
+        )
+        return response
 
 
 class TokenRefreshCookieView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get("refresh_token")
+        refresh_token = request.data.get("refresh")
+        if not refresh_token:
+            refresh_token = request.COOKIES.get("refresh_token")
         if not refresh_token:
             return Response(
                 {"detail": "refresh token is absent."},
@@ -134,7 +152,10 @@ class TokenRefreshCookieView(TokenRefreshView):
 
         access_token = serializer.validated_data["access"]
         response = Response(
-            {"detail": "access token refreshed successfully."},
+            {
+                "detail": "access token refreshed successfully.",
+                "access": access_token,
+            },
             status=status.HTTP_200_OK,
         )
         response.set_cookie(
@@ -165,7 +186,7 @@ class EmailVerifyView(APIView):
             user = get_user_model().objects.get(pk=user_id)
         except (signing.BadSignature, get_user_model().DoesNotExist):
             raise ValidationError("Link is invalid.")
-        if default_token_generator.check_token(user, token) is not True:
+        if not email_token_generator.check_token(user, token):
             raise ValidationError("Link is invalid.")
 
         if not user.email_verified:
@@ -175,7 +196,11 @@ class EmailVerifyView(APIView):
         refresh_token = RefreshToken.for_user(user)
         access_token = refresh_token.access_token
         response = Response(
-            {"detail": "Email successfully verified."},
+            {
+                "detail": "Email successfully verified.",
+                "access": str(access_token),
+                "refresh": str(refresh_token),
+            },
             status=status.HTTP_200_OK,
         )
         response.set_cookie(
@@ -200,4 +225,26 @@ class EmailVerifyView(APIView):
             samesite="Lax" if settings.DEBUG else "None",
             path=str(reverse("user:token_refresh")),
         )
+
         return response
+
+
+class VerifyEmailResendView(APIView):
+    permission_classes = (AllowAny,)
+    allowed_methods = ("POST",)
+
+    def post(self, request, *args, **kwargs):
+        serializer = ResendEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = (
+            get_user_model()
+            .objects.filter(email=serializer.validated_data["email"])
+            .first()
+        )
+        if user and user.email_verified is False:
+            send_verification_email.delay(user.pk)
+
+        return Response(
+            {"detail": "Verification link has been resend."},
+            status=status.HTTP_200_OK,
+        )

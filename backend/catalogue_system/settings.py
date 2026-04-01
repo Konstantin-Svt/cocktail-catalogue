@@ -14,6 +14,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
 from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -111,9 +112,8 @@ if DEBUG:
         }
     }
 else:
-    from dotenv import load_dotenv
-
     load_dotenv()
+
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -248,7 +248,10 @@ else:
     )
 
 PASSWORD_RESET_TIMEOUT = 86400
-AUTO_VERIFY_EMAIL = os.environ.get("AUTO_VERIFY_EMAIL", DEBUG)
+EMAIL_VERIFY_RESET_TIMEOUT = 86400
+AUTO_VERIFY_EMAIL = os.environ.get(
+    "AUTO_VERIFY_EMAIL", str(DEBUG)
+).lower() in ("1", "true")
 EMAIL_API_BASE_URL = os.environ.get("EMAIL_API_BASE_URL")
 EMAIL_API_KEY = os.environ.get("EMAIL_API_KEY")
 EMAIL_DOMAIN = os.environ.get("EMAIL_DOMAIN")

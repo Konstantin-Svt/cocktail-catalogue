@@ -53,3 +53,7 @@ class ManageUserSerializer(serializers.ModelSerializer):
         instance.country = validated_data.get("country", instance.country)
         instance.save()
         return instance
+
+
+class ResendEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()

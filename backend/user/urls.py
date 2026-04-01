@@ -5,7 +5,7 @@ from user.views import (
     CreateUserView,
     TokenObtainCookiePairView,
     TokenRefreshCookieView,
-    EmailVerifyView,
+    EmailVerifyView, VerifyEmailResendView,
 )
 
 urlpatterns = [
@@ -18,6 +18,7 @@ urlpatterns = [
         name="token_refresh",
     ),
     path("verify-email/", EmailVerifyView.as_view(), name="verify_email"),
+    path("verify-resend/", VerifyEmailResendView.as_view(), name="verify_resend"),
 ]
 
 app_name = "user"
