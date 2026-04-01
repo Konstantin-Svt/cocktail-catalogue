@@ -55,5 +55,25 @@ class ManageUserSerializer(serializers.ModelSerializer):
         return instance
 
 
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(
+        write_only=True,
+        style={"input_type": "password"},
+    )
+    new_password = serializers.CharField(
+        write_only=True,
+        style={"input_type": "password"},
+        validators=[PasswordValidator()],
+    )
+
+
 class ResendEmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class ChangeEmailSerializer(serializers.Serializer):
+    new_email = serializers.EmailField()
+    password = serializers.CharField(
+        write_only=True,
+        style={"input_type": "password"},
+    )

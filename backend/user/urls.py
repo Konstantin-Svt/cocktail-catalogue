@@ -1,15 +1,18 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
 from user.views import (
     ManageUserView,
     CreateUserView,
     TokenObtainCookiePairView,
     TokenRefreshCookieView,
-    EmailVerifyView, VerifyEmailResendView,
+    EmailVerifyView, EmailVerifyResendView,
 )
 
+user_router = DefaultRouter()
+user_router.register("", ManageUserView, basename="me")
+
 urlpatterns = [
-    path("me/", ManageUserView.as_view(), name="me"),
     path("register/", CreateUserView.as_view(), name="register"),
     path("token/", TokenObtainCookiePairView.as_view(), name="token"),
     path(
@@ -18,7 +21,8 @@ urlpatterns = [
         name="token_refresh",
     ),
     path("verify-email/", EmailVerifyView.as_view(), name="verify_email"),
-    path("verify-resend/", VerifyEmailResendView.as_view(), name="verify_resend"),
+    path("verify-resend/", EmailVerifyResendView.as_view(), name="verify_resend"),
+    path("", include(user_router.urls)),
 ]
 
 app_name = "user"

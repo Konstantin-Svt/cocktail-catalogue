@@ -4,26 +4,34 @@ from requests import Response
 
 
 def create_email_payload(
-    user_email: str, link: str, mail_type: str = "verify"
+    user_email: str, link: str, mail_type: str = "email_verify"
 ) -> dict:
     """
-    mail_type: defaults to "verify" - verify user email.
-    Other options are: "password" for password reset.
+    mail_type: defaults to "email_verify" - verify user email.
+    Other options are: "password_reset" for password reset,
+    "email_change" for changing email address.
     """
-    if mail_type == "verify":
+    if mail_type == "email_verify":
         subject = "Drinkly Email verification"
         intro = (
             "Thank you for registration! To confirm your "
-            "email, please click on the link below:"
+            "email, please click on the button or the link below:"
         )
         button_text = "Verify"
-    else:
+    elif mail_type == "password_reset":
         subject = "Drinkly password reset"
         intro = (
-            "You've requested a password reset on Drinkly."
-            " To confirm reset, please click on the link below:"
+            "You've requested a password reset on Drinkly. To confirm "
+            "reset, please click on the button or the link below:"
         )
         button_text = "Reset"
+    else:
+        subject = "Drinkly Email change"
+        intro = (
+            "You've requested an email change on Drinkly. To confirm your "
+            "new email, please click on the button or the link below:"
+        )
+        button_text = "Change"
 
     payload = {
         "from": f"Drinkly <{settings.EMAIL_DOMAIN}>",
@@ -55,6 +63,10 @@ def create_email_payload(
                            style="background-color:#7E2F4E; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:5px; display:inline-block;">
                           {button_text}
                         </a>
+                      </p>
+                      
+                      <p style="margin:30px 0;">
+                        <a href="{link}">{link}</a>
                       </p>
         
                       <p>If you didn't invoke this action - just ignore the letter.</p>

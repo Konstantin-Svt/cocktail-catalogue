@@ -3,7 +3,8 @@ from django.contrib.auth import get_user_model
 from django.core import signing
 from django.db import transaction
 from django.urls import reverse
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets, mixins
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -19,9 +20,11 @@ from user.authentication import EmailVerificationTokenGenerator
 from user.serializers import (
     CreateUserSerializer,
     ManageUserSerializer,
+    ChangePasswordSerializer,
     ResendEmailSerializer,
+    ChangeEmailSerializer,
 )
-from user.tasks import send_verification_email
+from user.tasks import send_verification_email, send_change_email
 
 email_token_generator = EmailVerificationTokenGenerator()
 
@@ -43,6 +46,12 @@ class CreateUserView(generics.GenericAPIView):
                 .first()
             )
             if user:
+                if not user.can_send_mail():
+                    return Response(
+                        {"detail": "You need to wait."},
+                        status=status.HTTP_429_TOO_MANY_REQUESTS,
+                    )
+
                 if user.email_verified is True:
                     return Response(
                         {
@@ -68,7 +77,11 @@ class CreateUserView(generics.GenericAPIView):
         )
 
 
-class ManageUserView(generics.RetrieveUpdateAPIView):
+class ManageUserView(
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    viewsets.GenericViewSet,
+):
     permission_classes = (IsAuthenticated,)
     serializer_class = ManageUserSerializer
 
@@ -77,6 +90,107 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
             get_user_model()
             .objects.prefetch_related("favourite_cocktails")
             .get(pk=self.request.user.pk)
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="change-password",
+        serializer_class=ChangePasswordSerializer,
+    )
+    def change_password(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        if not user.check_password(serializer.validated_data["old_password"]):
+            raise ValidationError({"old_password": "Wrong password."})
+        user.set_password(serializer.validated_data["new_password"])
+        user.save(update_fields=["password"])
+        return Response(
+            {"detail": "Password successfully changed."},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="change-email",
+        serializer_class=ChangeEmailSerializer,
+    )
+    def change_email(self, request, pk=None):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        if not user.check_password(serializer.validated_data["password"]):
+            raise ValidationError({"password": "Wrong password."})
+
+        new_email = serializer.validated_data["new_email"]
+        if user.email == new_email:
+            raise ValidationError(
+                {"new_email": "New email is your current email."}
+            )
+
+        if not user.can_send_mail():
+            return Response(
+                {"detail": "You need to wait."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        if get_user_model().objects.filter(email=new_email).exists():
+            return Response(
+                {
+                    "detail": "Verification link has been send to the new email."
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        send_change_email.delay(
+            user.pk,
+            new_email,
+        )
+        return Response(
+            {"detail": "Verification link has been send to the new email."},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="change-email-verify",
+        serializer_class=None,
+    )
+    def change_email_verify(self, request, pk=None):
+        token = request.query_params.get("token")
+        uid = request.query_params.get("uid")
+        if not token or not uid:
+            raise ValidationError("Link is invalid.")
+        try:
+            user_id, new_email = signing.loads(
+                uid,
+                salt="email-change-id",
+                max_age=settings.EMAIL_VERIFY_RESET_TIMEOUT,
+            )
+        except signing.BadSignature:
+            raise ValidationError("Link is invalid.")
+        with transaction.atomic():
+            user = (
+                get_user_model()
+                .objects.select_for_update()
+                .filter(pk=user_id)
+                .first()
+            )
+            if (
+                not user
+                or not email_token_generator.check_token(user, token)
+                or get_user_model().objects.filter(email=new_email).exists()
+            ):
+                raise ValidationError("Link is invalid.")
+            user.email = new_email
+            user.save(update_fields=["email"])
+
+        return Response(
+            {"detail": "Email changed successfully.", "email": new_email},
+            status=status.HTTP_200_OK,
         )
 
 
@@ -182,7 +296,11 @@ class EmailVerifyView(APIView):
         if not token or not uid:
             raise ValidationError("Link is invalid.")
         try:
-            user_id = signing.loads(uid, salt="email-confirmation-id")
+            user_id = signing.loads(
+                uid,
+                salt="email-confirmation-id",
+                max_age=settings.EMAIL_VERIFY_RESET_TIMEOUT,
+            )
             user = get_user_model().objects.get(pk=user_id)
         except (signing.BadSignature, get_user_model().DoesNotExist):
             raise ValidationError("Link is invalid.")
@@ -229,7 +347,7 @@ class EmailVerifyView(APIView):
         return response
 
 
-class VerifyEmailResendView(APIView):
+class EmailVerifyResendView(APIView):
     permission_classes = (AllowAny,)
     allowed_methods = ("POST",)
 

@@ -1,8 +1,16 @@
+from datetime import timedelta
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser, UserManager
-from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from django.core.validators import (
+    MinValueValidator,
+    MaxValueValidator,
+    RegexValidator,
+)
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from cocktail.models import Cocktail
@@ -89,6 +97,23 @@ class User(AbstractUser):
     favourite_cocktails = models.ManyToManyField(
         Cocktail, blank=True, related_name="in_users_favourite"
     )
+    last_mail_sent = models.DateTimeField(null=True, blank=True)
+    daily_mail_count = models.PositiveIntegerField(default=0)
+
+    def can_send_mail(self) -> bool:
+        if (
+            self.last_mail_sent
+            and self.daily_mail_count > 0
+            and timezone.now().date() > self.last_mail_sent.date()
+        ):
+            self.daily_mail_count = 0
+            self.save(update_fields=["daily_mail_count"])
+        if self.last_mail_sent and (
+            self.daily_mail_count >= settings.DAILY_MAIL_THRESHOLD
+            or self.last_mail_sent >= timezone.now() - timedelta(seconds=60)
+        ):
+            return False
+        return True
 
     def __str__(self):
         return self.email
@@ -110,8 +135,12 @@ class Rate(models.Model):
 
 
 class Review(models.Model):
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="reviews")
-    cocktail = models.ForeignKey(Cocktail, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(
+        get_user_model(), on_delete=models.CASCADE, related_name="reviews"
+    )
+    cocktail = models.ForeignKey(
+        Cocktail, on_delete=models.CASCADE, related_name="reviews"
+    )
     text = models.TextField(max_length=600)
     timestamp = models.DateTimeField(auto_now_add=True)
 
