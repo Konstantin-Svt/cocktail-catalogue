@@ -13,7 +13,7 @@ from user.views import (
 )
 
 user_router = DefaultRouter()
-user_router.register("", ManageUserView, basename="me")
+user_router.register("", ManageUserView, basename="")
 
 urlpatterns = [
     path("register/", CreateUserView.as_view(), name="register"),
@@ -37,7 +37,7 @@ urlpatterns = [
         ResetPasswordConfirmView.as_view(),
         name="reset_password_confirm",
     ),
-    path("", include(user_router.urls)),
+    path("me/", include(user_router.urls)),
 ]
 
 app_name = "user"

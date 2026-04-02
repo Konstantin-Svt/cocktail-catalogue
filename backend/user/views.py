@@ -4,6 +4,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core import signing
 from django.db import transaction
 from django.urls import reverse
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics, status, viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -39,6 +40,13 @@ class CreateUserView(generics.GenericAPIView):
     serializer_class = CreateUserSerializer
 
     def post(self, request, *args, **kwargs):
+        """
+        Endpoint to create a new user. If user with that email already exists and
+        email is verified, does nothing. If email is not verified, sends verification email.
+        The most recent password & other info are set to this account.
+        Response is similar whether user with this email exists or not
+        to prevent user enumeration.
+        """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
@@ -90,6 +98,8 @@ class ManageUserView(
 ):
     permission_classes = (IsAuthenticated,)
     serializer_class = ManageUserSerializer
+    lookup_field = None
+    lookup_url_kwarg = None
 
     def get_object(self):
         return (
@@ -99,7 +109,7 @@ class ManageUserView(
         )
 
     @action(
-        detail=True,
+        detail=False,
         methods=["post"],
         url_path="change-password",
         serializer_class=ChangePasswordSerializer,
@@ -118,7 +128,7 @@ class ManageUserView(
         )
 
     @action(
-        detail=True,
+        detail=False,
         methods=["post"],
         url_path="change-email",
         serializer_class=ChangeEmailSerializer,
@@ -159,13 +169,38 @@ class ManageUserView(
             status=status.HTTP_200_OK,
         )
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="uid",
+                type=str,
+                description="Identifier of the user, "
+                "resend from mail verification link",
+                many=False,
+                required=True
+            ),
+            OpenApiParameter(
+                name="token",
+                type=str,
+                description="Token of the user, "
+                "resend from mail verification link",
+                many=False,
+                required=True
+            ),
+        ]
+    )
     @action(
-        detail=True,
+        detail=False,
         methods=["get"],
         url_path="change-email-verify",
         serializer_class=None,
     )
     def change_email_verify(self, request, pk=None):
+        """
+        Requires being authenticated!!!
+        Endpoint to verify changing email address. Requires q_params
+        'token' and 'uid' from verification link sent to email.
+        """
         token = request.query_params.get("token")
         uid = request.query_params.get("uid")
         if not token or not uid:
@@ -295,8 +330,35 @@ class TokenRefreshCookieView(TokenRefreshView):
 
 class EmailVerifyView(APIView):
     permission_classes = (AllowAny,)
+    allowed_methods = ("GET",)
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="uid",
+                type=str,
+                description="Identifier of the user, "
+                "resend from mail verification link",
+                many=False,
+                required=True
+            ),
+            OpenApiParameter(
+                name="token",
+                type=str,
+                description="Token of the user, "
+                "resend from mail verification link",
+                many=False,
+                required=True
+            ),
+        ]
+    )
     def get(self, request, *args, **kwargs):
+        """
+        Endpoint to verify email address. If user with this email is verified,
+        does nothing. Requires q_params 'token' and 'uid' from
+        verification link sent to email. If the user exists,
+        automatically creates JWT tokens, puts them in cookies and logins the user.
+        """
         token = request.query_params.get("token")
         uid = request.query_params.get("uid")
         if not token or not uid:
@@ -357,7 +419,14 @@ class EmailVerifyResendView(APIView):
     permission_classes = (AllowAny,)
     allowed_methods = ("POST",)
 
+    @extend_schema(request=EmailSerializer)
     def post(self, request, *args, **kwargs):
+        """
+        Endpoint for requesting an email verification link to send again.
+        If user with this email is already verified, does nothing.
+        Response is similar whether user with this email exists or not
+        to prevent user enumeration.
+        """
         serializer = EmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = (
@@ -384,7 +453,13 @@ class ResetPasswordView(APIView):
     permission_classes = (AllowAny,)
     allowed_methods = ("POST",)
 
+    @extend_schema(request=EmailSerializer)
     def post(self, request, *args, **kwargs):
+        """
+        Endpoint for requesting a password reset link being sent to email.
+        Response is similar whether user with this email exists or not
+        to prevent user enumeration.
+        """
         serializer = EmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = (
@@ -415,7 +490,12 @@ class ResetPasswordConfirmView(APIView):
     permission_classes = (AllowAny,)
     allowed_methods = ("POST",)
 
+    @extend_schema(request=ResetPasswordSerializer)
     def post(self, request, *args, **kwargs):
+        """
+        Endpoint to set a new password after reset. Take 'uid' and 'token' from
+        reset link q_params sent to email.
+        """
         serializer = ResetPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         uid = serializer.validated_data["uid"]
