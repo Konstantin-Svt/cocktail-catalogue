@@ -10,6 +10,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -79,6 +80,7 @@ class CreateUserView(generics.GenericAPIView):
                         user.set_password(value)
                     else:
                         setattr(user, key, value)
+                user.is_active = True
                 user.save()
                 send_verification_email.delay_on_commit(user.pk)
             else:
@@ -94,19 +96,42 @@ class CreateUserView(generics.GenericAPIView):
 class ManageUserView(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
     permission_classes = (IsAuthenticated,)
-    serializer_class = ManageUserSerializer
-    lookup_field = None
-    lookup_url_kwarg = None
 
-    def get_object(self):
+    def get_serializer_class(self):
+        if self.action == "change_password":
+            return ChangePasswordSerializer
+        elif self.action == "change_email":
+            return ChangeEmailSerializer
+        elif self.action in ("change_email_verify", "logout"):
+            return Serializer
+        return ManageUserSerializer
+
+    def get_queryset(self):
         return (
             get_user_model()
             .objects.prefetch_related("favourite_cocktails")
             .get(pk=self.request.user.pk)
         )
+
+    def get_object(self):
+        return self.get_queryset()
+
+    def destroy(self, request, *args, **kwargs):
+        res = super().destroy(request, *args, **kwargs)
+        res.delete_cookie("access_token", path="/api/")
+        res.delete_cookie(
+            "refresh_token", path=str(reverse("user:token_refresh"))
+        )
+        return res
+
+    def perform_destroy(self, instance):
+        instance.is_active = False
+        instance.email_verified = False
+        instance.save()
 
     @action(
         detail=False,
@@ -177,7 +202,7 @@ class ManageUserView(
                 description="Identifier of the user, "
                 "resend from mail verification link",
                 many=False,
-                required=True
+                required=True,
             ),
             OpenApiParameter(
                 name="token",
@@ -185,7 +210,7 @@ class ManageUserView(
                 description="Token of the user, "
                 "resend from mail verification link",
                 many=False,
-                required=True
+                required=True,
             ),
         ]
     )
@@ -233,6 +258,25 @@ class ManageUserView(
             {"detail": "Email changed successfully.", "email": new_email},
             status=status.HTTP_200_OK,
         )
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="logout",
+        serializer_class=None,
+    )
+    def logout(self, request):
+        """
+        Send empty post to logout and delete both tokens from cookies.
+        """
+        res = Response(
+            {"detail": "Successfully logged out."}, status=status.HTTP_200_OK
+        )
+        res.delete_cookie("access_token", path="/api/")
+        res.delete_cookie(
+            "refresh_token", path=str(reverse("user:token_refresh"))
+        )
+        return res
 
 
 class TokenObtainCookiePairView(TokenObtainPairView):
@@ -289,6 +333,11 @@ class TokenObtainCookiePairView(TokenObtainPairView):
 
 class TokenRefreshCookieView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
+        """
+        Endpoint to refresh access token. Either send empty post request if refresh token
+        is in cookies or send refresh token value in body to get a new access token,
+        which is returned both in cookies and response field.
+        """
         refresh_token = request.data.get("refresh")
         if not refresh_token:
             refresh_token = request.COOKIES.get("refresh_token")
@@ -340,7 +389,7 @@ class EmailVerifyView(APIView):
                 description="Identifier of the user, "
                 "resend from mail verification link",
                 many=False,
-                required=True
+                required=True,
             ),
             OpenApiParameter(
                 name="token",
@@ -348,7 +397,7 @@ class EmailVerifyView(APIView):
                 description="Token of the user, "
                 "resend from mail verification link",
                 many=False,
-                required=True
+                required=True,
             ),
         ]
     )

@@ -1,5 +1,4 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
 from user.views import (
     ManageUserView,
@@ -11,9 +10,6 @@ from user.views import (
     ResetPasswordView,
     ResetPasswordConfirmView,
 )
-
-user_router = DefaultRouter()
-user_router.register("", ManageUserView, basename="")
 
 urlpatterns = [
     path("register/", CreateUserView.as_view(), name="register"),
@@ -37,7 +33,24 @@ urlpatterns = [
         ResetPasswordConfirmView.as_view(),
         name="reset_password_confirm",
     ),
-    path("me/", include(user_router.urls)),
+    path("me/change-password/", ManageUserView.as_view({
+        "post": "change_password"
+    })),
+    path("me/change-email/", ManageUserView.as_view({
+        "post": "change_email"
+    })),
+    path("me/change-email-verify/", ManageUserView.as_view({
+        "get": "change_email_verify"
+    })),
+    path("me/logout/", ManageUserView.as_view({
+        "post": "logout"
+    })),
+    path("me/", ManageUserView.as_view({
+        "get": "retrieve",
+        "put": "update",
+        "patch": "partial_update",
+        "delete": "destroy"
+    })),
 ]
 
 app_name = "user"
