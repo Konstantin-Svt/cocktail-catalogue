@@ -6,7 +6,10 @@ from user.views import (
     CreateUserView,
     TokenObtainCookiePairView,
     TokenRefreshCookieView,
-    EmailVerifyView, EmailVerifyResendView,
+    EmailVerifyView,
+    EmailVerifyResendView,
+    ResetPasswordView,
+    ResetPasswordConfirmView,
 )
 
 user_router = DefaultRouter()
@@ -21,7 +24,19 @@ urlpatterns = [
         name="token_refresh",
     ),
     path("verify-email/", EmailVerifyView.as_view(), name="verify_email"),
-    path("verify-resend/", EmailVerifyResendView.as_view(), name="verify_resend"),
+    path(
+        "verify-email-resend/",
+        EmailVerifyResendView.as_view(),
+        name="verify_resend",
+    ),
+    path(
+        "reset-password/", ResetPasswordView.as_view(), name="reset_password"
+    ),
+    path(
+        "reset-password-confirm/",
+        ResetPasswordConfirmView.as_view(),
+        name="reset_password_confirm",
+    ),
     path("", include(user_router.urls)),
 ]
 

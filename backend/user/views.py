@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
 from django.core import signing
 from django.db import transaction
 from django.urls import reverse
@@ -21,10 +22,15 @@ from user.serializers import (
     CreateUserSerializer,
     ManageUserSerializer,
     ChangePasswordSerializer,
-    ResendEmailSerializer,
+    EmailSerializer,
     ChangeEmailSerializer,
+    ResetPasswordSerializer,
 )
-from user.tasks import send_verification_email, send_change_email
+from user.tasks import (
+    send_verification_email,
+    send_change_email,
+    send_reset_password_email,
+)
 
 email_token_generator = EmailVerificationTokenGenerator()
 
@@ -352,17 +358,84 @@ class EmailVerifyResendView(APIView):
     allowed_methods = ("POST",)
 
     def post(self, request, *args, **kwargs):
-        serializer = ResendEmailSerializer(data=request.data)
+        serializer = EmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = (
             get_user_model()
             .objects.filter(email=serializer.validated_data["email"])
             .first()
         )
-        if user and user.email_verified is False:
-            send_verification_email.delay(user.pk)
+        if user:
+            if not user.can_send_mail():
+                return Response(
+                    {"detail": "You need to wait."},
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
+            if user.email_verified is False:
+                send_verification_email.delay(user.pk)
 
         return Response(
             {"detail": "Verification link has been resend."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class ResetPasswordView(APIView):
+    permission_classes = (AllowAny,)
+    allowed_methods = ("POST",)
+
+    def post(self, request, *args, **kwargs):
+        serializer = EmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = (
+            get_user_model()
+            .objects.select_for_update()
+            .filter(email=serializer.validated_data["email"])
+            .first()
+        )
+        if user:
+            if not user.can_send_mail():
+                return Response(
+                    {"detail": "You need to wait."},
+                    status=status.HTTP_429_TOO_MANY_REQUESTS,
+                )
+
+            mail = send_reset_password_email.delay(user.pk)
+            if settings.AUTO_VERIFY_EMAIL:
+                mail = mail.get()
+                return Response({"link": mail}, status=status.HTTP_200_OK)
+
+        return Response(
+            {"detail": "Reset password link has been send to email."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class ResetPasswordConfirmView(APIView):
+    permission_classes = (AllowAny,)
+    allowed_methods = ("POST",)
+
+    def post(self, request, *args, **kwargs):
+        serializer = ResetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        uid = serializer.validated_data["uid"]
+        token = serializer.validated_data["token"]
+        try:
+            user_id = signing.loads(
+                uid,
+                salt="password-reset-id",
+                max_age=settings.PASSWORD_RESET_TIMEOUT,
+            )
+            user = get_user_model().objects.get(pk=user_id)
+        except (signing.BadSignature, get_user_model().DoesNotExist):
+            raise ValidationError("Link is invalid.")
+        if not default_token_generator.check_token(user, token):
+            raise ValidationError("Link is invalid.")
+
+        user.set_password(serializer.validated_data["new_password"])
+        user.save(update_fields=["password"])
+
+        return Response(
+            {"detail": "Password has been successfully changed."},
             status=status.HTTP_200_OK,
         )

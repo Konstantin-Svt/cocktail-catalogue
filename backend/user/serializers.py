@@ -67,7 +67,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     )
 
 
-class ResendEmailSerializer(serializers.Serializer):
+class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
 
@@ -77,3 +77,13 @@ class ChangeEmailSerializer(serializers.Serializer):
         write_only=True,
         style={"input_type": "password"},
     )
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(
+        write_only=True,
+        style={"input_type": "password"},
+        validators=[PasswordValidator()]
+    )
+    uid = serializers.CharField(allow_blank=False, allow_null=False)
+    token = serializers.CharField(allow_blank=False, allow_null=False)

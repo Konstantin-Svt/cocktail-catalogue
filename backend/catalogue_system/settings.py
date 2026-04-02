@@ -120,7 +120,7 @@ else:
             "NAME": os.environ.get("POSTGRES_DB"),
             "USER": os.environ.get("POSTGRES_USER", "postgres"),
             "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-            "PORT": os.environ.get("POSTGRES_PORT"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
             "HOST": os.environ.get("POSTGRES_HOST", "db"),
         }
     }
@@ -247,9 +247,11 @@ else:
         "Celery_beat will not send analytics data to BigQuery."
     )
 
+# Email
+
 PASSWORD_RESET_TIMEOUT = 86400
 EMAIL_VERIFY_RESET_TIMEOUT = 86400
-DAILY_MAIL_THRESHOLD = 15
+DAILY_MAIL_THRESHOLD = 20
 AUTO_VERIFY_EMAIL = os.environ.get(
     "AUTO_VERIFY_EMAIL", str(DEBUG)
 ).lower() in ("1", "true")
