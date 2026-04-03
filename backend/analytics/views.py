@@ -6,12 +6,14 @@ from rest_framework.response import Response
 from analytics.models import Event
 from analytics.serializers import EventCreateSerializer
 from analytics.services import create_event_from_frontend
+from user.authentication import SafeJWTAuthentication
 
 
 class EventCreate(generics.CreateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
-    permission_classes = [AllowAny]
+    permission_classes = (AllowAny,)
+    authentication_classes = (SafeJWTAuthentication,)
 
     @csrf_exempt
     def post(self, request, *args, **kwargs):

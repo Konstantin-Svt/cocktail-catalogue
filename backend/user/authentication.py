@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.crypto import constant_time_compare
 from django.utils.http import base36_to_int
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
@@ -58,3 +59,11 @@ class JWTHeaderFromCookieAuthentication(JWTAuthentication):
         validated_token = self.get_validated_token(raw_token)
 
         return self.get_user(validated_token), validated_token
+
+
+class SafeJWTAuthentication(JWTAuthentication):
+    def authenticate(self, request):
+        try:
+            return super().authenticate(request)
+        except AuthenticationFailed:
+            return None
