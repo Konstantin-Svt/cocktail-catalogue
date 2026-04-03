@@ -11,7 +11,6 @@ from analytics.services import create_event_from_frontend
 class EventCreate(generics.CreateAPIView):
     queryset = Event.objects.all()
     serializer_class = EventCreateSerializer
-    authentication_classes = []
     permission_classes = [AllowAny]
 
     @csrf_exempt

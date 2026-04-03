@@ -11,6 +11,9 @@ from analytics.services import (
     create_filter_applied_events,
     create_card_view_events,
     create_cocktail_page_open_event,
+    create_login_event,
+    create_signup_event,
+    create_logout_event,
 )
 
 ENGINE = connection
@@ -110,7 +113,9 @@ def cocktail_list_analytics_wrapper(
 ) -> None:
     analytic_session = create_page_view_event(request_dict, "search")
     create_filter_applied_events(request_dict, response_dict, analytic_session)
-    create_card_view_events(request_dict, response_dict, analytic_session)
+    create_card_view_events(
+        request_dict, response_dict, "search_results", analytic_session
+    )
 
 
 @shared_task(bind=True, retry_kwargs={"max_retries": 3})
@@ -121,4 +126,23 @@ def cocktail_detail_analytics_wrapper(
     create_cocktail_page_open_event(
         request_dict, response_dict, analytic_session
     )
-    create_card_view_events(request_dict, response_dict, analytic_session)
+    create_card_view_events(
+        request_dict, response_dict, "similar_cocktails", analytic_session
+    )
+
+
+@shared_task(bind=True, retry_kwargs={"max_retries": 3})
+def login_analytics_wrapper(self, request_dict: dict) -> None:
+    analytic_session = create_page_view_event(request_dict, "login")
+    create_login_event(request_dict, analytic_session)
+
+
+@shared_task(bind=True, retry_kwargs={"max_retries": 3})
+def signup_analytics_wrapper(self, request_dict: dict) -> None:
+    analytic_session = create_page_view_event(request_dict, "signup")
+    create_signup_event(request_dict, analytic_session)
+
+
+@shared_task(bind=True, retry_kwargs={"max_retries": 3})
+def logout_analytics_wrapper(self, request_dict: dict) -> None:
+    create_logout_event(request_dict)

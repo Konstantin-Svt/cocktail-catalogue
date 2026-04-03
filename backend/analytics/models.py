@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
@@ -12,6 +13,11 @@ class Event(models.Model):
         CARD_VIEW = "cocktail_card_view"
         PAGE_OPEN = "cocktail_page_open"
         SERVINGS_CHANGED = "servings_changed"
+        SIGNUP = "signup"
+        LOGIN = "login"
+        LOGOUT = "logout"
+        RATING_ADDED = "rating_added"
+        REVIEW_ADDED = "review_added"
 
     event_name = models.CharField(max_length=100, choices=EventName.choices)
     timestamp = models.DateTimeField(default=timezone.now)
@@ -33,12 +39,18 @@ class Event(models.Model):
     servings_number = models.PositiveIntegerField(null=True, blank=True)
     age_confirmed = models.BooleanField(null=True, blank=True)
     position = models.PositiveIntegerField(null=True, blank=True)
+    source = models.CharField(max_length=255, null=True, blank=True)
+    success = models.BooleanField(null=True, blank=True)
+    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True)
+    rating_value = models.PositiveIntegerField(null=True, blank=True)
+    review_length = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.event_name
 
 
 class Session(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True)
     anonymous_user_id = models.CharField(max_length=255)
     session_start = models.DateTimeField(default=timezone.now)
     session_end = models.DateTimeField(default=timezone.now)

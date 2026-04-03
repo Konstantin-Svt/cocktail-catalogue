@@ -19,6 +19,12 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from analytics.tasks import (
+    signup_analytics_wrapper,
+    login_analytics_wrapper,
+    logout_analytics_wrapper,
+)
+from catalogue_system.celery import request_dict_converter
 from user.authentication import EmailVerificationTokenGenerator
 from user.serializers import (
     CreateUserSerializer,
@@ -269,6 +275,9 @@ class ManageUserView(
         """
         Send empty post to logout and delete both tokens from cookies.
         """
+        request_dict = request_dict_converter(request)
+        logout_analytics_wrapper.delay(request_dict)
+
         res = Response(
             {"detail": "Successfully logged out."}, status=status.HTTP_200_OK
         )
@@ -282,12 +291,15 @@ class ManageUserView(
 class TokenObtainCookiePairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        request_dict = request_dict_converter(request)
         try:
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
+            login_analytics_wrapper.delay(request_dict)
             raise InvalidToken(e.args[0]) from e
 
         if serializer.user.email_verified is False:
+            login_analytics_wrapper.delay(request_dict)
             send_verification_email.delay(serializer.user.pk)
             return Response(
                 {
@@ -295,6 +307,9 @@ class TokenObtainCookiePairView(TokenObtainPairView):
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
+
+        request_dict["user_id"] = serializer.user.id
+        login_analytics_wrapper.delay(request_dict)
 
         access_token = serializer.validated_data["access"]
         refresh_token = serializer.validated_data["refresh"]
@@ -412,6 +427,8 @@ class EmailVerifyView(APIView):
         uid = request.query_params.get("uid")
         if not token or not uid:
             raise ValidationError("Link is invalid.")
+
+        request_dict = request_dict_converter(request)
         try:
             user_id = signing.loads(
                 uid,
@@ -420,10 +437,14 @@ class EmailVerifyView(APIView):
             )
             user = get_user_model().objects.get(pk=user_id)
         except (signing.BadSignature, get_user_model().DoesNotExist):
+            signup_analytics_wrapper.delay(request_dict)
             raise ValidationError("Link is invalid.")
         if not email_token_generator.check_token(user, token):
+            signup_analytics_wrapper.delay(request_dict)
             raise ValidationError("Link is invalid.")
 
+        request_dict["user_id"] = user_id
+        signup_analytics_wrapper.delay(request_dict)
         if not user.email_verified:
             user.email_verified = True
             user.save(update_fields=["email_verified"])

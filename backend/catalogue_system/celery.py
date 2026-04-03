@@ -18,6 +18,9 @@ def debug_task(self):
 def request_dict_converter(request: Request) -> dict:
     request_dict = dict()
     request_dict["anon_id"] = request.anon_id
+    request_dict["user_id"] = (
+        request.user.id if request.user.is_authenticated else None
+    )
     request_dict["User-Agent"] = request.headers.get("User-Agent", "")
     request_dict["page_url"] = request.build_absolute_uri()
     request_dict["cocktail_page_id"] = (
