@@ -45,6 +45,11 @@ EVENT_DTYPE_SCHEMA = {
     "page_url": pandas.ArrowDtype(pyarrow.string()),
     "previous_filters": pandas.ArrowDtype(pyarrow.string()),
     "filters_applied": pandas.ArrowDtype(pyarrow.bool_()),
+    "rating_value": pandas.ArrowDtype(pyarrow.int64()),
+    "review_length": pandas.ArrowDtype(pyarrow.int64()),
+    "source": pandas.ArrowDtype(pyarrow.string()),
+    "success": pandas.ArrowDtype(pyarrow.bool_()),
+    "user_id": pandas.ArrowDtype(pyarrow.int64()),
 }
 
 
