@@ -6,7 +6,13 @@ from google import genai
 
 from cocktail.models import Cocktail, Vibe, Ingredient
 
-CLIENT = genai.Client()
+CLIENT = None
+
+def get_client():
+    global CLIENT
+    if CLIENT is None:
+        CLIENT = genai.Client()
+    return CLIENT
 
 
 @database_sync_to_async
@@ -31,7 +37,7 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         self.chat_history = []
-        self.client = CLIENT
+        self.client = get_client()
         self.filters = get_filters()
         await self.send(
             text_data=json.dumps(
