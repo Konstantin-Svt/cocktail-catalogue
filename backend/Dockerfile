@@ -25,4 +25,4 @@ USER django-user
 CMD sh -c "python manage.py collectstatic --noinput && \
            python manage.py wait_for_db && \
            python manage.py migrate && \
-           daphne -b 0.0.0.0 -p $PORT catalogue_system.settings:ASGI_APPLICATION"
+           daphne -b 0.0.0.0 -p $PORT catalogue_system.asgi:application"
