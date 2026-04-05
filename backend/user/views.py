@@ -589,3 +589,10 @@ class ResetPasswordConfirmView(APIView):
             {"detail": "Password has been successfully changed."},
             status=status.HTTP_200_OK,
         )
+
+
+class UnsubscribeView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, *args, **kwargs):
+        return Response({"detail": "Unsubscribed"})

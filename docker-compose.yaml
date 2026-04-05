@@ -11,10 +11,11 @@ services:
     depends_on:
       - db
     restart: unless-stopped
-    command: sh -c "python manage.py wait_for_db &&
+    command: sh -c "python manage.py collectstatic --noinput &&
+                    python manage.py wait_for_db &&
                     python manage.py migrate &&
                     python manage.py init_data &&
-                    gunicorn --access-logfile - --error-logfile - --bind 0.0.0.0:${PORT:-8000} catalogue_system.wsgi:application"
+                    daphne -b 0.0.0.0 -p ${PORT:-8000} catalogue_system.asgi:application"
     environment:
       DJANGO_DEBUG: ${DJANGO_DEBUG:-false}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}

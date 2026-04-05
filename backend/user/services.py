@@ -1,5 +1,6 @@
 import requests
 from django.conf import settings
+from django.utils import timezone
 from requests import Response
 
 
@@ -49,7 +50,7 @@ def create_email_payload(
         button_text = "Change"
 
     payload = {
-        "from": f"Drinkly <{settings.EMAIL_DOMAIN}>",
+        "from": f"Drinkly <send@{settings.EMAIL_DOMAIN}>",
         "to": user_email,
         "subject": subject,
         "text": f"Hello,\n{intro}\n{link}\nWith all respect,\nDrinkly team.",
@@ -89,7 +90,9 @@ def create_email_payload(
         
                   <tr>
                     <td style="background-color:#f0f0f0; padding:15px; text-align:center; font-size:12px; color:#888888;">
-                      © All rights reserved
+                      <p>If you don't want to receive these mails, 
+                        <a href="{settings.FRONTEND_BASE_URL}/api/user/unsubscribe/?email={user_email}">Unsubscribe here</a><br>
+                      ©{timezone.now().year} All rights reserved</p>
                     </td>
                   </tr>
         
@@ -99,6 +102,10 @@ def create_email_payload(
           </table>
         </body>
         """,
+        "headers": {
+            "List-Unsubscribe": f"<{settings.FRONTEND_BASE_URL}/api/user/unsubscribe/?email={user_email}>, "
+            f"<mailto:unsubscribe@{settings.EMAIL_DOMAIN}>"
+        },
     }
 
     return payload

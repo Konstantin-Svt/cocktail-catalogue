@@ -37,6 +37,7 @@ ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1"]
 if os.environ.get("ALLOWED_HOSTS"):
     try:
         ALLOWED_HOSTS += os.environ.get("ALLOWED_HOSTS").split(",")
+        SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     except ValueError:
         print(
             "ALLOWED_HOSTS environment variable is set incorrectly, using default value"
@@ -54,6 +55,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # libs
+    "daphne",
+    "channels",
     "rest_framework",
     "debug_toolbar",
     "drf_spectacular",
@@ -99,7 +102,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "catalogue_system.wsgi.application"
+ASGI_APPLICATION = "catalogue_system.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -169,6 +172,11 @@ USE_TZ = False
 
 # External libs settings
 
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
+if not CELERY_BROKER_URL:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -198,10 +206,19 @@ SIMPLE_JWT = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
-if not CELERY_BROKER_URL:
-    CELERY_TASK_ALWAYS_EAGER = True
-    CELERY_TASK_EAGER_PROPAGATES = True
+if CELERY_BROKER_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [CELERY_BROKER_URL],
+            },
+        },
+    }
+else:
+    CHANNELS_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+    }
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/

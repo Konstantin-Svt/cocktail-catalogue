@@ -8,7 +8,7 @@ from user.views import (
     EmailVerifyView,
     EmailVerifyResendView,
     ResetPasswordView,
-    ResetPasswordConfirmView,
+    ResetPasswordConfirmView, UnsubscribeView,
 )
 
 urlpatterns = [
@@ -33,6 +33,7 @@ urlpatterns = [
         ResetPasswordConfirmView.as_view(),
         name="reset_password_confirm",
     ),
+    path("unsubscribe/", UnsubscribeView.as_view(), name="unsubscribe"),
     path("me/change-password/", ManageUserView.as_view({
         "post": "change_password"
     })),
