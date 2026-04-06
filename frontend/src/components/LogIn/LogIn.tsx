@@ -1,13 +1,39 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import './LogIn.scss';
+import { authApi } from '../../api/authApi';
 
 export const LogIn = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
     const isFormValid = email.length > 0 && password.length > 0;
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!isFormValid) return;
+
+        setIsLoading(true);
+        setError('');
+
+        try {
+            const data = await authApi.login({ email, password });
+
+            if (data.access) {
+                navigate('/');
+            }
+        } catch (err: any) {
+            console.error("Login error:", err.response?.data);
+            const errorMsg = err.response?.data?.detail || "Invalid email or password";
+            setError(errorMsg);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="login">
@@ -20,7 +46,7 @@ export const LogIn = () => {
             <main className="login__container">
                 <h1 className="login__title">Log in</h1>
 
-                <form className="login__form" onSubmit={(e) => e.preventDefault()}>
+                <form className="login__form" onSubmit={handleSubmit}>
                     <div className="login__field">
                         <label>Email address</label>
                         <input
@@ -46,6 +72,7 @@ export const LogIn = () => {
                                 onClick={() => setShowPassword(!showPassword)}
                             />
                         </div>
+                        {error && <p className="login__error-message" style={{ color: '#FF4D4D', fontSize: '14px', marginTop: '8px' }}>{error}</p>}
                         <div className="login__restore-link">
                             Forgot your password? <Link to="/restore">Restore</Link>
                         </div>
@@ -63,19 +90,6 @@ export const LogIn = () => {
                 <p className="login__signup-link">
                     Don't have an account? <Link to="/SignUp">Registration</Link>
                 </p>
-
-                <div className="login__divider">
-                    <span>or</span>
-                </div>
-
-                <div className="login__socials">
-                    <button className="login__social-btn">
-                        <img src="/icons/google.svg" alt="" /> Google
-                    </button>
-                    <button className="login__social-btn">
-                        <img src="/icons/facebook.svg" alt="" /> Facebook
-                    </button>
-                </div>
             </main>
         </div>
     );

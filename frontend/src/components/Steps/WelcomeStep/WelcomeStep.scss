@@ -1,0 +1,61 @@
+.welcome-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh; // Центруємо весь блок вертикально
+    text-align: center;
+
+    &__content {
+        display: flex;
+        flex-direction: column;
+        align-items: center; // Центрує всі елементи всередині по горизонталі
+        width: 100%;
+        max-width: 400px; // Обмежуємо ширину, щоб кнопка не розтягувалася на весь екран
+    }
+
+    &__image-wrapper {
+        margin-bottom: 24px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__icon {
+        width: 200px; // Підбери розмір як на макеті
+        background-image: url(../../../public/img/WelcomePage.svg);
+        height: 200px;
+        background-repeat: no-repeat;
+    }
+
+    &__title {
+        font-size: 32px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #1a1a1a;
+    }
+
+    &__subtitle {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 40px;
+    }
+
+    &__btn-go {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%; // Кнопка займає всю ширину контентної області
+        padding: 16px;
+        background-color: #7e2f4e; // Бордовий колір з макета
+        color: #ffffff;
+        text-decoration: none; // Прибираємо підкреслення посилання
+        border-radius: 100px; // Кругла кнопка як на скріншоті
+        font-weight: 500;
+        font-size: 16px;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+            background-color: #6a2741;
+        }
+    }
+}

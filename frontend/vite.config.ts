@@ -1,22 +1,20 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const API_URL = process.env.VITE_API_URL
-const isLocalAPI = API_URL === '/api'
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
 
-export default defineConfig({
+  return {
     plugins: [react()],
     server: {
-    ...(isLocalAPI
-      ? {
-          proxy: {
-            '/api': {
-              target: 'http://127.0.0.1:8000',
-              changeOrigin: true,
-              secure: false,
-            },
-          },
-        }
-      : {}),
-  },
+      proxy: {
+        '/api': {
+          target: 'https://cocktail-catalogue-dev.onrender.com',
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path) => path.replace(/^\/api/, '/api'),
+        },
+      },
+    },
+  }
 })

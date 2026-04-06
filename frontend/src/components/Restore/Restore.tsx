@@ -6,7 +6,7 @@ export const Restore = () => {
     const [email, setEmail] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const handleSendLink = (e: React.FormEvent) => {
+    const handleSendLink = (e: React) => {
         e.preventDefault();
         // Тут буде логіка виклику API
         setIsSubmitted(true);
