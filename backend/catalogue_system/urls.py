@@ -30,6 +30,7 @@ urlpatterns = (
     [
         path("admin/", admin.site.urls),
         path("api/", include("cocktail.urls", namespace="cocktail")),
+        path("api/user/", include("user.urls", namespace="user")),
         path(
             "api/analytics/", include("analytics.urls", namespace="analytics")
         ),
