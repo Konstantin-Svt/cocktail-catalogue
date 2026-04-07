@@ -24,8 +24,8 @@ export const Profile = () => {
 
             setShowConfirmScreen(true);
             setIsEditingEmail(false);
-            setConfirmPassword('');
         } catch (err: any) {
+            setConfirmPassword('');
             if (err.message === "401") {
                 navigate('/LogIn');
             } else {
@@ -60,12 +60,17 @@ export const Profile = () => {
         return (
             <ConfirmEmail
                 email={newEmail}
-                password="" 
+                password={confirmPassword}
+                isChangeMode={true}
                 onConfirmed={() => {
                     setShowConfirmScreen(false);
+                    setConfirmPassword('');
                     window.location.reload();
                 }}
-                onBack={() => setShowConfirmScreen(false)}
+                onBack={() => {
+                    setShowConfirmScreen(false);
+                    setConfirmPassword('');
+                }}
             />
         );
     }

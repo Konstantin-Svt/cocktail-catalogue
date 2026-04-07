@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ConfirmEmail.scss';
-import { authApi, passwordApi } from '../../../api/authApi'; 
+import { authApi, passwordApi } from '../../../api/authApi';
+import { requestEmailChange } from '../../../api/userProfileApi';
 
 interface Props {
     email: string;
@@ -14,13 +15,19 @@ export const ConfirmEmail: React.FC<Props> = ({ email,
     password = '',
     onConfirmed,
     onBack,
-    isResetMode = false }) => {
+    isResetMode = false,
+    isChangeMode = false }) => {
     const [timer, setTimer] = useState(30);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleConfirmClick = async () => {
         if (isResetMode) {
             alert("Please check your email and click the link to set a new password.");
+            return;
+        }
+
+        if (isChangeMode) {
+            alert("Please check your new email and click the link to verify this email.");
             return;
         }
 
@@ -44,6 +51,8 @@ export const ConfirmEmail: React.FC<Props> = ({ email,
             if (isResetMode) {
   
                 await passwordApi.requestReset(email);
+            } else if (isChangeMode) {
+                await requestEmailChange(email, password);
             } else {
                 
                 await authApi.resendVerification(email);
@@ -83,7 +92,7 @@ export const ConfirmEmail: React.FC<Props> = ({ email,
                     <p className="confirm-email__value">{email}</p>
                 </div>
                 
-                {!isResetMode && (
+                {!isResetMode && !isChangeMode && (
                     <button
                         onClick={handleConfirmClick}
                         disabled={isLoading}

@@ -49,7 +49,6 @@ INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
 INSTALLED_APPS = [
     "daphne",
-    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -57,6 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # libs
+    "channels",
     "rest_framework",
     "debug_toolbar",
     "drf_spectacular",
@@ -276,7 +276,7 @@ EMAIL_API_BASE_URL = os.environ.get("EMAIL_API_BASE_URL")
 EMAIL_API_KEY = os.environ.get("EMAIL_API_KEY")
 EMAIL_DOMAIN = os.environ.get("EMAIL_DOMAIN")
 FRONTEND_BASE_URL = os.environ.get(
-    "FRONTEND_BASE_URL", "http://127.0.0.1:5173"
+    "FRONTEND_BASE_URL", "http://localhost:5173/#"
 )
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
