@@ -11,8 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
+from dotenv import load_dotenv
 from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -35,6 +37,7 @@ ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1"]
 if os.environ.get("ALLOWED_HOSTS"):
     try:
         ALLOWED_HOSTS += os.environ.get("ALLOWED_HOSTS").split(",")
+        SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     except ValueError:
         print(
             "ALLOWED_HOSTS environment variable is set incorrectly, using default value"
@@ -45,6 +48,7 @@ INTERNAL_IPS = ["127.0.0.1", "localhost"]
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -52,6 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # libs
+    "channels",
     "rest_framework",
     "debug_toolbar",
     "drf_spectacular",
@@ -97,7 +102,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "catalogue_system.wsgi.application"
+ASGI_APPLICATION = "catalogue_system.asgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -110,19 +115,23 @@ if DEBUG:
         }
     }
 else:
-    from dotenv import load_dotenv
     load_dotenv()
+
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": os.environ.get("POSTGRES_DB"),
             "USER": os.environ.get("POSTGRES_USER", "postgres"),
             "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-            "PORT": os.environ.get("POSTGRES_PORT"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
             "HOST": os.environ.get("POSTGRES_HOST", "db"),
         }
     }
-    if os.environ.get("POSTGRES_SSLMODE", "disabled").lower() in ("require", "1", "true"):
+    if os.environ.get("POSTGRES_SSLMODE", "disabled").lower() in (
+        "require",
+        "1",
+        "true",
+    ):
         DATABASES["default"].update(
             {
                 "OPTIONS": {
@@ -163,8 +172,16 @@ USE_TZ = False
 
 # External libs settings
 
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
+if not CELERY_BROKER_URL:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "user.authentication.JWTHeaderFromCookieAuthentication",
+    ],
 }
 
 SPECTACULAR_SETTINGS = {
@@ -180,14 +197,28 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+}
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
-if not CELERY_BROKER_URL:
-    CELERY_TASK_ALWAYS_EAGER = True
-    CELERY_TASK_EAGER_PROPAGATES = True
+if CELERY_BROKER_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [CELERY_BROKER_URL],
+            },
+        },
+    }
+else:
+    CHANNELS_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+    }
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
@@ -232,3 +263,20 @@ else:
         "No ANALYTICS_DATASET_ID and/or GOOGLE_APPLICATION_CREDENTIALS, "
         "Celery_beat will not send analytics data to BigQuery."
     )
+
+# Email
+load_dotenv()
+PASSWORD_RESET_TIMEOUT = 86400
+EMAIL_VERIFY_RESET_TIMEOUT = 86400
+DAILY_MAIL_THRESHOLD = 20
+AUTO_VERIFY_EMAIL = os.environ.get(
+    "AUTO_VERIFY_EMAIL", str(DEBUG)
+).lower() in ("1", "true")
+EMAIL_API_BASE_URL = os.environ.get("EMAIL_API_BASE_URL")
+EMAIL_API_KEY = os.environ.get("EMAIL_API_KEY")
+EMAIL_DOMAIN = os.environ.get("EMAIL_DOMAIN")
+FRONTEND_BASE_URL = os.environ.get(
+    "FRONTEND_BASE_URL", "http://localhost:5173/#"
+)
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")

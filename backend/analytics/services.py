@@ -21,6 +21,7 @@ def event_create_executor(
     Session instance to which Event(s) were bound.
     """
     anon_id = request_dict["anon_id"]
+    user_id = request_dict.get("user_id")
     now = timezone.now()
     old_session = False if session else True
 
@@ -41,6 +42,7 @@ def event_create_executor(
             session_end=now,
             browser=ua.browser.family,
             device_type=ua.os.family,
+            user_id=user_id,
         )
         old_session = False
 
@@ -49,15 +51,21 @@ def event_create_executor(
             event.session_id = session.id
             event.anonymous_user_id = anon_id
             event.timestamp = now
+            event.user_id = user_id
         Event.objects.bulk_create(data)
     else:
         Event.objects.create(
-            anonymous_user_id=anon_id, session=session, timestamp=now, **data
+            anonymous_user_id=anon_id,
+            session=session,
+            timestamp=now,
+            user_id=user_id,
+            **data
         )
 
     if old_session:
         session.session_end = now
-        session.save(update_fields=["session_end"])
+        session.user_id = user_id
+        session.save()
 
     return session
 
@@ -143,7 +151,10 @@ def create_filter_applied_events(
 
 
 def create_card_view_events(
-    request_dict: dict, response_dict: dict, session: Session = None
+    request_dict: dict,
+    response_dict: dict,
+    source: str,
+    session: Session = None,
 ) -> Session:
     results = response_dict["results"]
     bulk_data = [
@@ -151,6 +162,7 @@ def create_card_view_events(
             event_name="cocktail_card_view",
             position=i,
             cocktail_id=cocktail["id"],
+            source=source,
         )
         for i, cocktail in enumerate(results, start=1)
     ]
@@ -167,6 +179,39 @@ def create_cocktail_page_open_event(
     data = {
         "event_name": "cocktail_page_open",
         "cocktail_id": response_dict["id"],
+    }
+    session = event_create_executor(data, request_dict, session)
+    return session
+
+
+def create_signup_event(
+    request_dict: dict, session: Session = None
+) -> Session:
+    data = {
+        "event_name": "signup",
+        "success": True if request_dict.get("user_id") else False,
+    }
+    session = event_create_executor(data, request_dict, session)
+    return session
+
+
+def create_login_event(
+    request_dict: dict, session: Session = None
+) -> Session:
+    data = {
+        "event_name": "login",
+        "success": True if request_dict.get("user_id") else False,
+    }
+    session = event_create_executor(data, request_dict, session)
+    return session
+
+
+def create_logout_event(
+    request_dict: dict, session: Session = None
+) -> Session:
+    data = {
+        "event_name": "logout",
+        "success": True if request_dict.get("user_id") else False,
     }
     session = event_create_executor(data, request_dict, session)
     return session

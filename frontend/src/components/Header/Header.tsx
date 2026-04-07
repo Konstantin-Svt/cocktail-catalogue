@@ -12,6 +12,9 @@ export const Header: React.FC<HeaderProps> = ({ searchValue, onSearchChange, isD
     const [localValue, setLocalValue] = useState(searchValue);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
+
+    const isAuthenticated = !!localStorage.getItem('access_token');
+    
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             
@@ -54,18 +57,43 @@ export const Header: React.FC<HeaderProps> = ({ searchValue, onSearchChange, isD
                 ref={searchRef}
                 className={`header__search-container ${isSearchOpen ? 'header__search-container--open' : ''}`}>
                     <input 
-                    type="text" 
-                    className="header__input" 
-                    placeholder='Search cocktails or ingredients'
-                    maxLength={50}
-                    value={localValue}
-                    onChange={(e) => setLocalValue(e.target.value)}
-                    autoFocus={isSearchOpen}
-                    onBlur={() => !localValue && setIsSearchOpen(false)}
-                    disabled={isDisabled}/>
-                <button className="header__search-btn" onClick={toggleSearch} type="button" /> 
-            </div>
-
+                        type="text" 
+                        className="header__input" 
+                        placeholder='Search cocktails or ingredients'
+                        maxLength={50}
+                        value={localValue}
+                        onChange={(e) => setLocalValue(e.target.value)}
+                        autoFocus={isSearchOpen}
+                        onBlur={() => !localValue && setIsSearchOpen(false)}
+                        disabled={isDisabled}/>
+                    <button className="header__search-btn" onClick={toggleSearch} type="button" /> 
+                </div>
+                <div className="header__auths">
+                    {isAuthenticated ? (
+                        /* Показуємо іконки для залогіненого юзера */
+                        <div className="header__user-menu" style={{ display: 'flex', gap: '15px' }}>
+                            <button className="header__icon-btn header__icon-btn--heart" />
+                            <Link to='/Profile'className="header__avatar-wrapper">
+                                
+                            </Link>
+                        </div>
+                    ) : (
+                        /* Показуємо кнопки логіну */
+                        <>
+                            <div className="header__auth-desktop">
+                                <Link to='/SignUp'>
+                                    <button className="header__auth header__signUp">Sign up</button>
+                                </Link>
+                                <Link to='/LogIn'>
+                                    <button className="header__auth header__logIn">Log in</button>
+                                </Link>
+                            </div>
+                            <Link to='/LogIn' className="header__auth-mobile">
+                                <button className="header__profile-btn" type="button" />
+                            </Link>
+                        </>
+                    )}
+                </div>
             </div>
         </header>
     )

@@ -1,0 +1,89 @@
+.confirm-email {
+    margin: 60px auto; // Трохи опустив від хедера
+    width: 100%;
+    max-width: 440px;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    &__icon {
+        width: 150px;
+        height: 150px;
+        background: #F7F8FA url('../../../public/img/Restore.svg') no-repeat center;
+        background-size: 150px;
+        border-radius: 50%;
+        margin-bottom: 32px;
+    }
+
+    &__title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 16px;
+    }
+
+    &__subtitle {
+        font-size: 16px;
+        color: #666;
+        line-height: 1.5;
+        margin-bottom: 32px;
+        max-width: 320px; // Щоб текст переносився як на макеті
+    }
+
+    &__info-box {
+        width: 100%;
+        padding: 16px;
+        background: #F9F9F9;
+        border: 1px solid #E0E0E0;
+        border-radius: 12px;
+        font-size: 16px;
+        color: #1a1a1a;
+        margin-bottom: 32px;
+        display: flex;
+        justify-content: center; // Центруємо текст всередині плашки
+        gap: 5px;
+
+        span {
+            color: #7e2f4e;
+            font-weight: 600;
+        }
+    }
+
+    &__resend-btn {
+        background: none;
+        border: none;
+        color: #7e2f4e;
+        font-weight: 600;
+        font-size: 14px;
+        margin-top: 32px;
+        cursor: pointer;
+
+        &:disabled {
+            color: #ADADAD;
+            cursor: not-allowed;
+        }
+    }
+
+    &__footer {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #666;
+
+        button {
+            background: none;
+            border: none;
+            color: #7e2f4e;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 4px;
+            font-size: 14px;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}

@@ -1,0 +1,215 @@
+.registration-layout {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+
+    &__header {
+        padding: 24px 40px;
+        display: flex;
+        justify-content: flex-start; // Back строго зліва
+    }
+
+    &__container {
+        max-width: 440px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 40px 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    padding: 0;
+
+    &:hover {
+        color: #1a1a1a;
+    }
+}
+
+.registration-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 32px;
+}
+
+.registration-form {
+    width: 100%;
+
+    .form-group {
+        margin-bottom: 20px;
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #E0E0E0;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #F9F9F9;
+        }
+    }
+}
+
+// ФІКС: Рівні інпути
+.password-wrapper {
+    position: relative;
+    width: 100%;
+
+    input {
+        width: 100% !important;
+        padding-right: 48px !important; // Око не стискає інпут
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+}
+
+// ФІКС: БОРДОВІ ГАЛОЧКИ
+.validation-list {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0 32px 0;
+
+    li {
+        color: #ADADAD;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+
+        .check-icon {
+            opacity: 0.3;
+        }
+
+        &.is-valid {
+            color: #7e2f4e; // Бордовий текст
+
+            .check-icon {
+                opacity: 1;
+                color: #7e2f4e; // Бордова галочка
+            }
+        }
+    }
+}
+
+.continue-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 30px;
+    border: none;
+    background: #F0F0F0;
+    color: #ADADAD;
+    font-weight: 600;
+    cursor: not-allowed;
+
+    &--active {
+        background: #7e2f4e;
+        color: #fff;
+        cursor: pointer;
+    }
+}
+
+.registration-step-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+// Рівна ширина інпутів (око зверху)
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+
+    input {
+        width: 100% !important;
+        padding-right: 48px !important; // щоб текст не ліз під око
+        box-sizing: border-box;
+    }
+
+    .password-eye-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 10;
+    }
+}
+
+// Бордові галочки за Фігмою
+.registration-requirements {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0 32px 0;
+    width: 100%;
+
+    li {
+        color: #ADADAD; // Текст сірий для неактивних
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px; // Відступ між іконкою та текстом
+        margin-bottom: 10px;
+
+        // Саме коло
+        .check-mark {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #F0F0F0; // Сіре неактивне коло
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+
+            // Сама галочка (v) всередині кола
+            &__v {
+                font-size: 12px;
+                color: transparent; // Ховаємо галочку для неактивного стану
+                font-weight: bold;
+            }
+        }
+
+        // Стан, коли валідація пройшла
+        &.passed {
+            color: #1a1a1a; // Текст стає чорним (або твого основного кольору)
+
+            .check-mark {
+                background-color: #7e2f4e; // Коло стає БОРДОВИМ
+
+                &__v {
+                    color: #ffffff; // Галочка стає БІЛОЮ
+                }
+            }
+        }
+    }
+}

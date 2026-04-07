@@ -27,7 +27,10 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
     params.append('page_size', '12');
 
 
-    const response = await fetch(`${BASE_URL}/cocktails?${params.toString()}`);
+    const response = await fetch(`${BASE_URL}/cocktails/?${params.toString()}`, {
+        method: 'GET',
+        credentials: 'include',
+    });
 
     if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -37,7 +40,10 @@ export const fetchCocktails = async (filters: FilterState, page: number = 1) => 
 };
 
 export const fetchCocktailById = async (id: string) => {
-    const response = await fetch(`${BASE_URL}/cocktails/${id}/`);
+    const response = await fetch(`${BASE_URL}/cocktails/${id}/`, {
+        method: 'GET',
+        credentials: 'include',
+    });
 
     if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
@@ -49,14 +55,14 @@ export const fetchCocktailById = async (id: string) => {
 export const sendAnalyticsEvent = (payload: Record<string, unknown>) => {
     try {
         fetch(`${BASE_URL}/analytics/events/`, {
-            method: `POST`,
-            credentials: `include`,
+            method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(payload)
         });
     } catch (error) {
-        console.error("Analytics error:", error);
+        console.error('Analytics error:', error);
     }
 };
