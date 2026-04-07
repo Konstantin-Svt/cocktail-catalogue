@@ -532,23 +532,24 @@ class ResetPasswordView(APIView):
         """
         serializer = EmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = (
-            get_user_model()
-            .objects.select_for_update()
-            .filter(email=serializer.validated_data["email"])
-            .first()
-        )
-        if user:
-            if not user.can_send_mail():
-                return Response(
-                    {"detail": "You need to wait."},
-                    status=status.HTTP_429_TOO_MANY_REQUESTS,
-                )
+        with transaction.atomic():
+            user = (
+                get_user_model()
+                .objects.select_for_update()
+                .filter(email=serializer.validated_data["email"])
+                .first()
+            )
+            if user:
+                if not user.can_send_mail():
+                    return Response(
+                        {"detail": "You need to wait."},
+                        status=status.HTTP_429_TOO_MANY_REQUESTS,
+                    )
 
-            mail = send_reset_password_email.delay(user.pk)
-            if settings.AUTO_VERIFY_EMAIL:
-                mail = mail.get()
-                return Response({"link": mail}, status=status.HTTP_200_OK)
+                mail = send_reset_password_email.delay(user.pk)
+                if settings.AUTO_VERIFY_EMAIL:
+                    mail = mail.get()
+                    return Response({"link": mail}, status=status.HTTP_200_OK)
 
         return Response(
             {"detail": "Reset password link has been send to email."},

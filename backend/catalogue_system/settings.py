@@ -278,3 +278,5 @@ EMAIL_DOMAIN = os.environ.get("EMAIL_DOMAIN")
 FRONTEND_BASE_URL = os.environ.get(
     "FRONTEND_BASE_URL", "http://127.0.0.1:5173"
 )
+
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")

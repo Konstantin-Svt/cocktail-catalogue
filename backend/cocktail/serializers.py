@@ -83,3 +83,10 @@ class CocktailDetailSerializer(CocktailListSerializer):
             "similar_cocktails",
         )
         read_only_fields = fields
+
+
+class AIFiltersSerializer(serializers.Serializer):
+    alcohol_level = serializers.CharField(required=True, allow_null=True)
+    sweetness_level = serializers.CharField(required=True, allow_null=True)
+    vibe = serializers.CharField(required=True, allow_null=True)
+    ingredients = serializers.CharField(required=True, allow_null=True, many=True)
