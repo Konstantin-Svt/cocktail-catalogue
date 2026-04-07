@@ -11,6 +11,10 @@ import { LogIn } from "./components/LogIn/LogIn";
 import { SignUp } from "./components/SignUp/SignUp";
 import { Restore } from "./components/Restore/Restore";
 import { Profile } from "./components/Profile/Profile";
+import { WelcomeStep } from "./components/Steps/WelcomeStep/WelcomeStep";
+import { EmailVerification } from "./components/EmailVerification/EmailVerification";
+import { ConfirmEmailChange } from "./components/ConfirmEmailChange/ConfirmEmailChange";
+import { ChangePassword } from "./components/ChangePassword/ChangePassword";
 
 export const App = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -106,6 +110,9 @@ export const App = () => {
                     <Route path="/SignUp" element={<SignUp />} />
                     <Route path="/restore" element={<Restore />} />
                     <Route path="/Profile" element={<Profile />} />
+                    <Route path="/Welcome" element={<WelcomeStep />} />
+                    <Route path="/verify-email" element={<EmailVerification />} />
+                    <Route path="/ChangePassword" element={<ChangePassword />} />
                 </Routes>
             )}
         </div>

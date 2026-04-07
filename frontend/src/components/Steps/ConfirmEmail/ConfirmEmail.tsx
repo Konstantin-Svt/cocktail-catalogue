@@ -1,24 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import './ConfirmEmail.scss';
-import axios from 'axios';
-import { authApi } from '../../../api/authApi'; // Імпортуй свій створений api файл
+import { authApi, passwordApi } from '../../../api/authApi'; 
 
 interface Props {
     email: string;
-    password: string;
+    password?: string; 
     onConfirmed: () => void;
-    onBack: () => void; // Додаємо цей пропс
+    onBack: () => void;
+    isResetMode?: boolean; 
 }
 
-export const ConfirmEmail: React.FC<Props> = ({ email, password, onConfirmed, onBack }) => {
+export const ConfirmEmail: React.FC<Props> = ({ email,
+    password = '',
+    onConfirmed,
+    onBack,
+    isResetMode = false }) => {
     const [timer, setTimer] = useState(30);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleConfirmClick = async () => {
+        if (isResetMode) {
+            alert("Please check your email and click the link to set a new password.");
+            return;
+        }
+
         setIsLoading(true);
         try {
             const data = await authApi.login({ email, password });
-
             if (data.access) {
                 onConfirmed();
             }
@@ -31,12 +39,21 @@ export const ConfirmEmail: React.FC<Props> = ({ email, password, onConfirmed, on
     };
 
     const handleResend = async () => {
+        setIsLoading(true);
         try {
-            await axios.post('/api/user/verify-email-resend/', { email });
-            alert("Verification link sent again!");
+            if (isResetMode) {
+  
+                await passwordApi.requestReset(email);
+            } else {
+                
+                await authApi.resendVerification(email);
+            }
+            alert("Link sent again!");
             setTimer(30);
         } catch (error: any) {
             alert("Failed to resend: " + (error.response?.data?.detail || "Try again later"));
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -51,9 +68,12 @@ export const ConfirmEmail: React.FC<Props> = ({ email, password, onConfirmed, on
         <div className="signup">
             <main className="confirm-email">
                 <div className="confirm-email__icon" />
-                <h2 className="confirm-email__title">Confirm email address</h2>
+                <h2 className="confirm-email__title">{isResetMode ? "Check your inbox" : "Confirm email address"}</h2>
                 <p className="confirm-email__subtitle">
-                    We've sent a verification link to your email.<br />
+                    {isResetMode
+                        ? "We've sent a password reset link to your email."
+                        : "We've sent a verification link to your email."
+                    }<br />
                     Please check your inbox.
                 </p>
 
@@ -62,14 +82,16 @@ export const ConfirmEmail: React.FC<Props> = ({ email, password, onConfirmed, on
                     <p className="confirm-email__label">Your email</p>
                     <p className="confirm-email__value">{email}</p>
                 </div>
-
-                <button
-                    onClick={handleConfirmClick}
-                    disabled={isLoading}
-                    className={`signup__btn-continue ${isLoading ? '' : 'signup__btn-continue--active'}`}
-                >
-                    {isLoading ? 'Checking...' : "I've confirmed email"}
-                </button>
+                
+                {!isResetMode && (
+                    <button
+                        onClick={handleConfirmClick}
+                        disabled={isLoading}
+                        className={`signup__btn-continue ${isLoading ? '' : 'signup__btn-continue--active'}`}
+                    >
+                        {isLoading ? 'Checking...' : "I've confirmed email"}
+                    </button>
+                )}
 
                 <button
                     className="confirm-email__resend-btn"
@@ -80,7 +102,7 @@ export const ConfirmEmail: React.FC<Props> = ({ email, password, onConfirmed, on
                 </button>
 
                 <div className="confirm-email__footer">
-                    Wrong email? <button onClick={onBack}>Change it</button>
+                    {isResetMode ? "Incorrect email?" : "Wrong email?"} <button onClick={onBack}>Change it</button>
                 </div>
             </main>
         </div>

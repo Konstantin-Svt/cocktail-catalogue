@@ -13,14 +13,24 @@ export const Profile = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
 
     const handleEmailChange = async () => {
+        if (!newEmail || !confirmPassword) {
+            alert("Please fill in both new email and your current password");
+            return;
+        }
+
         try {
-    
+            
             await requestEmailChange(newEmail, confirmPassword);
+
             setShowConfirmScreen(true);
             setIsEditingEmail(false);
             setConfirmPassword('');
         } catch (err: any) {
-            alert(err.message);
+            if (err.message === "401") {
+                navigate('/LogIn');
+            } else {
+                alert(err.message || "Помилка при зміні пошти");
+            }
         }
     };
 
@@ -77,9 +87,7 @@ export const Profile = () => {
                             className="profile__avatar"
                             style={user.avatar ? { backgroundImage: `url(${user.avatar})` } : {}}
                         ></div>
-                        <button className="profile__avatar-edit">
-                            
-                        </button>
+                        
                     </div>
                     <div className="profile__user-info">
                         <h2 className="profile__user-name">{user.first_name} {user.last_name}</h2>
@@ -91,7 +99,6 @@ export const Profile = () => {
                 <section className="profile__section">
                     <div className="profile__section-header">
                         <h3 className="profile__section-title">Basic information</h3>
-                        <button className="profile__edit-btn">Edit</button>
                     </div>
                     <div className="profile__info-table">
                         <div className="profile__info-row">
@@ -118,14 +125,17 @@ export const Profile = () => {
                             <span className="profile__info-label">Password</span>
                             <span className="profile__info-value">**********</span>
                         </div>
-                        <button className="profile__edit-btn">Edit</button>
+                        
+                        <button className="profile__edit-btn" onClick={() => navigate('/ChangePassword')}>
+                            Edit
+                        </button>
                     </div>
 
                     <div className="profile__action-card">
                         <div className="profile__action-icon profile__action-icon-email">
                         </div>
                         <div className="profile__action-content">
-                            <span className="profile__info-label">Email</span>
+                            <span className="profile__info-label">Email <span className='profile---email'>{user.email}</span></span>
                             {isEditingEmail && (
                                 <div className="profile__edit-fields">
                                     <input

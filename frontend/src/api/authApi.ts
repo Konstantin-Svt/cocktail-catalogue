@@ -9,6 +9,9 @@ const api = axios.create({
     baseURL: "https://cocktail-catalogue-dev.onrender.com",
 });
 
+const BASE_URL = "https://cocktail-catalogue-dev.onrender.com";
+const API_URL = `${BASE_URL}/api/user`;
+
 export const authApi = {
     login: async (credentials: LoginCredentials) => {
         const response = await api.post('/api/user/token/', credentials);
@@ -20,6 +23,11 @@ export const authApi = {
             localStorage.setItem('refresh_token', response.data.refresh);
         }
 
+        return response.data;
+    },
+
+    resendVerification: async (email: string) => {
+        const response = await api.post('/api/user/verify-email-resend/', { email });
         return response.data;
     }
 };
@@ -44,4 +52,23 @@ export const refreshToken = async () => {
     const data = await response.json();
     localStorage.setItem('access_token', data.access);
     return data.access;
+};
+
+export const passwordApi = {
+    requestReset: async (email: string) => {
+        const response = await axios.post(`${API_URL}/reset-password/`, { email });
+        return response.data;
+    },
+
+   
+    resendResetEmail: async (email: string) => {
+        const response = await axios.post(`${API_URL}/reset-password/`, { email });
+        return response.data;
+    },
+
+
+    confirmReset: async (data: { uid: string; token: string; new_password: string }) => {
+        const response = await axios.post(`${API_URL}/reset-password-confirm/`, data);
+        return response.data;
+    }
 };

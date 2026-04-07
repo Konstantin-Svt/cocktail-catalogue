@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({ searchValue, onSearchChange, isD
                         <>
                             <div className="header__auth-desktop">
                                 <Link to='/SignUp'>
-                                    <button className="header__auth header__signUp">sign up</button>
+                                    <button className="header__auth header__signUp">Sign up</button>
                                 </Link>
                                 <Link to='/LogIn'>
                                     <button className="header__auth header__logIn">Log in</button>
