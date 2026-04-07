@@ -534,8 +534,7 @@ class ResetPasswordView(APIView):
         serializer.is_valid(raise_exception=True)
         user = (
             get_user_model()
-            .objects.select_for_update()
-            .filter(email=serializer.validated_data["email"])
+            .objects.filter(email=serializer.validated_data["email"])
             .first()
         )
         if user:

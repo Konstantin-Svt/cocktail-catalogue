@@ -12,8 +12,9 @@ from django.db.models import (
 )
 from django.db.models.aggregates import Count
 from django.http import QueryDict
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
 
 from catalogue_system.celery import (
     request_dict_converter,
@@ -37,6 +38,7 @@ from cocktail.serializers import (
     VibeSerializer,
     IngredientSerializer,
 )
+from user.authentication import SafeJWTAuthentication
 
 
 def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
@@ -155,6 +157,8 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
         ),
     ).prefetch_related("vibes")
     pagination_class = StandardResultsSetPagination
+    permission_classes = (AllowAny,)
+    authentication_classes = (SafeJWTAuthentication,)
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -257,8 +261,12 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
 class VibeViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Vibe.objects.all()
     serializer_class = VibeSerializer
+    permission_classes = (AllowAny,)
+    authentication_classes = (SafeJWTAuthentication,)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    permission_classes = (AllowAny,)
+    authentication_classes = (SafeJWTAuthentication,)
