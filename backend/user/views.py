@@ -453,7 +453,8 @@ class EmailVerifyView(APIView):
         access_token = refresh_token.access_token
         response = Response(
             {
-                "detail": "Email successfully verified.",
+                "detail": "Email successfully verified! "
+                "You can come back now to registration page.",
                 "access": str(access_token),
                 "refresh": str(refresh_token),
             },

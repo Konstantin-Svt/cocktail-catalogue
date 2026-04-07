@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Profile.scss';
-import { fetchUserProfile, requestEmailChange } from '../../api/userProfileApi';
+import { fetchUserProfile, requestEmailChange, logoutRequest } from '../../api/userProfileApi';
 import { ConfirmEmail } from '../Steps/ConfirmEmail/ConfirmEmail';
 
 export const Profile = () => {
@@ -178,8 +178,10 @@ export const Profile = () => {
                 <button
                     className="profile__logout-btn"
                     onClick={() => {
+                        logoutRequest();
+                        localStorage.removeItem('refresh_token');
                         localStorage.removeItem('access_token');
-                        window.location.href = '/LogIn';
+                        window.location.href = '#/LogIn';
                     }}
                 >
                     Log Out

@@ -1,6 +1,5 @@
 import { refreshToken } from "./authApi";
-
-const BASE_URL = 'https://cocktail-catalogue-dev.onrender.com/api';
+import { BASE_URL } from './cocktailApi';
 
 const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
 
@@ -20,7 +19,8 @@ const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
 
         return await fetch(`${BASE_URL}${endpoint}`, {
             ...options,
-            headers: headers, 
+            headers: headers,
+            credentials: 'include',
         });
     };
 
@@ -60,6 +60,7 @@ export const changePassword = async (passwordData: any) => {
     const response = await apiFetch('/user/me/change-password/', {
         method: 'POST',
         body: JSON.stringify(passwordData),
+        credentials: 'include',
     });
     return await response.json();
 };
@@ -72,13 +73,15 @@ export const requestEmailChange = async (newEmail: string, currentPassword: stri
             new_email: newEmail,
             password: currentPassword
         }),
+        credentials: 'include',
     });
     return true;
 };
 
 export const verifyEmailChange = async (uid: string, token: string) => {
     const response = await apiFetch(`/user/me/change-email-verify/?uid=${uid}&token=${token}`, {
-        method: 'GET'
+        method: 'GET',
+        credentials: 'include',
     });
 
     if (response.status === 204) return { detail: "Success" };
@@ -86,11 +89,12 @@ export const verifyEmailChange = async (uid: string, token: string) => {
 };
 
 export const verifyEmail = async (uid: string, token: string) => {
-    const response = await fetch(`${BASE_URL}/verify-email/?uid=${uid}&token=${token}`, {
+    const response = await fetch(`${BASE_URL}/user/verify-email/?uid=${uid}&token=${token}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
     });
 
     const data = await response.json();
@@ -107,6 +111,14 @@ export const updatePassword = async (oldPassword: string, newPassword: string) =
             old_password: oldPassword,
             new_password: newPassword
         }),
+        credentials: 'include',
     });
     return await response.json();
+};
+
+export const logoutRequest = () => {
+    apiFetch('/user/me/logout/', {
+        method: 'POST',
+        credentials: 'include',
+    });
 };

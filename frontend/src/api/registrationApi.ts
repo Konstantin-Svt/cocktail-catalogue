@@ -1,13 +1,13 @@
 import axios from 'axios';
-
-const BASE_URL = '/api';
+import { BASE_URL } from './cocktailApi';
 
 export const api = axios.create({
     baseURL: BASE_URL,
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
-    }
+    },
+    credentials: 'include',
 });
 
 export const registrationApi = {

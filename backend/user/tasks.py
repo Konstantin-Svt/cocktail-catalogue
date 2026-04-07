@@ -27,7 +27,7 @@ def send_verification_email(self, user_id) -> int:
             & Q(daily_mail_count__lt=settings.DAILY_MAIL_THRESHOLD)
             & (
                 Q(last_mail_sent__isnull=True)
-                | Q(last_mail_sent__lte=timezone.now() - timedelta(seconds=60))
+                | Q(last_mail_sent__lte=timezone.now() - timedelta(seconds=30))
             )
         )
         .update(
@@ -41,7 +41,7 @@ def send_verification_email(self, user_id) -> int:
     user = get_user_model().objects.get(pk=user_id)
     uid = signing.dumps(user_id, salt="email-confirmation-id")
     token = email_token_generator.make_token(user)
-    link = f"{settings.FRONTEND_BASE_URL}/api/user/verify-email/?uid={uid}&token={token}"
+    link = f"{settings.FRONTEND_BASE_URL}/register-verify-email/?uid={uid}&token={token}"
     payload = create_email_payload(user.email, link, mail_type="email_verify")
     response = send_email_via_provider(payload)
     response.raise_for_status()
@@ -63,7 +63,7 @@ def send_change_email(self, user_id, new_email) -> int:
             & Q(daily_mail_count__lt=settings.DAILY_MAIL_THRESHOLD)
             & (
                 Q(last_mail_sent__isnull=True)
-                | Q(last_mail_sent__lte=timezone.now() - timedelta(seconds=60))
+                | Q(last_mail_sent__lte=timezone.now() - timedelta(seconds=30))
             )
         )
         .update(
@@ -82,7 +82,7 @@ def send_change_email(self, user_id, new_email) -> int:
 
     uid = signing.dumps([user_id, new_email], salt="email-change-id")
     token = email_token_generator.make_token(user)
-    link = f"{settings.FRONTEND_BASE_URL}/api/user/me/change-email-verify/?uid={uid}&token={token}"
+    link = f"{settings.FRONTEND_BASE_URL}/verify-email/?uid={uid}&token={token}"
     payload = create_email_payload(new_email, link, mail_type="email_change")
     response = send_email_via_provider(payload)
     response.raise_for_status()
@@ -94,7 +94,7 @@ def send_reset_password_email(self, user_id):
     user = get_user_model().objects.get(pk=user_id)
     uid = signing.dumps(user_id, salt="password-reset-id")
     token = default_token_generator.make_token(user)
-    link = f"{settings.FRONTEND_BASE_URL}/api/user/reset-password-confirm/?uid={uid}&token={token}"
+    link = f"{settings.FRONTEND_BASE_URL}/restore/?uid={uid}&token={token}"
     if settings.AUTO_VERIFY_EMAIL:
         return link
 
@@ -105,7 +105,7 @@ def send_reset_password_email(self, user_id):
             & Q(daily_mail_count__lt=settings.DAILY_MAIL_THRESHOLD)
             & (
                 Q(last_mail_sent__isnull=True)
-                | Q(last_mail_sent__lte=timezone.now() - timedelta(seconds=60))
+                | Q(last_mail_sent__lte=timezone.now() - timedelta(seconds=30))
             )
         )
         .update(

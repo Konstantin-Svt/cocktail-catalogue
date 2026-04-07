@@ -1,4 +1,5 @@
 import axios from "axios";
+import { BASE_URL } from './cocktailApi';
 
 interface LoginCredentials {
     email: string;
@@ -6,15 +7,15 @@ interface LoginCredentials {
 }
 
 const api = axios.create({
-    baseURL: "https://cocktail-catalogue-dev.onrender.com",
+    baseURL: BASE_URL,
+    credentials: 'include',
 });
 
-const BASE_URL = "https://cocktail-catalogue-dev.onrender.com";
-const API_URL = `${BASE_URL}/api/user`;
+const API_URL = `${BASE_URL}/user`;
 
 export const authApi = {
     login: async (credentials: LoginCredentials) => {
-        const response = await api.post('/api/user/token/', credentials);
+        const response = await api.post('/user/token/', credentials);
 
         if (response.data.access) {
             localStorage.setItem('access_token', response.data.access);
@@ -27,7 +28,7 @@ export const authApi = {
     },
 
     resendVerification: async (email: string) => {
-        const response = await api.post('/api/user/verify-email-resend/', { email });
+        const response = await api.post('/user/verify-email-resend/', { email });
         return response.data;
     }
 };
@@ -39,10 +40,11 @@ export const refreshToken = async () => {
         throw new Error("No refresh token available");
     }
 
-    const response = await fetch('https://cocktail-catalogue-dev.onrender.com/api/user/token/refresh/', {
+    const response = await fetch(`${BASE_URL}/user/token/refresh/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh })
+        body: JSON.stringify({ refresh }),
+        credentials: 'include',
     });
 
     if (!response.ok) {

@@ -13,6 +13,7 @@ import { Restore } from "./components/Restore/Restore";
 import { Profile } from "./components/Profile/Profile";
 import { WelcomeStep } from "./components/Steps/WelcomeStep/WelcomeStep";
 import { EmailVerification } from "./components/EmailVerification/EmailVerification";
+import { RegisterEmailVerification } from "./components/RegisterEmailVerification/RegisterEmailVerification";
 import { ConfirmEmailChange } from "./components/ConfirmEmailChange/ConfirmEmailChange";
 import { ChangePassword } from "./components/ChangePassword/ChangePassword";
 
@@ -111,6 +112,7 @@ export const App = () => {
                     <Route path="/restore" element={<Restore />} />
                     <Route path="/Profile" element={<Profile />} />
                     <Route path="/Welcome" element={<WelcomeStep />} />
+                    <Route path="/register-verify-email" element={<RegisterEmailVerification />} />
                     <Route path="/verify-email" element={<EmailVerification />} />
                     <Route path="/ChangePassword" element={<ChangePassword />} />
                 </Routes>

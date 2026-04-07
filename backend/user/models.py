@@ -110,7 +110,7 @@ class User(AbstractUser):
             self.save(update_fields=["daily_mail_count"])
         if self.last_mail_sent and (
             self.daily_mail_count >= settings.DAILY_MAIL_THRESHOLD
-            or self.last_mail_sent >= timezone.now() - timedelta(seconds=60)
+            or self.last_mail_sent >= timezone.now() - timedelta(seconds=30)
         ):
             return False
         return True
