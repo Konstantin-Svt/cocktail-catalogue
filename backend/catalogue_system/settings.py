@@ -45,6 +45,27 @@ if os.environ.get("ALLOWED_HOSTS"):
 
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+    },
+}
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -220,6 +241,8 @@ else:
         "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
     }
 
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
@@ -278,5 +301,3 @@ EMAIL_DOMAIN = os.environ.get("EMAIL_DOMAIN")
 FRONTEND_BASE_URL = os.environ.get(
     "FRONTEND_BASE_URL", "http://localhost:5173/#"
 )
-
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")

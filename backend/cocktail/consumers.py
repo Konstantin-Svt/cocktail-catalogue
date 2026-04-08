@@ -9,8 +9,6 @@ from cocktail.models import Cocktail, Vibe, Ingredient
 from cocktail.serializers import AIFiltersSerializer
 from cocktail.views import CocktailViewSet
 
-CLIENT = AsyncClient()
-
 
 @database_sync_to_async
 def get_filters():
@@ -31,41 +29,40 @@ def get_filters():
 
 
 async def serializer_exc_fallback(a_client: AsyncClient, model_result: dict):
-    async with a_client as client:
-        response = await client.post(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent",
-            headers={
-                "content-type": "application/json",
-                "x-goog-api-key": settings.GEMINI_API_KEY,
-            },
-            json={
-                "contents": {
-                    "role": "server",
-                    "parts": [
-                        {
-                            "text": f"""Your previous JSON result: 
-                                    {json.dumps(model_result, indent=2, ensure_ascii=False)}
-                                    
-                                    It should have looked like this:
-                                    {{
-                                      "type": "result",
-                                      "content": {{
-                                        "alcohol_level": string or null,
-                                        "sweetness_level": string or null,
-                                        "vibe": string or null,
-                                        "ingredients": [string] or null,
-                                      }}
-                                    }}
-                                    
-                                    Fix it and return ONLY valid JSON.
-                                    No explanations.
-                                    No additional text.
-                                    """
-                        }
-                    ],
-                }
-            },
-        )
+    response = await a_client.post(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent",
+        headers={
+            "content-type": "application/json",
+            "x-goog-api-key": settings.GEMINI_API_KEY,
+        },
+        json={
+            "contents": {
+                "role": "server",
+                "parts": [
+                    {
+                        "text": f"""Your previous JSON result: 
+                                {json.dumps(model_result, indent=2, ensure_ascii=False)}
+                                
+                                It should have looked like this:
+                                {{
+                                  "type": "result",
+                                  "content": {{
+                                    "alcohol_level": string or null,
+                                    "sweetness_level": string or null,
+                                    "vibe": string or null,
+                                    "ingredients": [string] or null,
+                                  }}
+                                }}
+                                
+                                Fix it and return ONLY valid JSON.
+                                No explanations.
+                                No additional text.
+                                """
+                    }
+                ],
+            }
+        },
+    )
     return response.json()
 
 
@@ -98,7 +95,7 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         self.chat_history = []
-        self.client = CLIENT
+        self.client = AsyncClient()
         self.filters = await get_filters()
         self.system_instructions = f"""
         You are a barman AI assistant.
@@ -158,25 +155,25 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
             self.chat_history = self.chat_history[-4:]
         self.chat_history.append(user_query)
 
-        async with self.client as client:
-            response = await client.post(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent",
-                headers={
-                    "content-type": "application/json",
-                    "x-goog-api-key": settings.GEMINI_API_KEY,
+        response = await self.client.post(
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent",
+            headers={
+                "content-type": "application/json",
+                "x-goog-api-key": settings.GEMINI_API_KEY,
+            },
+            json={
+                "system_instruction": {
+                    "parts": [
+                        {
+                            "text": self.system_instructions,
+                        }
+                    ]
                 },
-                json={
-                    "system_instruction": {
-                        "parts": [
-                            {
-                                "text": self.system_instructions,
-                            }
-                        ]
-                    },
-                    "contents": self.chat_history,
-                },
-            )
-        response_data = response.json()
+                "contents": self.chat_history,
+            },
+        )
+        response_data = response.json().get("candidates")[0].get("content").get("parts")[0].get("text")
+        print(response_data)
 
         if response_data.get("type") == "extra_query":
             await self.send(
@@ -214,11 +211,14 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
             )
             message = intro + "\n".join(
                 [
-                    f"- {name}: {settings.FRONTEND_BASE_URL}/#/product/{cid}"
+                    f"- {name}: {settings.FRONTEND_BASE_URL}/product/{cid}"
                     for cid, name in db_results["result"]
                 ]
             )
+            await self.send(text_data=json.dumps({"message": message}))
 
         model_response = {"role": "model", "parts": [{"text": response_data}]}
         self.chat_history.append(model_response)
-        print(response_data)
+
+    async def disconnect(self, code):
+        await self.client.aclose()

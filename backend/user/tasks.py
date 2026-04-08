@@ -51,8 +51,11 @@ def send_verification_email(self, user_id) -> int:
 @shared_task(bind=True)
 def send_change_email(self, user_id, new_email) -> int:
     if settings.AUTO_VERIFY_EMAIL:
-        if get_user_model().objects.filter(email=new_email).exists():
-            return 400
+        existing_user = get_user_model().objects.filter(email=new_email).first()
+        if existing_user:
+            if existing_user.email_verified is True:
+                return 400
+            existing_user.delete()
         get_user_model().objects.filter(pk=user_id).update(email=new_email)
         return 299
 

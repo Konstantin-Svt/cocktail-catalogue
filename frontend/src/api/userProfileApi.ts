@@ -116,8 +116,8 @@ export const updatePassword = async (oldPassword: string, newPassword: string) =
     return await response.json();
 };
 
-export const logoutRequest = () => {
-    apiFetch('/user/me/logout/', {
+export const logoutRequest = async () => {
+    await apiFetch('/user/me/logout/', {
         method: 'POST',
         credentials: 'include',
     });

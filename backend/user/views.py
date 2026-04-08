@@ -183,7 +183,11 @@ class ManageUserView(
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
-        if get_user_model().objects.filter(email=new_email).exists():
+        if (
+            get_user_model()
+            .objects.filter(email=new_email, email_verified=True)
+            .exists()
+        ):
             return Response(
                 {
                     "detail": "Verification link has been send to the new email."
@@ -251,12 +255,21 @@ class ManageUserView(
                 .filter(pk=user_id)
                 .first()
             )
+            existing_user = (
+                get_user_model()
+                .objects.select_for_update()
+                .filter(email=new_email)
+                .first()
+            )
             if (
                 not user
                 or not email_token_generator.check_token(user, token)
-                or get_user_model().objects.filter(email=new_email).exists()
+                or (existing_user and existing_user.email_verified is True)
             ):
                 raise ValidationError("Link is invalid.")
+
+            if existing_user and existing_user.email_verified is False:
+                existing_user.delete()
             user.email = new_email
             user.save(update_fields=["email"])
 
