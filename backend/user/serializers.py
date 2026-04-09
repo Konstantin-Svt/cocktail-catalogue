@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from cocktail.serializers import CocktailListSerializer
 from user.models import PasswordValidator
 
 
@@ -29,6 +30,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 
 class ManageUserSerializer(serializers.ModelSerializer):
+    favourite_cocktails = CocktailListSerializer(many=True, read_only=True)
+
     class Meta:
         model = get_user_model()
         fields = (
@@ -68,11 +71,18 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class EmailSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.EmailField(allow_null=False, allow_blank=False)
+
+
+class PasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        write_only=True,
+        style={"input_type": "password"},
+    )
 
 
 class ChangeEmailSerializer(serializers.Serializer):
-    new_email = serializers.EmailField()
+    new_email = serializers.EmailField(allow_null=False, allow_blank=False)
     password = serializers.CharField(
         write_only=True,
         style={"input_type": "password"},
@@ -83,7 +93,7 @@ class ResetPasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(
         write_only=True,
         style={"input_type": "password"},
-        validators=[PasswordValidator()]
+        validators=[PasswordValidator()],
     )
     uid = serializers.CharField(allow_blank=False, allow_null=False)
     token = serializers.CharField(allow_blank=False, allow_null=False)

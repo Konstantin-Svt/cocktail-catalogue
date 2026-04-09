@@ -85,6 +85,15 @@ class CocktailDetailSerializer(CocktailListSerializer):
         read_only_fields = fields
 
 
+class FavCocktailIdSerializer(serializers.Serializer):
+    cocktail_id = serializers.IntegerField(required=True, allow_null=False)
+
+    def validate_cocktail_id(self, value):
+        if not Cocktail.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Cocktail with that id does not exist.")
+        return value
+
+
 class AIFiltersSerializer(serializers.Serializer):
     alcohol_level = serializers.CharField(required=True, allow_null=True)
     sweetness_level = serializers.CharField(required=True, allow_null=True)
