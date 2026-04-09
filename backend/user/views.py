@@ -182,6 +182,7 @@ class ManageUserView(
         )
         return res
 
+    @extend_schema(responses=CocktailListSerializer)
     @action(
         detail=False,
         methods=["get"],
