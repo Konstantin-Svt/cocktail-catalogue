@@ -24,8 +24,12 @@ from analytics.tasks import (
     login_analytics_wrapper,
     logout_analytics_wrapper,
 )
+from cocktail.views import CocktailViewSet
 from catalogue_system.celery import request_dict_converter
-from cocktail.serializers import FavCocktailIdSerializer
+from cocktail.serializers import (
+    FavCocktailIdSerializer,
+    CocktailListSerializer,
+)
 from user.authentication import EmailVerificationTokenGenerator
 from user.serializers import (
     CreateUserSerializer,
@@ -125,6 +129,17 @@ class ManageUserView(
         return ManageUserSerializer
 
     def get_queryset(self):
+        if self.action == "favourite_cocktails":
+            return (
+                CocktailViewSet.queryset.filter(
+                    pk__in=self.request.user.favourite_cocktails.values_list(
+                        "pk", flat=True
+                    )
+                )
+                .prefetch_related("ingredients")
+                .order_by("name")
+                .distinct()
+            )
         return (
             get_user_model()
             .objects.prefetch_related("favourite_cocktails")
@@ -166,6 +181,16 @@ class ManageUserView(
             "refresh_token", path=str(reverse("user:token_refresh"))
         )
         return res
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="favourites",
+        serializer_class=CocktailListSerializer,
+    )
+    def favourite_cocktails(self, request, *args, **kwargs):
+        serializer = CocktailListSerializer(self.get_queryset(), many=True)
+        return Response(serializer.data)
 
     @action(
         detail=False,

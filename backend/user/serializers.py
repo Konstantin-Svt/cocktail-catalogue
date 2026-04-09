@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from cocktail.serializers import CocktailListSerializer
 from user.models import PasswordValidator
 
 
@@ -30,8 +29,6 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 
 class ManageUserSerializer(serializers.ModelSerializer):
-    favourite_cocktails = CocktailListSerializer(many=True, read_only=True)
-
     class Meta:
         model = get_user_model()
         fields = (
