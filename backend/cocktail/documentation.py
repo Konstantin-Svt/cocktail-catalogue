@@ -74,3 +74,35 @@ cocktail_filters_documentation = extend_schema(
         ),
     ]
 )
+
+cocktail_reviews_documentation = extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name="reviews_mode",
+            type=str,
+            description="cocktail reviews API appearance mode."
+            "Possible values are 'flat' or 'tree'. Default is 'flat'."
+            " In tree mode reviews have nested list field 'children'.",
+        ),
+        OpenApiParameter(
+            name="page_size",
+            type=int,
+            description=f"Number of reviews shown for level depth 0"
+            " (or level 1 for NEXT RENDER). If not given default is 10",
+        ),
+        OpenApiParameter(
+            name="max_depth",
+            type=int,
+            description="Maximum amount of replies depth level per one render"
+            " (starting with 0 - no replies are shown)"
+            "If not given default is 2, max is 9",
+        ),
+        OpenApiParameter(
+            name="max_children_len",
+            type=int,
+            description="Maximum amount of nested replies "
+            "list for all depth levels except for 0 "
+            "(or 1 for NEXT RENDER) per one child. If not given default is 2",
+        ),
+    ]
+)

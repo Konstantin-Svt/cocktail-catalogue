@@ -7,7 +7,6 @@ from django.conf import settings
 
 from cocktail.models import Cocktail, Vibe, Ingredient
 from cocktail.serializers import AIFiltersSerializer
-from cocktail.views import CocktailViewSet
 
 MODEL_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent"
 HEADERS = {
@@ -48,7 +47,7 @@ def get_cocktails(filters: dict) -> dict:
             del conditions[condition]
 
     result = list(
-        CocktailViewSet.queryset.filter(**conditions)
+        Cocktail.objects.with_levels().prefetch_related("vibes").filter(**conditions)
         .distinct()
         .values_list("id", "name")[:3]
     )
@@ -56,7 +55,7 @@ def get_cocktails(filters: dict) -> dict:
     while len(result) == 0 and len(conditions) > 1:
         conditions.popitem()
         result = list(
-            CocktailViewSet.queryset.filter(**conditions)
+            Cocktail.objects.with_levels().prefetch_related("vibes").filter(**conditions)
             .distinct()
             .values_list("id", "name")[:3]
         )

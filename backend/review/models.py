@@ -24,18 +24,18 @@ class Review(models.Model):
 
     class Meta:
         constraints = [
-            UniqueConstraint(
-                fields=["user", "cocktail"],
-                condition=models.Q(parent__isnull=True),
-                name="unique_cocktail_review"
-            ),
-            CheckConstraint(
-                condition=(
-                    models.Q(parent__isnull=True, mark__isnull=False)
-                    | models.Q(parent__isnull=False, mark__isnull=True)
-                ),
-                name="valid_mark_usage",
-            ),
+            # UniqueConstraint(
+            #     fields=["user", "cocktail"],
+            #     condition=models.Q(parent__isnull=True),
+            #     name="unique_cocktail_review"
+            # ),
+            # CheckConstraint(
+            #     condition=(
+            #         models.Q(parent__isnull=True, mark__isnull=False)
+            #         | models.Q(parent__isnull=False, mark__isnull=True)
+            #     ),
+            #     name="valid_mark_usage",
+            # ),
         ]
         indexes = [models.Index(fields=["cocktail", "parent"])]
 

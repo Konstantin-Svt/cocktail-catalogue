@@ -24,8 +24,9 @@ from analytics.tasks import (
     login_analytics_wrapper,
     logout_analytics_wrapper,
 )
-from cocktail.views import CocktailViewSet
+from catalogue_system.pagination import StandardResultsSetPagination
 from catalogue_system.celery import request_dict_converter
+from cocktail.models import Cocktail
 from cocktail.serializers import (
     FavCocktailIdSerializer,
     CocktailListSerializer,
@@ -131,12 +132,12 @@ class ManageUserView(
     def get_queryset(self):
         if self.action == "favourite_cocktails":
             return (
-                CocktailViewSet.queryset.filter(
+                Cocktail.objects.with_levels().filter(
                     pk__in=self.request.user.favourite_cocktails.values_list(
                         "pk", flat=True
                     )
                 )
-                .prefetch_related("ingredients")
+                .prefetch_related("vibes", "ingredients")
                 .order_by("name")
                 .distinct()
             )
@@ -188,6 +189,7 @@ class ManageUserView(
         methods=["get"],
         url_path="favourites",
         serializer_class=CocktailListSerializer,
+        pagination_class=StandardResultsSetPagination,
     )
     def favourite_cocktails(self, request, *args, **kwargs):
         serializer = CocktailListSerializer(self.get_queryset(), many=True)

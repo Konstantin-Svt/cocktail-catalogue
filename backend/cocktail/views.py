@@ -1,6 +1,3 @@
-import operator
-from functools import reduce
-
 from django.db.models import (
     Prefetch,
     Q,
@@ -8,13 +5,14 @@ from django.db.models import (
     Case,
     When,
     Value,
-    CharField,
+    IntegerField,
 )
 from django.db.models.aggregates import Count
 from django.http import QueryDict
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from catalogue_system.celery import (
     request_dict_converter,
@@ -25,7 +23,10 @@ from analytics.tasks import (
     cocktail_detail_analytics_wrapper,
 )
 from catalogue_system.pagination import StandardResultsSetPagination
-from cocktail.documentation import cocktail_filters_documentation
+from cocktail.documentation import (
+    cocktail_filters_documentation,
+    cocktail_reviews_documentation,
+)
 from cocktail.models import (
     Cocktail,
     CocktailIngredients,
@@ -38,28 +39,25 @@ from cocktail.serializers import (
     VibeSerializer,
     IngredientSerializer,
 )
+from review.serializers import ReviewRecursiveSerializer, ReviewSerializer
+from review.services import build_reviews_tree, flatten_reviews_tree
 from user.authentication import SafeJWTAuthentication
 
 
 def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
-    conditions = []
+    conditions = Q()
     if q_params.get("search"):
-        conditions.append(
-            (
-                Q(cocktails__name__icontains=q_params["search"])
-                | Q(cocktails__description__icontains=q_params["search"])
-            )
+        conditions &= Q(cocktails__name__icontains=q_params["search"]) | Q(
+            cocktails__description__icontains=q_params["search"]
         )
     if q_params.get("vibes"):
-        conditions.append(
-            Q(cocktails__vibes__name__in=q_params.get("vibes").split(","))
+        conditions &= Q(
+            cocktails__vibes__name__in=q_params.get("vibes").split(",")
         )
     if q_params.get("ingredients"):
-        conditions.append(
-            Q(
-                cocktails__ingredients__name__in=q_params.get(
-                    "ingredients"
-                ).split(",")
+        conditions &= Q(
+            cocktails__ingredients__name__in=q_params.get("ingredients").split(
+                ","
             )
         )
     if q_params.get("alcohol_level"):
@@ -70,7 +68,7 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
                     cocktails__alcohol_scale__gte=level.min_v,
                     cocktails__alcohol_scale__lte=level.max_v,
                 )
-        conditions.append(alcohol_q)
+        conditions &= alcohol_q
     if q_params.get("sweetness_level"):
         sweet_q = Q()
         for level in Cocktail.SWEETNESS_SCALE_MAP:
@@ -79,23 +77,18 @@ def apply_annotate_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
                     cocktails__sweetness_scale__gte=level.min_v,
                     cocktails__sweetness_scale__lte=level.max_v,
                 )
-        conditions.append(sweet_q)
+        conditions &= sweet_q
     if q_params.get("min_price"):
         if not q_params.get("min_price").isdigit():
             raise ValidationError("Min price must be an integer")
-        conditions.append(
-            Q(cocktails__average_price__gte=q_params["min_price"])
-        )
+        conditions &= Q(cocktails__average_price__gte=q_params["min_price"])
     if q_params.get("max_price"):
         if not q_params.get("max_price").isdigit():
             raise ValidationError("Max price must be an integer")
-        conditions.append(
-            Q(cocktails__average_price__lte=q_params["max_price"])
-        )
+        conditions &= Q(cocktails__average_price__lte=q_params["max_price"])
 
-    filters = reduce(operator.and_, conditions, Q())
     return base_qs.annotate(
-        cocktail_count=Count("cocktails", filter=filters, distinct=True)
+        cocktail_count=Count("cocktails", filter=conditions, distinct=True)
     )
 
 
@@ -132,30 +125,7 @@ def apply_queryset_filters(base_qs: QuerySet, q_params: QueryDict) -> QuerySet:
 
 
 class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Cocktail.objects.annotate(
-        alcohol_level=Case(
-            *[
-                When(
-                    alcohol_scale__lte=level.max_v,
-                    alcohol_scale__gte=level.min_v,
-                    then=Value(level.name),
-                )
-                for level in Cocktail.ALCOHOL_SCALE_MAP
-            ],
-            output_field=CharField(),
-        ),
-        sweetness_level=Case(
-            *[
-                When(
-                    sweetness_scale__lte=level.max_v,
-                    sweetness_scale__gte=level.min_v,
-                    then=Value(level.name),
-                )
-                for level in Cocktail.SWEETNESS_SCALE_MAP
-            ],
-            output_field=CharField(),
-        ),
-    ).prefetch_related("vibes")
+    queryset = Cocktail.objects.with_levels().prefetch_related("vibes")
     pagination_class = StandardResultsSetPagination
     permission_classes = (AllowAny,)
     authentication_classes = (SafeJWTAuthentication,)
@@ -187,6 +157,7 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
                 "similar_cocktails__vibes",
                 "similar_cocktails__ingredients",
             )
+        return qs
 
     @cocktail_filters_documentation
     def list(self, request, *args, **kwargs):
@@ -250,11 +221,59 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
         res.data.update(summary)
         return res
 
+    @cocktail_reviews_documentation
     def retrieve(self, request, *args, **kwargs):
-        res = super().retrieve(request, *args, **kwargs)
+        cocktail = self.get_object()
+        serializer = self.get_serializer(cocktail)
+        res = Response(serializer.data)
         request_dict = request_dict_converter(request)
         response_dict = response_data_dict_converter(res.data)
         cocktail_detail_analytics_wrapper.delay(request_dict, response_dict)
+
+        reviews_mode = request.query_params.get("reviews_mode", "flat")
+        if reviews_mode not in ("flat", "tree"):
+            raise ValidationError("Invalid reviews_mode parameter.")
+
+        int_params = {
+            "page_size": request.query_params.get("page_size", 10),
+            "max_depth": request.query_params.get("max_depth", 2),
+            "max_children_len": request.query_params.get(
+                "max_children_len", 2
+            ),
+        }
+        for key, value in int_params.items():
+            try:
+                int_params[key] = int(value)
+            except (ValueError, TypeError):
+                raise ValidationError(
+                    {key: "Invalid parameter. Must be an integer."}
+                )
+
+        sort_by = request.query_params.get("sort_by", "timestamp")
+        user_id = (
+            Case(
+                When(user_id=request.user.id, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField(),
+            )
+            if request.user.is_authenticated
+            else None
+        )
+        ordering = [user_id, sort_by] if user_id else [sort_by]
+        tree = build_reviews_tree(
+            cocktail.id,
+            ordering,
+            page_size=int_params["page_size"],
+            max_depth=int_params["max_depth"],
+            max_children_len=int_params["max_children_len"],
+        )
+        if reviews_mode == "tree":
+            reviews_data = ReviewRecursiveSerializer(tree, many=True).data
+        else:
+            reviews = flatten_reviews_tree(tree)
+            reviews_data = ReviewSerializer(reviews, many=True).data
+
+        res.data["reviews"] = reviews_data
         return res
 
 
