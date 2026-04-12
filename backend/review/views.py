@@ -1,14 +1,19 @@
 from django.db.models import Case, When, Value, IntegerField
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from cocktail.documentation import cocktail_reviews_documentation
 from review.models import Review
-from review.serializers import ReviewRecursiveSerializer, ReviewSerializer
+from review.serializers import (
+    ReviewRecursiveSerializer,
+    ReviewSerializer,
+    CreateReviewSerializer,
+)
 from review.services import build_reviews_tree, flatten_reviews_tree
 from user.authentication import SafeJWTAuthentication
 
@@ -166,3 +171,27 @@ class LoadNextRenderReviewsView(APIView):
             reviews = flatten_reviews_tree(tree)
             reviews_data = ReviewSerializer(reviews, many=True).data
         return Response(reviews_data)
+
+
+class CreateReviewView(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CreateReviewSerializer
+    queryset = Review.objects
+
+    def post(self, request, *args, **kwargs):
+        """
+        Must be authenticated.
+        Review must contain cocktail_id and mark, and can contain text.
+        Reply must contain parent_id and text.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        params = {"user_id": request.user.id}
+
+        if serializer.validated_data["parent"] is not None:
+            params["cocktail_id"] = serializer.validated_data[
+                "parent"
+            ].cocktail_id
+
+        serializer.save(**params)
+        return Response(serializer.data)

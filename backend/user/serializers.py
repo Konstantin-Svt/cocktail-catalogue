@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from rest_framework import serializers
 
 from user.models import PasswordValidator
@@ -24,7 +25,12 @@ class CreateUserSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        user = get_user_model().objects.create_user(**validated_data)
+        try:
+            user = get_user_model().objects.create_user(**validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError(
+                {"detail": "User already exists"}
+            )
         return user
 
 
@@ -41,7 +47,12 @@ class ManageUserSerializer(serializers.ModelSerializer):
             "email_verified",
             "favourite_cocktails",
         )
-        read_only_fields = ("id", "email_verified", "email", "favourite_cocktails")
+        read_only_fields = (
+            "id",
+            "email_verified",
+            "email",
+            "favourite_cocktails",
+        )
 
     def update(self, instance, validated_data):
         instance.first_name = validated_data.get(

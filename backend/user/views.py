@@ -52,6 +52,7 @@ email_token_generator = EmailVerificationTokenGenerator()
 
 
 class CreateUserView(generics.GenericAPIView):
+    permission_classes = (AllowAny,)
     serializer_class = CreateUserSerializer
 
     def post(self, request, *args, **kwargs):
