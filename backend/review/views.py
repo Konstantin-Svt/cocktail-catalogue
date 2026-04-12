@@ -1,3 +1,168 @@
-from django.shortcuts import render
+from django.db.models import Case, When, Value, IntegerField
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-# Create your views here.
+from cocktail.documentation import cocktail_reviews_documentation
+from review.models import Review
+from review.serializers import ReviewRecursiveSerializer, ReviewSerializer
+from review.services import build_reviews_tree, flatten_reviews_tree
+from user.authentication import SafeJWTAuthentication
+
+
+class LoadMoreReviewsView(APIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = (SafeJWTAuthentication,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="id",
+                type=int,
+                description="id of review that 'has_more'",
+                required=True,
+            ),
+            OpenApiParameter(
+                name="index",
+                type=int,
+                description="index of review that 'has_more'",
+                required=True,
+            ),
+            OpenApiParameter(
+                name="depth",
+                type=int,
+                description="depth of review that 'has_more'",
+                required=True,
+            ),
+        ]
+    )
+    @cocktail_reviews_documentation
+    def get(self, request, *args, **kwargs):
+        reviews_mode = request.query_params.get("reviews_mode", "flat")
+        if reviews_mode not in ("flat", "tree"):
+            raise ValidationError("Invalid reviews_mode parameter.")
+
+        int_params = {
+            "id": request.query_params.get("id"),
+            "index": request.query_params.get("index"),
+            "depth": request.query_params.get("depth"),
+            "page_size": request.query_params.get("page_size", 10),
+            "max_depth": request.query_params.get("max_depth", 2),
+            "max_children_len": request.query_params.get(
+                "max_children_len", 2
+            ),
+        }
+        for key, value in int_params.items():
+            try:
+                int_params[key] = int(value)
+            except (ValueError, TypeError):
+                raise ValidationError(
+                    {key: "Invalid parameter. Must be an integer."}
+                )
+
+        sort_by = request.query_params.get("sort_by", "timestamp")
+        user_id = (
+            Case(
+                When(user_id=request.user.id, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField(),
+            )
+            if request.user.is_authenticated
+            else None
+        )
+        ordering = [user_id, sort_by] if user_id else [sort_by]
+
+        upper_node = get_object_or_404(Review, id=int_params["id"])
+        try:
+            tree = build_reviews_tree(
+                upper_node.cocktail_id,
+                ordering,
+                upper_node.parent_id,
+                skip_index=int_params["index"],
+                page_size=int_params["page_size"],
+                current_depth=int_params["depth"],
+                max_depth=int_params["max_depth"],
+                max_children_len=int_params["max_children_len"],
+            )
+        except ValueError as e:
+            raise ValidationError(e)
+
+        if reviews_mode == "tree":
+            reviews_data = ReviewRecursiveSerializer(tree, many=True).data
+        else:
+            reviews = flatten_reviews_tree(tree)
+            reviews_data = ReviewSerializer(reviews, many=True).data
+        return Response(reviews_data)
+
+
+class LoadNextRenderReviewsView(APIView):
+    permission_classes = (AllowAny,)
+    authentication_classes = (SafeJWTAuthentication,)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="id",
+                type=int,
+                description="id of review that has 'hidden_children'"
+                " for next render",
+                required=True,
+            ),
+        ]
+    )
+    @cocktail_reviews_documentation
+    def get(self, request, *args, **kwargs):
+        reviews_mode = request.query_params.get("reviews_mode", "flat")
+        if reviews_mode not in ("flat", "tree"):
+            raise ValidationError("Invalid reviews_mode parameter.")
+
+        int_params = {
+            "id": request.query_params.get("id"),
+            "page_size": request.query_params.get("page_size", 10),
+            "max_depth": request.query_params.get("max_depth", 2),
+            "max_children_len": request.query_params.get(
+                "max_children_len", 2
+            ),
+        }
+        for key, value in int_params.items():
+            try:
+                int_params[key] = int(value)
+            except (ValueError, TypeError):
+                raise ValidationError(
+                    {key: "Invalid parameter. Must be an integer."}
+                )
+
+        sort_by = request.query_params.get("sort_by", "timestamp")
+        user_id = (
+            Case(
+                When(user_id=request.user.id, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField(),
+            )
+            if request.user.is_authenticated
+            else None
+        )
+        ordering = [user_id, sort_by] if user_id else [sort_by]
+
+        upper_node = get_object_or_404(Review, id=int_params["id"])
+        try:
+            tree = build_reviews_tree(
+                upper_node.cocktail_id,
+                ordering,
+                upper_node.parent_id,
+                page_size=int_params["page_size"],
+                max_depth=int_params["max_depth"],
+                max_children_len=int_params["max_children_len"],
+            )
+        except ValueError as e:
+            raise ValidationError(e)
+
+        if reviews_mode == "tree":
+            reviews_data = ReviewRecursiveSerializer(tree, many=True).data
+        else:
+            reviews = flatten_reviews_tree(tree)
+            reviews_data = ReviewSerializer(reviews, many=True).data
+        return Response(reviews_data)

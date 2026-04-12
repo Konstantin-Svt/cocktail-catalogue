@@ -87,8 +87,8 @@ cocktail_reviews_documentation = extend_schema(
         OpenApiParameter(
             name="page_size",
             type=int,
-            description=f"Number of reviews shown for level depth 0"
-            " (or level 1 for NEXT RENDER). If not given default is 10",
+            description=f"Number of reviews shown for level depth 0."
+            " If not given default is 10",
         ),
         OpenApiParameter(
             name="max_depth",
@@ -101,8 +101,8 @@ cocktail_reviews_documentation = extend_schema(
             name="max_children_len",
             type=int,
             description="Maximum amount of nested replies "
-            "list for all depth levels except for 0 "
-            "(or 1 for NEXT RENDER) per one child. If not given default is 2",
+            "list for all depth levels except for 0"
+            " per one child. If not given default is 2",
         ),
     ]
 )
