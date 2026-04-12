@@ -260,13 +260,17 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
             else None
         )
         ordering = [user_id, sort_by] if user_id else [sort_by]
-        tree = build_reviews_tree(
-            cocktail.id,
-            ordering,
-            page_size=int_params["page_size"],
-            max_depth=int_params["max_depth"],
-            max_children_len=int_params["max_children_len"],
-        )
+        try:
+            tree = build_reviews_tree(
+                cocktail.id,
+                ordering,
+                page_size=int_params["page_size"],
+                max_depth=int_params["max_depth"],
+                max_children_len=int_params["max_children_len"],
+            )
+        except ValueError as e:
+            raise ValidationError(e)
+
         if reviews_mode == "tree":
             reviews_data = ReviewRecursiveSerializer(tree, many=True).data
         else:

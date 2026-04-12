@@ -32,6 +32,7 @@ class ManageUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = (
+            "id",
             "email",
             "first_name",
             "last_name",
@@ -40,7 +41,7 @@ class ManageUserSerializer(serializers.ModelSerializer):
             "email_verified",
             "favourite_cocktails",
         )
-        read_only_fields = ("email_verified", "email", "favourite_cocktails")
+        read_only_fields = ("id", "email_verified", "email", "favourite_cocktails")
 
     def update(self, instance, validated_data):
         instance.first_name = validated_data.get(

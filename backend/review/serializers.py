@@ -14,10 +14,11 @@ class ReviewRecursiveSerializer(serializers.ModelSerializer):
         model = Review
         fields = (
             "id",
-            "user",
+            "user_id",
+            "cocktail_id",
             "text",
             "timestamp",
-            "parent",
+            "parent_id",
             "has_more",
             "hidden_children",
             "index",
@@ -26,7 +27,7 @@ class ReviewRecursiveSerializer(serializers.ModelSerializer):
         )
 
     def get_children(self, obj):
-        children = getattr(obj, "children")
+        children = getattr(obj, "children", [])
         return ReviewRecursiveSerializer(children, many=True).data
 
 
@@ -40,10 +41,11 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = (
             "id",
-            "user",
+            "user_id",
+            "cocktail_id",
             "text",
             "timestamp",
-            "parent",
+            "parent_id",
             "has_more",
             "hidden_children",
             "index",

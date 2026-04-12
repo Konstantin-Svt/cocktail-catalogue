@@ -17,6 +17,7 @@ def build_reviews_tree(
     max_depth = min(9, max_depth) - current_depth
     if max_depth < 0:
         raise ValueError("current_depth can't be higher than max_depth")
+
     nodes = dict()
     base_qs = Review.objects.filter(cocktail_id=cocktail_id)
 
@@ -29,7 +30,18 @@ def build_reviews_tree(
     qs = (
         base_qs.filter(parent_id=parent_id)
         .order_by(*ordering)
-        .select_related("user")[skip : limit + 1]
+        .select_related("user")
+        .only(
+            "id",
+            "mark",
+            "timestamp",
+            "text",
+            "cocktail_id",
+            "parent_id",
+            "user__id",
+            "user__first_name",
+            "user__last_name",
+        )[skip : limit + 1]
     )
 
     for i, root in enumerate(qs, start=skip):
@@ -46,16 +58,21 @@ def build_reviews_tree(
 
     prev_layer = list(nodes.keys())
     roots = list(nodes.values())
+
     for depth in range(max_depth + 1):
         is_last_layer = depth == max_depth
+
         if is_last_layer:
-            curr_layer = base_qs.filter(parent_id__in=prev_layer)
+            curr_layer = base_qs.filter(parent_id__in=prev_layer).only(
+                "id", "parent_id", "cocktail_id"
+            )
             for node in curr_layer:
                 parent = nodes.get(node.parent_id)
                 if not parent:
                     continue
                 parent.hidden_children = True
         else:
+            ordering = [F("parent_id")] + ordering
             curr_layer = list(
                 base_qs.filter(parent_id__in=prev_layer)
                 .annotate(
@@ -67,16 +84,30 @@ def build_reviews_tree(
                 )
                 .filter(rn__lte=max_children_len + 1)
                 .select_related("user")
+                .only(
+                    "id",
+                    "mark",
+                    "timestamp",
+                    "text",
+                    "cocktail_id",
+                    "parent_id",
+                    "user__id",
+                    "user__first_name",
+                    "user__last_name",
+                )
             )
             prev_layer = []
-            if len(curr_layer) > max_children_len:
-                curr_layer.pop()
-                curr_layer[-1].has_more = True
+            if curr_layer:
+                prev_parent = curr_layer[0].parent_id
+
             for i, node in enumerate(curr_layer):
+                if node.rn > max_children_len and node.parent_id == prev_parent and i != 0:
+                    curr_layer[i - 1].has_more = True
+                    continue
                 parent = nodes.get(node.parent_id)
                 if not parent:
                     continue
-                node.index = i
+                node.index = node.rn - 1
                 node.depth = parent.depth + 1
                 if not hasattr(node, "has_more"):
                     node.has_more = False
@@ -85,6 +116,8 @@ def build_reviews_tree(
                 parent.children.append(node)
                 nodes[node.pk] = node
                 prev_layer.append(node.pk)
+                if prev_parent != node.parent_id:
+                    prev_parent = node.parent_id
 
     return roots
 

@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core import signing
 from django.db import transaction
+from django.db.models import Prefetch
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics, status, viewsets, mixins
@@ -132,7 +133,8 @@ class ManageUserView(
     def get_queryset(self):
         if self.action == "favourite_cocktails":
             return (
-                Cocktail.objects.with_levels().filter(
+                Cocktail.objects.with_levels()
+                .filter(
                     pk__in=self.request.user.favourite_cocktails.values_list(
                         "pk", flat=True
                     )
@@ -143,7 +145,11 @@ class ManageUserView(
             )
         return (
             get_user_model()
-            .objects.prefetch_related("favourite_cocktails")
+            .objects.prefetch_related(
+                Prefetch(
+                    "favourite_cocktails", queryset=Cocktail.objects.only("id")
+                )
+            )
             .get(pk=self.request.user.pk)
         )
 
@@ -198,7 +204,7 @@ class ManageUserView(
     @action(
         detail=False,
         methods=["post"],
-        url_path="add-favourite",
+        url_path="add-favourites",
         serializer_class=FavCocktailIdSerializer,
     )
     def add_favourite_cocktail(self, request, *args, **kwargs):
@@ -214,7 +220,7 @@ class ManageUserView(
     @action(
         detail=False,
         methods=["post"],
-        url_path="remove-favourite",
+        url_path="remove-favourites",
         serializer_class=FavCocktailIdSerializer,
     )
     def remove_favourite_cocktail(self, request, *args, **kwargs):
