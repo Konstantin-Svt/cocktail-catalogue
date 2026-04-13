@@ -117,32 +117,3 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
-
-
-class Rate(models.Model):
-    user = models.ForeignKey(
-        get_user_model(), on_delete=models.CASCADE, related_name="rates"
-    )
-    cocktail = models.ForeignKey(
-        Cocktail, on_delete=models.CASCADE, related_name="rates"
-    )
-    mark = models.PositiveIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(5)]
-    )
-
-    class Meta:
-        unique_together = ["user", "cocktail"]
-
-
-class Review(models.Model):
-    user = models.ForeignKey(
-        get_user_model(), on_delete=models.CASCADE, related_name="reviews"
-    )
-    cocktail = models.ForeignKey(
-        Cocktail, on_delete=models.CASCADE, related_name="reviews"
-    )
-    text = models.TextField(max_length=600)
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ["user", "cocktail"]

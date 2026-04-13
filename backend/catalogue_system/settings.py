@@ -45,6 +45,27 @@ if os.environ.get("ALLOWED_HOSTS"):
 
 INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
+        },
+    },
+}
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -64,6 +85,7 @@ INSTALLED_APPS = [
     "storages",
     # apps
     "user",
+    "review",
 ]
 
 APPS_WITH_ANALYTICS = ["cocktail", "analytics"]
@@ -220,6 +242,8 @@ else:
         "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
     }
 
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
@@ -255,7 +279,7 @@ if ANALYTICS_DATASET_ID and os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
     CELERY_BEAT_SCHEDULE = {
         "migrate-analytics-data-to-bigquery-daily": {
             "task": "analytics.tasks.migrate_data_to_bigquery",
-            "schedule": crontab(hour=8, minute=0),
+            "schedule": crontab(hour=6, minute=0),
         }
     }
 else:
@@ -278,5 +302,3 @@ EMAIL_DOMAIN = os.environ.get("EMAIL_DOMAIN")
 FRONTEND_BASE_URL = os.environ.get(
     "FRONTEND_BASE_URL", "http://localhost:5173/#"
 )
-
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")

@@ -62,7 +62,7 @@ class JWTHeaderFromCookieAuthentication(JWTAuthentication):
         return self.get_user(validated_token), validated_token
 
 
-class SafeJWTAuthentication(JWTAuthentication):
+class SafeJWTAuthentication(JWTHeaderFromCookieAuthentication):
     def authenticate(self, request):
         try:
             return super().authenticate(request)

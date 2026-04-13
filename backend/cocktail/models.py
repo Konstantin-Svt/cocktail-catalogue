@@ -13,7 +13,36 @@ def create_cocktail_image_path(instance, filename):
     return "cocktails/" + path
 
 
+class CocktailQuerySet(models.QuerySet):
+    def with_levels(self):
+        return self.annotate(
+            alcohol_level=models.Case(
+                *[
+                    models.When(
+                        alcohol_scale__lte=level.max_v,
+                        alcohol_scale__gte=level.min_v,
+                        then=models.Value(level.name),
+                    )
+                    for level in Cocktail.ALCOHOL_SCALE_MAP
+                ],
+                output_field=models.CharField(),
+            ),
+            sweetness_level=models.Case(
+                *[
+                    models.When(
+                        sweetness_scale__lte=level.max_v,
+                        sweetness_scale__gte=level.min_v,
+                        then=models.Value(level.name),
+                    )
+                    for level in Cocktail.SWEETNESS_SCALE_MAP
+                ],
+                output_field=models.CharField(),
+            ),
+        )
+
+
 class Cocktail(models.Model):
+    objects = CocktailQuerySet.as_manager()
     Level = namedtuple("Level", ["min_v", "max_v", "name"])
     ALCOHOL_SCALE_MAP = [
         Level(0, 0, "non-alcoholic"),
