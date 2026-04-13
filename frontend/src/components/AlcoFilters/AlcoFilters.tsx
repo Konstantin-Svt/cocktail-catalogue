@@ -60,6 +60,7 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, summary 
             setAiQuery(''); 
         }
     };
+    
     const alcoholTypes = useMemo(() => {
         if (!summary?.ingredients_count) return [];
         return Object.entries(summary.ingredients_count).map(([key, count]) => ({
