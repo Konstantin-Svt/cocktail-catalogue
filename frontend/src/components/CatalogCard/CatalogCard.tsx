@@ -1,5 +1,8 @@
+import { favoritesApi } from '../../api/favoritesApi';
 import './CatalogCard.scss';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { AuthModal } from '../AuthModal/AuthModal';
 
 
 interface CocktailData {
@@ -20,7 +23,12 @@ interface Props {
 }
 
 export const CatalogCard: React.FC<Props> = ({ data, ingredients, id }) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    const [addFavorite] = favoritesApi.useAddToFavoritesMutation();
+    const [removeFavorite] = favoritesApi.useRemoveFromFavoritesMutation();
 
+    const isAuthenticated = !!localStorage.getItem('access_token');
     const price = Math.round(Number(data.average_price));
     const getAlcoholStatusClass = (levelStr: string) => {
 
@@ -31,13 +39,64 @@ export const CatalogCard: React.FC<Props> = ({ data, ingredients, id }) => {
         if (level === 'medium') return 'dot--yellow';
         return 'dot--red';
     };
+    const { data: favoriteItems } = favoritesApi.useGetFavoritesQuery(undefined, {
+        skip: !localStorage.getItem('access_token'),
+    });
+
+    const isFavorite = favoriteItems?.some(item => item.id === id) || false;
+    const handleFavoriteClick = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!isAuthenticated) {
+            setIsModalOpen(true);
+            return;
+        }
+
+        try {
+            if (isFavorite) {
+                
+                await removeFavorite({ cocktail_id: id }).unwrap();
+            } else {
+
+                await addFavorite({ cocktail_id: id }).unwrap();
+            }
+        } catch (error) {
+            console.error("Failed to update favorites:", error);
+        }
+    };
+
+
+    
     return (
         <article className="cocktail-card">
-            <Link to={`/product/${id}`} className="cocktail-card__link">
-                <div className="cocktail-card__image">
-                    <img src={data.image} alt={data.name} className="cocktail-card__image-img" />
-                </div>
-            </Link>
+            <div className="cocktail-card__image-container">
+                <Link to={`/product/${id}`} className="cocktail-card__link">
+                    <div className="cocktail-card__image">
+                        <img src={data.image} alt={data.name} className="cocktail-card__image-img" />
+                    </div>
+                </Link>
+
+
+                <button
+                    className={`cocktail-card__favorite-btn ${isFavorite ? 'active' : ''}`}
+                    onClick={handleFavoriteClick}
+                >
+                    {isFavorite ? 
+                    <span className='heart-icon heart-icon-default'>
+
+                    </span> : 
+                    <span className='heart-icon heart-icon-checked'>
+                        </span>}
+                    
+                </button>
+            </div>
+
+            <AuthModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
+
             <div className="cocktail-card__content">
                 <div className="cocktail-card__header">
                     <Link to={`/product/${id}`} className="cocktail-card__link">

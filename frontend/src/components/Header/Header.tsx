@@ -70,15 +70,13 @@ export const Header: React.FC<HeaderProps> = ({ searchValue, onSearchChange, isD
                 </div>
                 <div className="header__auths">
                     {isAuthenticated ? (
-                        /* Показуємо іконки для залогіненого юзера */
                         <div className="header__user-menu" style={{ display: 'flex', gap: '15px' }}>
-                            <button className="header__icon-btn header__icon-btn--heart" />
+                            <Link to='/Favorites' className="header__icon-btn header__icon-btn--heart"></Link>
                             <Link to='/Profile'className="header__avatar-wrapper">
                                 
                             </Link>
                         </div>
                     ) : (
-                        /* Показуємо кнопки логіну */
                         <>
                             <div className="header__auth-desktop">
                                 <Link to='/SignUp'>

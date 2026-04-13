@@ -1,0 +1,124 @@
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); // Напівпрозорий чорний
+    backdrop-filter: blur(4px); // Ефект розмиття фону як на макеті
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.auth-modal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: #ffffff;
+    width: 90%;
+    max-width: 400px;
+    padding: 32px 24px;
+    border-radius: 24px;
+    position: relative;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+    &__close {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .heart-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 24px;
+        color: #832d48;
+        background-image: url(../../public/img/Heart2.svg);
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #1a1a1a;
+    }
+
+    p {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 24px;
+        line-height: 1.5;
+    }
+
+    // Стилізація кнопок
+    .btn-signup,
+    .btn-login,
+    .btn-continue {
+        display: block;
+        width: 50%;
+        padding: 12px;
+        border-radius: 100px; // Повністю круглі кути
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 12px;
+        transition: all 0.2s;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .btn-signup {
+        background: #832d48; // Темно-бордовий як на макеті
+        color: #ffffff;
+
+        &:hover {
+            background: #6b243a;
+        }
+    }
+
+    .btn-login {
+        background: #ffffff;
+        color: #832d48;
+        border: 1px solid #832d48;
+
+        &:hover {
+            background: #fdf2f2;
+        }
+    }
+
+    .btn-continue {
+        background: none;
+        color: #832d48;
+        font-size: 14px;
+        margin-bottom: 0;
+        text-decoration: underline;
+
+        &:hover {
+            opacity: 0.8;
+        }
+    }
+}
+
+.btn-out {
+    background-color: #fff;
+    border: none;
+    color: rgba(126, 47, 78, 1);
+    cursor: pointer;
+}

@@ -213,3 +213,16 @@
         }
     }
 }
+
+.password-icon {
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat;
+    background-position: center;
+    &-yes {
+        background-image: url(../../../public/img/see-password.svg);
+    }
+    &-not {
+        background-image: url(../../../public/img/nosee-password.svg);
+    }
+}

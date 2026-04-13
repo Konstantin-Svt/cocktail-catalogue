@@ -114,7 +114,7 @@ export const RegistrationStep: React.FC<Props> = ({ onContinue }) => {
                                 className="signup__eye-icon"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                {showPassword ? '👁️' : '🙈'}
+                                <span className={`password-icon ${showPassword ? 'password-icon-yes' : 'password-icon-not'}`}></span>
                             </button>
                         </div>
                     </div>
