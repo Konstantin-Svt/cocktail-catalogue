@@ -147,7 +147,7 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
             )
 
         if self.action == "retrieve":
-            return qs.prefetch_related(
+            return qs.with_ratings().prefetch_related(
                 Prefetch(
                     "through_ingredients",
                     queryset=CocktailIngredients.objects.select_related(
