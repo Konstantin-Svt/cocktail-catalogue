@@ -1,38 +1,51 @@
 import { useEffect, useRef, useState } from 'react';
 
-const [wsData, setWsData] = useState(null);
-const socket = useRef<WebSocket | null>(null);
+const DEFAULT_WS_URL = 'wss://cocktail-catalogue-uj8l.onrender.com/ws';
+export const BASE_WS_URL =
+  (import.meta as any).env?.VITE_WS_URL || DEFAULT_WS_URL;
 
-useEffect(() => {
-    socket.current = new WebSocket('wss://cocktail-catalogue-dev.onrender.com/ws/aifilters/');
+export function useAiWebSocket() {
+  const [wsData, setWsData] = useState<any>(null);
+  const socket = useRef<WebSocket | null>(null);
 
-    socket.current.onopen = () => {
-        console.log('WS Connected ✅');
+  useEffect(() => {
+    const ws = new WebSocket(`${BASE_WS_URL}/aifilters/`);
+    socket.current = ws;
+
+    ws.onopen = () => {
+      console.log('WS Connected ✅');
     };
 
-    socket.current.onmessage = (event) => {
+    ws.onmessage = (event) => {
+      try {
         const data = JSON.parse(event.data);
         console.log('WS Message:', data);
-        setWsData(data); 
+        setWsData(data);
+      } catch (e) {
+        console.error('JSON parse error ❌', e);
+      }
     };
 
-    socket.current.onerror = (error) => {
-        console.error('WS Error ❌', error);
+    ws.onerror = (error) => {
+      console.error('WS Error ❌', error);
     };
 
-    socket.current.onclose = () => {
-        console.log('WS Disconnected 🔌');
+    ws.onclose = () => {
+      console.log('WS Disconnected 🔌');
     };
-
 
     return () => {
-        socket.current?.close();
+      ws.close();
     };
-}, []);
+  }, []);
 
-
-const sendAiFilterRequest = (text: string) => {
+  const sendAiFilterRequest = (text: string) => {
     if (socket.current?.readyState === WebSocket.OPEN) {
-        socket.current.send(JSON.stringify({ message: text }));
+      socket.current.send(JSON.stringify({ message: text }));
+    } else {
+      console.warn('WebSocket not ready ❗');
     }
-};
+  };
+
+  return { wsData, sendAiFilterRequest };
+}

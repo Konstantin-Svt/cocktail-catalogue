@@ -1,10 +1,10 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { BASE_URL } from './cocktailApi';
 
 export const favoritesApi = createApi({
     reducerPath: 'favoritesApi',
     baseQuery: fetchBaseQuery({
-        // Використовуємо пряму адресу сервера замість /api
-        baseUrl: 'https://cocktail-catalogue-dev.onrender.com/api',
+        baseUrl: BASE_URL,
         prepareHeaders: (headers) => {
             const token = localStorage.getItem('access_token');
             if (token) {
@@ -20,12 +20,14 @@ export const favoritesApi = createApi({
             // Точно як у Swagger: /api/ вже в baseUrl, додаємо решту зі слейшем
             query: () => 'user/me/favourites/',
             providesTags: ['Favorite'],
+            credentials: 'include',
         }),
         addToFavorites: builder.mutation<void, { cocktail_id: number }>({
             query: (body) => ({
                 url: 'user/me/add-favourites/',
                 method: 'POST',
                 body,
+                credentials: 'include',
             }),
             invalidatesTags: ['Favorite'],
         }),
@@ -34,6 +36,7 @@ export const favoritesApi = createApi({
                 url: 'user/me/remove-favourites/',
                 method: 'POST',
                 body,
+                credentials: 'include',
             }),
             invalidatesTags: ['Favorite'],
         }),

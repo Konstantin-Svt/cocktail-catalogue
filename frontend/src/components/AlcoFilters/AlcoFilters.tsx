@@ -1,6 +1,7 @@
 import './AlcoFilters.scss';
 import React, { useEffect, useMemo } from 'react';
 import { sendAnalyticsEvent, } from '../../api/cocktailApi';
+import { BASE_WS_URL } from '../../webSocket/AiSockect';
 
 export interface FilterState {
     alcoholType: string[];
@@ -29,7 +30,7 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, summary 
         setTempPrice(filters.price);
     }, [filters.price]);
     useEffect(() => {
-        socketRef.current = new WebSocket('wss://cocktail-catalogue-dev.onrender.com/ws/aifilters/');
+        socketRef.current = new WebSocket(`${BASE_WS_URL}/aifilters/`);
 
         socketRef.current.onmessage = (event) => {
             const data = JSON.parse(event.data);
