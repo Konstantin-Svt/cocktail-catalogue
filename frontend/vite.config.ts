@@ -10,14 +10,14 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       proxy: useProxy
-      ? {
-        '/api': {
-          target: 'https://cocktail-catalogue-dev.onrender.com',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path) => path.replace(/^\/api/, '/api'),
-        },
-      }
+        ? {
+          '/api': {
+            target: 'https://cocktail-catalogue-dev.onrender.com',
+            changeOrigin: true,
+            secure: false,
+            rewrite: (path) => path.replace(/^\/api/, '/api'),
+          },
+        }
       : undefined,
     },
   }

@@ -22,6 +22,7 @@ export const RegistrationStep: React.FC<Props> = ({ onContinue }) => {
         upper: /[A-Z]/.test(password),
         lower: /[a-z]/.test(password),
         number: /[0-9]/.test(password),
+        match: password === confirmPassword && confirmPassword.length > 0,
     };
 
     const isFormValid =
@@ -63,9 +64,11 @@ export const RegistrationStep: React.FC<Props> = ({ onContinue }) => {
     };
 
     return (
+        
         <div className="signup">
+            
             <main className="signup__container">
-                <h1 className="signup__title">Sign up</h1>
+                <h1 className="signup__title">Sign up</h1>  
 
                 <form className="signup__form" onSubmit={handleSubmit}>
                     <div className="signup__field">
@@ -114,7 +117,7 @@ export const RegistrationStep: React.FC<Props> = ({ onContinue }) => {
                                 className="signup__eye-icon"
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                {showPassword ? '👁️' : '🙈'}
+                                <span className={`password-icon ${showPassword ? 'password-icon-yes' : 'password-icon-not'}`}></span>
                             </button>
                         </div>
                     </div>
@@ -128,6 +131,9 @@ export const RegistrationStep: React.FC<Props> = ({ onContinue }) => {
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
                         />
+                        {confirmPassword && password !== confirmPassword && (
+                            <span className="error-text">Passwords do not match</span>
+                        )}
                     </div>
 
                     <ul className="registration-requirements">

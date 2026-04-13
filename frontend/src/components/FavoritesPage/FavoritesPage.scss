@@ -1,0 +1,80 @@
+.favorites-page {
+    background-color: #fcfcfc;
+    min-height: calc(100vh - 80px); // враховуємо висоту хедера
+    padding: 40px 0;
+
+    &__container {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    &__controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+
+        .search-bar {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+
+            &__icon {
+                position: absolute;
+                left: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #999;
+            }
+
+            input {
+                width: 100%;
+                padding: 12px 12px 12px 45px;
+                border-radius: 100px;
+                border: 1px solid #eee;
+                outline: none;
+                font-size: 14px;
+                transition: border-color 0.2s;
+
+                &:focus {
+                    border-color: #832d48;
+                }
+            }
+        }
+
+        .sort-btn {
+            background: white;
+            border: 1px solid #eee;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+
+            span {
+                font-weight: 600;
+                color: #1a1a1a;
+            }
+        }
+    }
+
+    &__title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 30px;
+        color: #1a1a1a;
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+    }
+
+    &__empty {
+        text-align: center;
+        padding: 60px 0;
+        color: #999;
+    }
+}

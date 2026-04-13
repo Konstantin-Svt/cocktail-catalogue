@@ -2,6 +2,20 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
 
+User = get_user_model()
+
+
+class Session(models.Model):
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    anonymous_user_id = models.CharField(max_length=255)
+    session_start = models.DateTimeField(default=timezone.now)
+    session_end = models.DateTimeField(default=timezone.now)
+    device_type = models.CharField(max_length=255, null=True, blank=True)
+    browser = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"Session of {self.anonymous_user_id}"
+
 
 class Event(models.Model):
     class EventName(models.TextChoices):
@@ -41,21 +55,9 @@ class Event(models.Model):
     position = models.PositiveIntegerField(null=True, blank=True)
     source = models.CharField(max_length=255, null=True, blank=True)
     success = models.BooleanField(null=True, blank=True)
-    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     rating_value = models.PositiveIntegerField(null=True, blank=True)
     review_length = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.event_name
-
-
-class Session(models.Model):
-    user = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True)
-    anonymous_user_id = models.CharField(max_length=255)
-    session_start = models.DateTimeField(default=timezone.now)
-    session_end = models.DateTimeField(default=timezone.now)
-    device_type = models.CharField(max_length=255, null=True, blank=True)
-    browser = models.CharField(max_length=255, null=True, blank=True)
-
-    def __str__(self):
-        return f"Session of {self.anonymous_user_id}"

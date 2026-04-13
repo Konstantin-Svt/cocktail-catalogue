@@ -215,3 +215,119 @@
 .range-input:focus {
     z-index: 5;
 }
+
+.intelligent-filters {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    &__icon {
+        width: 20px;
+        height: 20px;
+        background-image: url('/img/ai-icon.svg'); // Переконайся, що іконка тут
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+
+    &__title {
+        font-size: 16px;
+        font-weight: 500;
+        color: #333; // Або твій колір тексту
+        margin: 0;
+    }
+
+    &__question {
+        font-size: 14px;
+        color: #444;
+        margin-bottom: 12px;
+    }
+
+    &__input-wrapper {
+        background: #f4f6f9; // Світло-сірий фон як на фото
+        border: 1px solid #d1d9e2;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    &__input {
+        width: 100%;
+        height: 80px;
+        border: none;
+        background: transparent;
+        resize: none;
+        font-size: 14px;
+        color: #666;
+        outline: none;
+        font-family: inherit;
+
+        &::placeholder {
+            color: #8e9aad;
+        }
+    }
+
+    &__search-btn {
+        background: transparent;
+        border: none;
+        color: #802c3e; // Бордовий колір як на макеті
+        font-size: 18px;
+        font-weight: 500;
+        cursor: pointer;
+        align-self: center;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 0.8;
+        }
+
+        &:disabled {
+            color: #ccc;
+        }
+    }
+}
+
+.intelligent-filters__result {
+    background: #fff4f6; // Світло-рожевий/бордовий відтінок для виділення
+    border-left: 3px solid #802c3e;
+    padding: 12px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    animation: fadeIn 0.3s ease-in;
+
+    .ai-message-text {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #333;
+        white-space: pre-wrap; // Зберігає переноси рядків (\n) з відповіді
+    }
+
+    .clear-ai-btn {
+        background: none;
+        border: none;
+        color: #802c3e;
+        font-size: 11px;
+        text-decoration: underline;
+        cursor: pointer;
+        margin-top: 8px;
+        padding: 0;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

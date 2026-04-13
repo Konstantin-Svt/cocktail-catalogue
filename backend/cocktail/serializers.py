@@ -57,6 +57,7 @@ class CocktailListSerializer(serializers.ModelSerializer):
             "name",
             "image",
             "average_price",
+            "average_rating",
             "alcohol_level",
             "alcohol_promille",
             "sweetness_level",
@@ -73,6 +74,7 @@ class CocktailDetailSerializer(CocktailListSerializer):
     )
     similar_cocktails = CocktailListSerializer(many=True, read_only=True)
     vibes = VibeSerializer(many=True, read_only=True)
+    ratings = serializers.SerializerMethodField()
 
     class Meta(CocktailListSerializer.Meta):
         fields = CocktailListSerializer.Meta.fields + (
@@ -80,9 +82,27 @@ class CocktailDetailSerializer(CocktailListSerializer):
             "preparation",
             "alcohol_scale",
             "sweetness_scale",
+            "ratings",
             "similar_cocktails",
         )
         read_only_fields = fields
+
+    def get_ratings(self, obj):
+        ratings = {}
+        for count in ("one", "two", "three", "four", "five"):
+            ratings[count] = getattr(obj, count, 0)
+        return ratings
+
+
+class FavCocktailIdSerializer(serializers.Serializer):
+    cocktail_id = serializers.IntegerField(required=True, allow_null=False)
+
+    def validate_cocktail_id(self, value):
+        if not Cocktail.objects.filter(id=value).exists():
+            raise serializers.ValidationError(
+                "Cocktail with that id does not exist."
+            )
+        return value
 
 
 class AIFiltersSerializer(serializers.Serializer):

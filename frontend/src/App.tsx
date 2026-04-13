@@ -16,6 +16,7 @@ import { EmailVerification } from "./components/EmailVerification/EmailVerificat
 import { RegisterEmailVerification } from "./components/RegisterEmailVerification/RegisterEmailVerification";
 import { ConfirmEmailChange } from "./components/ConfirmEmailChange/ConfirmEmailChange";
 import { ChangePassword } from "./components/ChangePassword/ChangePassword";
+import { Favorites } from "./components/FavoritesPage/FavoritesPage";
 
 export const App = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -115,6 +116,7 @@ export const App = () => {
                     <Route path="/register-verify-email" element={<RegisterEmailVerification />} />
                     <Route path="/verify-email" element={<EmailVerification />} />
                     <Route path="/ChangePassword" element={<ChangePassword />} />
+                    <Route path="/Favorites" element={<Favorites searchQuery={searchQuery} onSearchClear={setSearchQuery} />} />  
                 </Routes>
             )}
         </div>

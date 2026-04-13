@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core import signing
 from django.db import transaction
+from django.db.models import Prefetch
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import generics, status, viewsets, mixins
@@ -24,7 +25,13 @@ from analytics.tasks import (
     login_analytics_wrapper,
     logout_analytics_wrapper,
 )
+from catalogue_system.pagination import StandardResultsSetPagination
 from catalogue_system.celery import request_dict_converter
+from cocktail.models import Cocktail
+from cocktail.serializers import (
+    FavCocktailIdSerializer,
+    CocktailListSerializer,
+)
 from user.authentication import EmailVerificationTokenGenerator
 from user.serializers import (
     CreateUserSerializer,
@@ -33,6 +40,7 @@ from user.serializers import (
     EmailSerializer,
     ChangeEmailSerializer,
     ResetPasswordSerializer,
+    PasswordSerializer,
 )
 from user.tasks import (
     send_verification_email,
@@ -44,15 +52,13 @@ email_token_generator = EmailVerificationTokenGenerator()
 
 
 class CreateUserView(generics.GenericAPIView):
+    permission_classes = (AllowAny,)
     serializer_class = CreateUserSerializer
 
     def post(self, request, *args, **kwargs):
         """
-        Endpoint to create a new user. If user with that email already exists and
-        email is verified, does nothing. If email is not verified, sends verification email.
-        The most recent password & other info are set to this account.
-        Response is similar whether user with this email exists or not
-        to prevent user enumeration.
+        Endpoint to create a new user. If user with that email already exists
+        and email is not verified, sends verification email.
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -72,13 +78,17 @@ class CreateUserView(generics.GenericAPIView):
                         {"detail": "You need to wait."},
                         status=status.HTTP_429_TOO_MANY_REQUESTS,
                     )
-
                 if user.email_verified is True:
-                    return Response(
+                    raise ValidationError(
+                        {"email": "This email address is already taken."}
+                    )
+                if user.is_active is True:
+                    send_verification_email.delay_on_commit(user.pk)
+                    raise ValidationError(
                         {
-                            "detail": "Verification link has been send to email."
-                        },
-                        status=status.HTTP_201_CREATED,
+                            "email": "This email address is already taken, "
+                            "but unverified. If it is your email, check inbox."
+                        }
                     )
 
                 for key, value in serializer.validated_data.items():
@@ -88,11 +98,10 @@ class CreateUserView(generics.GenericAPIView):
                         setattr(user, key, value)
                 user.is_active = True
                 user.save()
-                send_verification_email.delay_on_commit(user.pk)
             else:
-                new_user = serializer.save()
-                send_verification_email.delay_on_commit(new_user.pk)
+                user = serializer.save()
 
+        send_verification_email.delay_on_commit(user.pk)
         return Response(
             {"detail": "Verification link has been send to email."},
             status=status.HTTP_201_CREATED,
@@ -102,7 +111,6 @@ class CreateUserView(generics.GenericAPIView):
 class ManageUserView(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
     permission_classes = (IsAuthenticated,)
@@ -110,34 +118,123 @@ class ManageUserView(
     def get_serializer_class(self):
         if self.action == "change_password":
             return ChangePasswordSerializer
-        elif self.action == "change_email":
+        if self.action == "change_email":
             return ChangeEmailSerializer
-        elif self.action in ("change_email_verify", "logout"):
+        if self.action in ("change_email_verify", "logout"):
             return Serializer
+        if self.action in (
+            "add_favourite_cocktail",
+            "remove_favourite_cocktail",
+        ):
+            return FavCocktailIdSerializer
+        if self.action == "delete_account":
+            return PasswordSerializer
         return ManageUserSerializer
 
     def get_queryset(self):
+        if self.action == "favourite_cocktails":
+            return (
+                Cocktail.objects.with_levels()
+                .filter(
+                    pk__in=self.request.user.favourite_cocktails.values_list(
+                        "pk", flat=True
+                    )
+                )
+                .prefetch_related("vibes", "ingredients")
+                .order_by("name")
+                .distinct()
+            )
         return (
             get_user_model()
-            .objects.prefetch_related("favourite_cocktails")
+            .objects.prefetch_related(
+                Prefetch(
+                    "favourite_cocktails", queryset=Cocktail.objects.only("id")
+                )
+            )
             .get(pk=self.request.user.pk)
         )
 
     def get_object(self):
         return self.get_queryset()
 
-    def destroy(self, request, *args, **kwargs):
-        res = super().destroy(request, *args, **kwargs)
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="delete",
+        serializer_class=PasswordSerializer,
+    )
+    def delete_account(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            user = (
+                get_user_model()
+                .objects.filter(pk=request.user.pk)
+                .select_for_update()
+                .first()
+            )
+            if not user:
+                raise ValidationError({"detail": "User not found."})
+            if not user.check_password(serializer.validated_data["password"]):
+                raise ValidationError({"password": "Incorrect password."})
+            user.is_active = False
+            user.email_verified = False
+            user.save()
+
+        res = Response(
+            {"detail": "User successfully deleted."}, status=status.HTTP_200_OK
+        )
         res.delete_cookie("access_token", path="/api/")
         res.delete_cookie(
             "refresh_token", path=str(reverse("user:token_refresh"))
         )
         return res
 
-    def perform_destroy(self, instance):
-        instance.is_active = False
-        instance.email_verified = False
-        instance.save()
+    @extend_schema(responses=CocktailListSerializer)
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="favourites",
+        serializer_class=CocktailListSerializer,
+        pagination_class=StandardResultsSetPagination,
+    )
+    def favourite_cocktails(self, request, *args, **kwargs):
+        serializer = CocktailListSerializer(self.get_queryset(), many=True)
+        return Response(serializer.data)
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="add-favourites",
+        serializer_class=FavCocktailIdSerializer,
+    )
+    def add_favourite_cocktail(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        user.favourite_cocktails.add(serializer.validated_data["cocktail_id"])
+        return Response(
+            {"detail": "Cocktail successfully added to favourites."},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="remove-favourites",
+        serializer_class=FavCocktailIdSerializer,
+    )
+    def remove_favourite_cocktail(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        user.favourite_cocktails.remove(
+            serializer.validated_data["cocktail_id"]
+        )
+        return Response(
+            {"detail": "Cocktail successfully removed from favourites."},
+            status=status.HTTP_200_OK,
+        )
 
     @action(
         detail=False,
@@ -183,16 +280,9 @@ class ManageUserView(
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
-        if (
-            get_user_model()
-            .objects.filter(email=new_email, email_verified=True)
-            .exists()
-        ):
-            return Response(
-                {
-                    "detail": "Verification link has been send to the new email."
-                },
-                status=status.HTTP_200_OK,
+        if get_user_model().objects.filter(email=new_email).exists():
+            raise ValidationError(
+                {"new_email": "This email address is already taken."},
             )
 
         send_change_email.delay(
@@ -262,14 +352,12 @@ class ManageUserView(
                 .first()
             )
             if (
-                not user
+                existing_user
+                or not user
                 or not email_token_generator.check_token(user, token)
-                or (existing_user and existing_user.email_verified is True)
             ):
                 raise ValidationError("Link is invalid.")
 
-            if existing_user and existing_user.email_verified is False:
-                existing_user.delete()
             user.email = new_email
             user.save(update_fields=["email"])
 
@@ -316,7 +404,7 @@ class TokenObtainCookiePairView(TokenObtainPairView):
             send_verification_email.delay(serializer.user.pk)
             return Response(
                 {
-                    "detail": "Email is not verified. Verification link has been sent to email."
+                    "detail": "Email is unverified. Verification link has been sent to your email."
                 },
                 status=status.HTTP_403_FORBIDDEN,
             )
@@ -431,8 +519,7 @@ class EmailVerifyView(APIView):
     )
     def get(self, request, *args, **kwargs):
         """
-        Endpoint to verify email address. If user with this email is verified,
-        does nothing. Requires q_params 'token' and 'uid' from
+        Endpoint to verify email address. Requires q_params 'token' and 'uid' from
         verification link sent to email. If the user exists,
         automatically creates JWT tokens, puts them in cookies and logins the user.
         """
@@ -507,9 +594,6 @@ class EmailVerifyResendView(APIView):
     def post(self, request, *args, **kwargs):
         """
         Endpoint for requesting an email verification link to send again.
-        If user with this email is already verified, does nothing.
-        Response is similar whether user with this email exists or not
-        to prevent user enumeration.
         """
         serializer = EmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -518,15 +602,19 @@ class EmailVerifyResendView(APIView):
             .objects.filter(email=serializer.validated_data["email"])
             .first()
         )
-        if user:
-            if not user.can_send_mail():
-                return Response(
-                    {"detail": "You need to wait."},
-                    status=status.HTTP_429_TOO_MANY_REQUESTS,
-                )
-            if user.email_verified is False:
-                send_verification_email.delay(user.pk)
+        if not user:
+            raise ValidationError({"email": "No such email address."})
 
+        if user.email_verified is True:
+            raise ValidationError({"email": "Email already verified."})
+
+        if not user.can_send_mail():
+            return Response(
+                {"detail": "You need to wait."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        send_verification_email.delay(user.pk)
         return Response(
             {"detail": "Verification link has been resend."},
             status=status.HTTP_200_OK,
@@ -541,8 +629,6 @@ class ResetPasswordView(APIView):
     def post(self, request, *args, **kwargs):
         """
         Endpoint for requesting a password reset link being sent to email.
-        Response is similar whether user with this email exists or not
-        to prevent user enumeration.
         """
         serializer = EmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -551,17 +637,19 @@ class ResetPasswordView(APIView):
             .objects.filter(email=serializer.validated_data["email"])
             .first()
         )
-        if user:
-            if not user.can_send_mail():
-                return Response(
-                    {"detail": "You need to wait."},
-                    status=status.HTTP_429_TOO_MANY_REQUESTS,
-                )
+        if not user:
+            raise ValidationError({"email": "No such email address."})
 
-            mail = send_reset_password_email.delay(user.pk)
-            if settings.AUTO_VERIFY_EMAIL:
-                mail = mail.get()
-                return Response({"link": mail}, status=status.HTTP_200_OK)
+        if not user.can_send_mail():
+            return Response(
+                {"detail": "You need to wait."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        mail = send_reset_password_email.delay(user.pk)
+        if settings.AUTO_VERIFY_EMAIL:
+            mail = mail.get()
+            return Response({"link": mail}, status=status.HTTP_200_OK)
 
         return Response(
             {"detail": "Reset password link has been send to email."},

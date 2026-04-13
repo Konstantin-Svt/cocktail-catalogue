@@ -1,6 +1,7 @@
 import './AlcoFilters.scss';
 import React, { useEffect, useMemo } from 'react';
 import { sendAnalyticsEvent, } from '../../api/cocktailApi';
+import { BASE_WS_URL } from '../../webSocket/AiSockect';
 
 export interface FilterState {
     alcoholType: string[];
@@ -19,12 +20,48 @@ interface Props {
 
 export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, summary }) => {
     const [tempPrice, setTempPrice] = React.useState<[number, number]>(filters.price);
+    const [aiQuery, setAiQuery] = React.useState('');
+    const [isAiProcessing, setIsAiProcessing] = React.useState(false);
+    const [aiResponse, setAiResponse] = React.useState<string | null>(null);
+    const socketRef = React.useRef<WebSocket | null>(null);
     const priceTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
         setTempPrice(filters.price);
     }, [filters.price]);
+    useEffect(() => {
+        socketRef.current = new WebSocket(`${BASE_WS_URL}/aifilters/`);
 
+        socketRef.current.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('AI Response:', data);
+
+            // Зберігаємо текст повідомлення для відображення
+            if (data.message) {
+                setAiResponse(data.message);
+            }
+
+            // Якщо сервер також надсилає фільтри для автоматичного застосування:
+            if (data.filters) {
+                onFilterChange(prev => ({ ...prev, ...data.filters }));
+            }
+
+            setIsAiProcessing(false);
+        };
+
+        return () => {
+            socketRef.current?.close();
+        };
+    }, [onFilterChange]);
+
+    const handleAiSearch = () => {
+        if (aiQuery.trim() && socketRef.current?.readyState === WebSocket.OPEN) {
+            setIsAiProcessing(true);
+            socketRef.current.send(JSON.stringify({ message: aiQuery }));
+            setAiQuery(''); 
+        }
+    };
+    
     const alcoholTypes = useMemo(() => {
         if (!summary?.ingredients_count) return [];
         return Object.entries(summary.ingredients_count).map(([key, count]) => ({
@@ -149,7 +186,41 @@ export const AlcoFilters: React.FC<Props> = ({ onFilterChange, filters, summary 
                         </div>
                     </div>
                 </div>
+                <div className="alcoFilters__section">
+                    <div className="intelligent-filters">
+                        <div className="intelligent-filters__header">
+                            <span className="intelligent-filters__icon"></span>
+                            <h3 className="intelligent-filters__title">Intelligent Filters:</h3>
+                        </div>
 
+                        <p className="intelligent-filters__question">What are you looking for?</p>
+
+                        <div className="intelligent-filters__input-wrapper">
+                            <textarea
+                                className="intelligent-filters__input"
+                                placeholder="Which ingredients are you interested in? I'll find cocktails based on them"
+                                value={aiQuery}
+                                onChange={(e) => setAiQuery(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Блок з відповіддю AI */}
+                        {aiResponse && (
+                            <div className="intelligent-filters__result">
+                                <p className="ai-message-text">{aiResponse}</p>
+                                <button className="clear-ai-btn" onClick={() => setAiResponse(null)}>Clear results</button>
+                            </div>
+                        )}
+
+                        <button
+                            className="intelligent-filters__search-btn"
+                            onClick={handleAiSearch}
+                            disabled={isAiProcessing}
+                        >
+                            {isAiProcessing ? 'Searching...' : 'Search'}
+                        </button>
+                    </div>
+                </div>
                 {/* Alcohol Level */}
                 <div className="alcoFilters__section">
                     <h3 className="filter-title">Alcohol Level</h3>

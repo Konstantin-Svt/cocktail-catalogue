@@ -17,7 +17,7 @@ django_asgi_app = get_asgi_application()
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 
-from cocktail.routing import websocket_urlpatterns
+from websockets.routing import websocket_urlpatterns
 
 application = ProtocolTypeRouter(
     {

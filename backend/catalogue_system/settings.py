@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     "storages",
     # apps
     "user",
+    "review",
 ]
 
 APPS_WITH_ANALYTICS = ["cocktail", "analytics"]
@@ -278,7 +279,7 @@ if ANALYTICS_DATASET_ID and os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"):
     CELERY_BEAT_SCHEDULE = {
         "migrate-analytics-data-to-bigquery-daily": {
             "task": "analytics.tasks.migrate_data_to_bigquery",
-            "schedule": crontab(hour=8, minute=0),
+            "schedule": crontab(hour=6, minute=0),
         }
     }
 else:

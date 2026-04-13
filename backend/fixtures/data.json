@@ -1,12 +1,107 @@
 [
 {
+  "model": "user.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$6aX2dWTGQeJR49KxJXjYh0$GNq3IxmYbW+3+h8paZwVgPipHABQ0dyKZxvCWzexs90=",
+    "last_login": "2026-03-28T22:49:59.318",
+    "is_superuser": true,
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-03-28T22:46:08.923",
+    "email": "admin2@admin.com",
+    "first_name": "",
+    "last_name": "",
+    "email_verified": true,
+    "gender": null,
+    "country": null,
+    "last_mail_sent": null,
+    "daily_mail_count": 0,
+    "groups": [],
+    "user_permissions": [],
+    "favourite_cocktails": []
+  }
+},
+{
+  "model": "user.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$Lo9HAGXWZUAsdSCgX6lgbp$fhlivGVmBa+sdjPm21WbvbbwhsO73RTo/Ia2OFfxFbI=",
+    "last_login": null,
+    "is_superuser": true,
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-03-28T22:46:43.455",
+    "email": "admin@admin.com",
+    "first_name": "",
+    "last_name": "",
+    "email_verified": true,
+    "gender": null,
+    "country": null,
+    "last_mail_sent": null,
+    "daily_mail_count": 0,
+    "groups": [],
+    "user_permissions": [],
+    "favourite_cocktails": []
+  }
+},
+{
+  "model": "user.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$lv1uzCni62wgIeX3KpVne0$kRv3QvZtr4PewMftJmyHcWV8FLUV1t04sFYvZ53W1VE=",
+    "last_login": null,
+    "is_superuser": false,
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-09T16:05:07.644",
+    "email": "kirillzabrodin18@gmail.com",
+    "first_name": "fghdfg",
+    "last_name": "dghdhdfh",
+    "email_verified": true,
+    "gender": "",
+    "country": "",
+    "last_mail_sent": null,
+    "daily_mail_count": 0,
+    "groups": [],
+    "user_permissions": [],
+    "favourite_cocktails": [
+      1,
+      3
+    ]
+  }
+},
+{
+  "model": "user.user",
+  "pk": 4,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$gbYoKTtqxU0D7Pn7FaWCH9$LDftliSEPFkYfRKj4yoPxqHWRjcERTLV3jpXysWHJks=",
+    "last_login": null,
+    "is_superuser": false,
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-04-09T20:06:47.025",
+    "email": "fdgsdgs@gmail.com",
+    "first_name": "hdfhdfh",
+    "last_name": "dfhdfh",
+    "email_verified": true,
+    "gender": null,
+    "country": null,
+    "last_mail_sent": null,
+    "daily_mail_count": 0,
+    "groups": [],
+    "user_permissions": [],
+    "favourite_cocktails": []
+  }
+},
+{
   "model": "cocktail.cocktail",
   "pk": 1,
   "fields": {
     "name": "White Rob Roy",
     "description": "White Rob Roy altogether lighter and whiter version of the classic Scotch Manhattan is delicious and comparable to what the White Negroni did for the classic Negroni.",
     "average_price": "13.40",
-    "average_rate": "5.00",
+    "average_rating": 4.0,
     "alcohol_promille": 26,
     "alcohol_scale": 9,
     "sweetness_scale": 1,
@@ -26,7 +121,7 @@
     "name": "Mojito",
     "description": "When well made, this Cuban cousin of the Mint Julep - Mojito, is one of the world's greatest and most refreshing cocktails.",
     "average_price": "30.00",
-    "average_rate": "5.00",
+    "average_rating": 3.0,
     "alcohol_promille": 17,
     "alcohol_scale": 5,
     "sweetness_scale": 6,
@@ -46,7 +141,7 @@
     "name": "Brown Derby",
     "description": "Said to have been created in the 1930s by a bartender at the Vendôme Café which sat at 6666 Sunset Boulevard in Hollywood, California. The Vendôme was opened in May 1933 by William \"Billy\" Wilkerson, a real estate developer who also owned The Hollywood Reporter, the offices of which were a block away.\r\n\r\nAlthough created at the Vendôme, this cocktail is named after another fashionable Hollywood restaurant of the era, the Brown Derby at 1628 North Vine Street. Due to its proximity to the movie studios, this branch of the Brown Derby was more famous than the original, smaller branch at 3427 Wilshire Boulevard, famous for being housed in a building shaped like a man's derby hat.\r\n\r\nA Brown Derby is a maple syrup-sweetened development on the earlier honey-sweetened De Rigueur Cocktail. The misguided belief that the Brown Derby should be sweetened with honey stems from a recipe in George Buzza Jr.'s, 1933",
     "average_price": "35.00",
-    "average_rate": "5.00",
+    "average_rating": 5.0,
     "alcohol_promille": 18,
     "alcohol_scale": 6,
     "sweetness_scale": 5,
@@ -377,45 +472,1851 @@
   }
 },
 {
-  "model": "user.user",
+  "model": "review.review",
   "pk": 1,
   "fields": {
-    "password": "pbkdf2_sha256$1200000$6aX2dWTGQeJR49KxJXjYh0$GNq3IxmYbW+3+h8paZwVgPipHABQ0dyKZxvCWzexs90=",
-    "last_login": "2026-03-28T22:49:59.318",
-    "is_superuser": true,
-    "is_staff": true,
-    "is_active": true,
-    "date_joined": "2026-03-28T22:46:08.923",
-    "email": "admin2@admin.com",
-    "first_name": "",
-    "last_name": "",
-    "email_verified": true,
-    "gender": null,
-    "country": null,
-    "groups": [],
-    "user_permissions": [],
-    "favourite_cocktails": []
+    "mark": null,
+    "text": "Roflan Budilnik 0",
+    "timestamp": "2026-04-11T19:28:56.599",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
   }
 },
 {
-  "model": "user.user",
+  "model": "review.review",
   "pk": 2,
   "fields": {
-    "password": "pbkdf2_sha256$1200000$Lo9HAGXWZUAsdSCgX6lgbp$fhlivGVmBa+sdjPm21WbvbbwhsO73RTo/Ia2OFfxFbI=",
-    "last_login": null,
-    "is_superuser": true,
-    "is_staff": true,
-    "is_active": true,
-    "date_joined": "2026-03-28T22:46:43.455",
-    "email": "admin@admin.com",
-    "first_name": "",
-    "last_name": "",
-    "email_verified": true,
-    "gender": null,
-    "country": null,
-    "groups": [],
-    "user_permissions": [],
-    "favourite_cocktails": []
+    "mark": null,
+    "text": "Roflan Budilnik 1",
+    "timestamp": "2026-04-11T19:28:56.608",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 3,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 2",
+    "timestamp": "2026-04-11T19:28:56.612",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 4,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 3",
+    "timestamp": "2026-04-11T19:28:56.617",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 5,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 4",
+    "timestamp": "2026-04-11T19:28:56.621",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 6,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 5",
+    "timestamp": "2026-04-11T19:28:56.625",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 7,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 6",
+    "timestamp": "2026-04-11T19:28:56.628",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 8,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 7",
+    "timestamp": "2026-04-11T19:28:56.632",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 9,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 8",
+    "timestamp": "2026-04-11T19:28:56.636",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 10,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 9",
+    "timestamp": "2026-04-11T19:28:56.640",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 11,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 10",
+    "timestamp": "2026-04-11T19:28:56.643",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 12,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 11",
+    "timestamp": "2026-04-11T19:28:56.651",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 13,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 12",
+    "timestamp": "2026-04-11T19:28:56.655",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 14,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 13",
+    "timestamp": "2026-04-11T19:28:56.658",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 15,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-11T19:28:56.662",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 16,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 0",
+    "timestamp": "2026-04-11T19:30:08.506",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 17,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 1",
+    "timestamp": "2026-04-11T19:30:08.515",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 18,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 2",
+    "timestamp": "2026-04-11T19:30:08.519",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 19,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 3",
+    "timestamp": "2026-04-11T19:30:08.523",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 20,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 4",
+    "timestamp": "2026-04-11T19:30:08.527",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 21,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 5",
+    "timestamp": "2026-04-11T19:30:08.531",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 22,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 6",
+    "timestamp": "2026-04-11T19:30:08.535",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 23,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 7",
+    "timestamp": "2026-04-11T19:30:08.539",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 24,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 8",
+    "timestamp": "2026-04-11T19:30:08.543",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 25,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 9",
+    "timestamp": "2026-04-11T19:30:08.547",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 26,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 10",
+    "timestamp": "2026-04-11T19:30:08.550",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 27,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 11",
+    "timestamp": "2026-04-11T19:30:08.554",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 28,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 12",
+    "timestamp": "2026-04-11T19:30:08.558",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 29,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 13",
+    "timestamp": "2026-04-11T19:30:08.562",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 30,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-11T19:30:08.566",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 31,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 0",
+    "timestamp": "2026-04-11T19:30:33.425",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 32,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 1",
+    "timestamp": "2026-04-11T19:30:33.435",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 33,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 2",
+    "timestamp": "2026-04-11T19:30:33.439",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 34,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 3",
+    "timestamp": "2026-04-11T19:30:33.443",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 35,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 4",
+    "timestamp": "2026-04-11T19:30:33.447",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 36,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 5",
+    "timestamp": "2026-04-11T19:30:33.451",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 37,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 6",
+    "timestamp": "2026-04-11T19:30:33.455",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 38,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 7",
+    "timestamp": "2026-04-11T19:30:33.459",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 39,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 8",
+    "timestamp": "2026-04-11T19:30:33.462",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 40,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 9",
+    "timestamp": "2026-04-11T19:30:33.466",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 41,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 10",
+    "timestamp": "2026-04-11T19:30:33.470",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 42,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 11",
+    "timestamp": "2026-04-11T19:30:33.474",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 43,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 12",
+    "timestamp": "2026-04-11T19:30:33.477",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 44,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 13",
+    "timestamp": "2026-04-11T19:30:33.481",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 45,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-11T19:30:33.485",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 46,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 0",
+    "timestamp": "2026-04-11T19:30:53.997",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 47,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 1",
+    "timestamp": "2026-04-11T19:30:54.007",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 48,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 2",
+    "timestamp": "2026-04-11T19:30:54.011",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 49,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 3",
+    "timestamp": "2026-04-11T19:30:54.015",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 50,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 4",
+    "timestamp": "2026-04-11T19:30:54.019",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 51,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 5",
+    "timestamp": "2026-04-11T19:30:54.023",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 52,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 6",
+    "timestamp": "2026-04-11T19:30:54.026",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 53,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 7",
+    "timestamp": "2026-04-11T19:30:54.030",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 54,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 8",
+    "timestamp": "2026-04-11T19:30:54.033",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 55,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 9",
+    "timestamp": "2026-04-11T19:30:54.037",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 56,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 10",
+    "timestamp": "2026-04-11T19:30:54.040",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 57,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 11",
+    "timestamp": "2026-04-11T19:30:54.044",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 58,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 12",
+    "timestamp": "2026-04-11T19:30:54.047",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 59,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 13",
+    "timestamp": "2026-04-11T19:30:54.051",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 60,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-11T19:30:54.055",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 61,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 0",
+    "timestamp": "2026-04-11T20:27:05.095",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 62,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 1",
+    "timestamp": "2026-04-11T20:27:05.097",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 63,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 2",
+    "timestamp": "2026-04-11T20:27:05.097",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 64,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 3",
+    "timestamp": "2026-04-11T20:27:05.097",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 65,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 4",
+    "timestamp": "2026-04-11T20:27:05.113",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 66,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 5",
+    "timestamp": "2026-04-11T20:27:05.113",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 67,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 6",
+    "timestamp": "2026-04-11T20:27:05.113",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 68,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 7",
+    "timestamp": "2026-04-11T20:27:05.113",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 69,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 8",
+    "timestamp": "2026-04-11T20:27:05.128",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 70,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 9",
+    "timestamp": "2026-04-11T20:27:05.128",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 71,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 10",
+    "timestamp": "2026-04-11T20:27:05.128",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 72,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 11",
+    "timestamp": "2026-04-11T20:27:05.128",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 73,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 12",
+    "timestamp": "2026-04-11T20:27:05.144",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 74,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 13",
+    "timestamp": "2026-04-11T20:27:05.144",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 75,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-11T20:27:05.144",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 46
+  }
+},
+{
+  "model": "review.review",
+  "pk": 76,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 0",
+    "timestamp": "2026-04-11T20:27:50.991",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 77,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 1",
+    "timestamp": "2026-04-11T20:27:51.001",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 78,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 2",
+    "timestamp": "2026-04-11T20:27:51.006",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 79,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 3",
+    "timestamp": "2026-04-11T20:27:51.010",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 80,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 4",
+    "timestamp": "2026-04-11T20:27:51.015",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 81,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 5",
+    "timestamp": "2026-04-11T20:27:51.019",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 82,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 6",
+    "timestamp": "2026-04-11T20:27:51.023",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 83,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 7",
+    "timestamp": "2026-04-11T20:27:51.027",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 84,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 8",
+    "timestamp": "2026-04-11T20:27:51.031",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 85,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 9",
+    "timestamp": "2026-04-11T20:27:51.035",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 86,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 10",
+    "timestamp": "2026-04-11T20:27:51.039",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 87,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 11",
+    "timestamp": "2026-04-11T20:27:51.043",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 88,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 12",
+    "timestamp": "2026-04-11T20:27:51.047",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 89,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 13",
+    "timestamp": "2026-04-11T20:27:51.050",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 90,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-11T20:27:51.054",
+    "cocktail": 1,
+    "user": 1,
+    "parent": 61
+  }
+},
+{
+  "model": "review.review",
+  "pk": 91,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-11T19:30:08.566",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 1
+  }
+},
+{
+  "model": "review.review",
+  "pk": 92,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 0",
+    "timestamp": "2026-04-12T02:22:32.048",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 93,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 1",
+    "timestamp": "2026-04-12T02:22:32.060",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 94,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 2",
+    "timestamp": "2026-04-12T02:22:32.065",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 95,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 3",
+    "timestamp": "2026-04-12T02:22:32.069",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 96,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 4",
+    "timestamp": "2026-04-12T02:22:32.073",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 97,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 5",
+    "timestamp": "2026-04-12T02:22:32.077",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 98,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 6",
+    "timestamp": "2026-04-12T02:22:32.081",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 99,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 7",
+    "timestamp": "2026-04-12T02:22:32.085",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 100,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 8",
+    "timestamp": "2026-04-12T02:22:32.089",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 101,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 9",
+    "timestamp": "2026-04-12T02:22:32.093",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 102,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 10",
+    "timestamp": "2026-04-12T02:22:32.097",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 103,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 11",
+    "timestamp": "2026-04-12T02:22:32.101",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 104,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 12",
+    "timestamp": "2026-04-12T02:22:32.105",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 105,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 13",
+    "timestamp": "2026-04-12T02:22:32.108",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 106,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-12T02:22:32.112",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 21
+  }
+},
+{
+  "model": "review.review",
+  "pk": 107,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 0",
+    "timestamp": "2026-04-12T02:23:06.760",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 108,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 1",
+    "timestamp": "2026-04-12T02:23:06.769",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 109,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 2",
+    "timestamp": "2026-04-12T02:23:06.773",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 110,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 3",
+    "timestamp": "2026-04-12T02:23:06.776",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 111,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 4",
+    "timestamp": "2026-04-12T02:23:06.780",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 112,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 5",
+    "timestamp": "2026-04-12T02:23:06.784",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 113,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 6",
+    "timestamp": "2026-04-12T02:23:06.788",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 114,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 7",
+    "timestamp": "2026-04-12T02:23:06.792",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 115,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 8",
+    "timestamp": "2026-04-12T02:23:06.796",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 116,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 9",
+    "timestamp": "2026-04-12T02:23:06.799",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 117,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 10",
+    "timestamp": "2026-04-12T02:23:06.803",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 118,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 11",
+    "timestamp": "2026-04-12T02:23:06.807",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 119,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 12",
+    "timestamp": "2026-04-12T02:23:06.811",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 120,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 13",
+    "timestamp": "2026-04-12T02:23:06.815",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 121,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-12T02:23:06.819",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 31
+  }
+},
+{
+  "model": "review.review",
+  "pk": 122,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 0",
+    "timestamp": "2026-04-12T02:23:17.621",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 123,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 1",
+    "timestamp": "2026-04-12T02:23:17.644",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 124,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 2",
+    "timestamp": "2026-04-12T02:23:17.648",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 125,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 3",
+    "timestamp": "2026-04-12T02:23:17.652",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 126,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 4",
+    "timestamp": "2026-04-12T02:23:17.656",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 127,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 5",
+    "timestamp": "2026-04-12T02:23:17.660",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 128,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 6",
+    "timestamp": "2026-04-12T02:23:17.664",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 129,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 7",
+    "timestamp": "2026-04-12T02:23:17.668",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 130,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 8",
+    "timestamp": "2026-04-12T02:23:17.672",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 131,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 9",
+    "timestamp": "2026-04-12T02:23:17.675",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 132,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 10",
+    "timestamp": "2026-04-12T02:23:17.679",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 133,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 11",
+    "timestamp": "2026-04-12T02:23:17.683",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 134,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 12",
+    "timestamp": "2026-04-12T02:23:17.687",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 135,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 13",
+    "timestamp": "2026-04-12T02:23:17.691",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 136,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-12T02:23:17.695",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 17
+  }
+},
+{
+  "model": "review.review",
+  "pk": 137,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 0",
+    "timestamp": "2026-04-12T02:23:33.588",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 138,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 1",
+    "timestamp": "2026-04-12T02:23:33.597",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 139,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 2",
+    "timestamp": "2026-04-12T02:23:33.602",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 140,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 3",
+    "timestamp": "2026-04-12T02:23:33.606",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 141,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 4",
+    "timestamp": "2026-04-12T02:23:33.610",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 142,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 5",
+    "timestamp": "2026-04-12T02:23:33.615",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 143,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 6",
+    "timestamp": "2026-04-12T02:23:33.619",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 144,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 7",
+    "timestamp": "2026-04-12T02:23:33.622",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 145,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 8",
+    "timestamp": "2026-04-12T02:23:33.626",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 146,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 9",
+    "timestamp": "2026-04-12T02:23:33.630",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 147,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 10",
+    "timestamp": "2026-04-12T02:23:33.634",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 148,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 11",
+    "timestamp": "2026-04-12T02:23:33.638",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 149,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 12",
+    "timestamp": "2026-04-12T02:23:33.642",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 150,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 13",
+    "timestamp": "2026-04-12T02:23:33.646",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 151,
+  "fields": {
+    "mark": null,
+    "text": "Roflan Budilnik 14",
+    "timestamp": "2026-04-12T02:23:33.650",
+    "cocktail": 1,
+    "user": 2,
+    "parent": 16
+  }
+},
+{
+  "model": "review.review",
+  "pk": 152,
+  "fields": {
+    "mark": 4,
+    "text": "",
+    "timestamp": "2026-04-13T23:02:12.447",
+    "cocktail": 1,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 153,
+  "fields": {
+    "mark": 3,
+    "text": "",
+    "timestamp": "2026-04-13T23:02:19.405",
+    "cocktail": 2,
+    "user": 1,
+    "parent": null
+  }
+},
+{
+  "model": "review.review",
+  "pk": 154,
+  "fields": {
+    "mark": 5,
+    "text": "",
+    "timestamp": "2026-04-13T23:02:26.190",
+    "cocktail": 3,
+    "user": 1,
+    "parent": null
   }
 }
 ]

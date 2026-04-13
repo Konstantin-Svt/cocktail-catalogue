@@ -71,12 +71,27 @@
             padding: 0;
             background-color: transparent;
         }
+        &__user-menu {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     &__text {
         font-family: 'Times New Roman', Times, serif;
         font-weight: 700;
         font-style: Bold;
         font-size: 34px;
         color: rgba(54, 44, 44, 1);
+    }
+    &__icon-btn--heart {
+        background-image: url(../../public/img/Heart_Header.svg);
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: #fff;
+        border: none;
+        width: 44px;
+        height: 44px;
+        cursor: pointer;
     }
     &__button {
         background-image: url(../../public/img/Logo.svg);
@@ -100,6 +115,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        text-align: left;
         height: 44px;
         width: 303px;
         background-image: url(../../public/img/Vector.svg);
@@ -109,12 +125,12 @@
         border-radius: 16px;
         font-weight: 400;
         font-size: 16px;
-        text-align: center;
         background-position: center left 16px;
         background-color: #F5F7FA;
         transition: all 0.3s ease;
+        padding-left: 45px;
         
-        @media (max-width: 500px) {
+        @media (max-width: 580px) {
                 width: 44px;
                 font-size: 7px;
                 background-position: center;
@@ -155,4 +171,14 @@
                     cursor: pointer;
                     z-index: 2;
                 }
+        &__signUp {
+            background-color: #fff;
+            border: 1px solid rgba(126, 47, 78, 1);
+            color: rgba(126, 47, 78, 1);
+            cursor: pointer;
+            &:hover {
+                color: #fff;
+                background-color: rgba(126, 47, 78, 1);
+            }
+        }
 }
