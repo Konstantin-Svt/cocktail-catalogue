@@ -1,6 +1,6 @@
 from django.db.models import Case, When, Value, IntegerField
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import generics, mixins, viewsets, status
+from rest_framework import generics
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -8,11 +8,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from cocktail.documentation import cocktail_reviews_documentation
-from review.models import Review, Like
+from review.models import Review
 from review.serializers import (
     ReviewRecursiveSerializer,
     ReviewSerializer,
-    CreateReviewSerializer, CreateUpdateLikeSerializer,
+    CreateReviewSerializer,
 )
 from review.services import build_reviews_tree, flatten_reviews_tree
 from user.authentication import SafeJWTAuthentication
