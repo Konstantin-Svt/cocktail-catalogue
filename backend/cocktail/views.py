@@ -255,16 +255,17 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
                 )
 
         sort_by = request.query_params.get("sort_by", "timestamp")
-        user_id = (
-            Case(
-                When(user_id=request.user.id, then=Value(0)),
+        user_id = request.user.id if request.user.is_authenticated else None
+        if user_id is not None:
+            user_sort = Case(
+                When(user_id=user_id, then=Value(0)),
                 default=Value(1),
                 output_field=IntegerField(),
             )
-            if request.user.is_authenticated
-            else None
-        )
-        ordering = [user_id, sort_by] if user_id else [sort_by]
+            ordering = [user_sort, sort_by]
+        else:
+            ordering = [sort_by]
+
         try:
             tree = build_reviews_tree(
                 cocktail.id,
@@ -272,6 +273,7 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
                 page_size=int_params["page_size"],
                 max_depth=int_params["max_depth"],
                 max_children_len=int_params["max_children_len"],
+                user_id=user_id
             )
         except ValueError as e:
             raise ValidationError(e)

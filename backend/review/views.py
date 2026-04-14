@@ -1,6 +1,6 @@
 from django.db.models import Case, When, Value, IntegerField
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import generics
+from rest_framework import generics, mixins, viewsets, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -8,11 +8,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from cocktail.documentation import cocktail_reviews_documentation
-from review.models import Review
+from review.models import Review, Like
 from review.serializers import (
     ReviewRecursiveSerializer,
     ReviewSerializer,
-    CreateReviewSerializer,
+    CreateReviewSerializer, CreateUpdateLikeSerializer,
 )
 from review.services import build_reviews_tree, flatten_reviews_tree
 from user.authentication import SafeJWTAuthentication
@@ -69,16 +69,16 @@ class LoadMoreReviewsView(APIView):
                 )
 
         sort_by = request.query_params.get("sort_by", "timestamp")
-        user_id = (
-            Case(
-                When(user_id=request.user.id, then=Value(0)),
+        user_id = request.user.id if request.user.is_authenticated else None
+        if user_id is not None:
+            user_sort = Case(
+                When(user_id=user_id, then=Value(0)),
                 default=Value(1),
                 output_field=IntegerField(),
             )
-            if request.user.is_authenticated
-            else None
-        )
-        ordering = [user_id, sort_by] if user_id else [sort_by]
+            ordering = [user_sort, sort_by]
+        else:
+            ordering = [sort_by]
 
         upper_node = get_object_or_404(Review, id=int_params["id"])
         try:
@@ -86,11 +86,10 @@ class LoadMoreReviewsView(APIView):
                 upper_node.cocktail_id,
                 ordering,
                 upper_node.parent_id,
-                skip_index=int_params["index"],
                 page_size=int_params["page_size"],
-                current_depth=int_params["depth"],
                 max_depth=int_params["max_depth"],
                 max_children_len=int_params["max_children_len"],
+                user_id=user_id,
             )
         except ValueError as e:
             raise ValidationError(e)
@@ -141,16 +140,16 @@ class LoadNextRenderReviewsView(APIView):
                 )
 
         sort_by = request.query_params.get("sort_by", "timestamp")
-        user_id = (
-            Case(
-                When(user_id=request.user.id, then=Value(0)),
+        user_id = request.user.id if request.user.is_authenticated else None
+        if user_id is not None:
+            user_sort = Case(
+                When(user_id=user_id, then=Value(0)),
                 default=Value(1),
                 output_field=IntegerField(),
             )
-            if request.user.is_authenticated
-            else None
-        )
-        ordering = [user_id, sort_by] if user_id else [sort_by]
+            ordering = [user_sort, sort_by]
+        else:
+            ordering = [sort_by]
 
         upper_node = get_object_or_404(Review, id=int_params["id"])
         try:
@@ -161,6 +160,7 @@ class LoadNextRenderReviewsView(APIView):
                 page_size=int_params["page_size"],
                 max_depth=int_params["max_depth"],
                 max_children_len=int_params["max_children_len"],
+                user_id=user_id,
             )
         except ValueError as e:
             raise ValidationError(e)
