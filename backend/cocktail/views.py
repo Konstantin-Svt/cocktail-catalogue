@@ -139,10 +139,15 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         qs = self.queryset
         if self.action == "list":
+            sort_by = self.request.query_params.get("sort_by", "name")
+            if sort_by == "rating":
+                ordering = "-average_rating"
+            else:
+                ordering = sort_by
             return (
                 apply_queryset_filters(qs, self.request.query_params)
                 .prefetch_related("ingredients")
-                .order_by("name")
+                .order_by(ordering)
                 .distinct()
             )
 
