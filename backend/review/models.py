@@ -64,7 +64,7 @@ class Review(models.Model):
                         }
                     )
 
-            if Review.objects.filter(
+            elif Review.objects.filter(
                 id=self.parent_id, user_id=self.user_id
             ).exists():
                 raise ValidationError(

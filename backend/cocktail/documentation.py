@@ -8,6 +8,13 @@ cocktail_filters_documentation = extend_schema(
             name="page", type=int, description="Page number for pagination."
         ),
         OpenApiParameter(
+            name="sort_by",
+            type=str,
+            description="Param to sort queryset by. Choices are:"
+            " 'rating' (from higher to lower), 'name' (alphabetical)."
+            " If not given, defaults to 'name'.",
+        ),
+        OpenApiParameter(
             name="page_size",
             type=int,
             description=f"Page size for pagination. To adjust a "
