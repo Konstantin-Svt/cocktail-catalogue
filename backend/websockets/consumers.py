@@ -9,7 +9,7 @@ from django.conf import settings
 from cocktail.models import Cocktail, Vibe, Ingredient
 from cocktail.serializers import AIFiltersSerializer
 
-MODEL_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent"
+MODEL_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent"
 HEADERS = {
     "content-type": "application/json",
     "x-goog-api-key": settings.GEMINI_API_KEY,
@@ -233,13 +233,16 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
                 response.raise_for_status()
                 break
             except HTTPStatusError as e:
-                if e.response.status_code == 503:
+                if e.response.status_code in (500, 502, 503, 504):
+                    print(e)
                     await asyncio.sleep(2 * i + 1)
+                else:
+                    raise
         else:
             print("HTTP API Error")
             await self.send(text_data=json.dumps({"message": "API Error"}))
             await self.close()
-            raise HTTPStatusError
+            raise Exception
         response_data = await self.gemini_response_parser(response)
 
         if response_data.get("type") == "extra_query":

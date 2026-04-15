@@ -1,14 +1,16 @@
 from django.db.models import Case, When, Value, IntegerField
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import generics
+from rest_framework import generics, viewsets, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 
 from cocktail.documentation import cocktail_reviews_documentation
-from review.models import Review
+from review.models import Review, Like
 from review.serializers import (
     ReviewRecursiveSerializer,
     ReviewSerializer,
@@ -195,3 +197,53 @@ class CreateReviewView(generics.GenericAPIView):
 
         serializer.save(**params)
         return Response(serializer.data)
+
+
+class ReviewLikesViewSet(viewsets.GenericViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = Review.objects
+    serializer_class = Serializer
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="toggle-like",
+    )
+    def toggle_like(self, request, pk):
+        """
+       Toggles user like for a given review. Must be authenticated.
+       If not liked/disliked, sets as liked.
+       If already liked, removes like.
+       If already disliked, sets as liked.
+        """
+        review = self.get_object()
+        like, created = Like.objects.get_or_create(review=review, user=request.user, defaults={"liked": True})
+        if not created:
+            if like.liked is True:
+                like.delete()
+            else:
+                like.liked = True
+                like.save(update_fields=["liked"])
+        return Response(status=status.HTTP_200_OK)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="toggle-dislike",
+    )
+    def toggle_dislike(self, request, pk):
+        """
+       Toggles user dislike for a given review. Must be authenticated.
+       If not liked/disliked, sets as disliked.
+       If already disliked, removes dislike.
+       If already liked, sets as disliked.
+        """
+        review = self.get_object()
+        like, created = Like.objects.get_or_create(review=review, user=request.user, defaults={"liked": False})
+        if not created:
+            if like.liked is False:
+                like.delete()
+            else:
+                like.liked = False
+                like.save(update_fields=["liked"])
+        return Response(status=status.HTTP_200_OK)

@@ -102,6 +102,7 @@ def build_reviews_tree(
                     "cocktail_id",
                     "parent_id",
                     "user__id",
+                    "user__is_active",
                     "user__first_name",
                     "user__last_name",
                 )
