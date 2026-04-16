@@ -100,6 +100,11 @@ export const ProductCard: React.FC = () => {
     const ingredients = cocktail.ingredients || [];
     const mainIngredients = ingredients.filter((ing: any) => ing.category !== 'garnish');
 
+    const glass = ingredients
+        .filter((ing: any) => ing.category === 'glass')
+        .map((ing: any) => ing.name)
+        .join(', ');
+
     const garnishIngredients = ingredients
         .filter((ing: any) => ing.category === 'garnish')
         .map((ing: any) => ing.name)
@@ -235,7 +240,7 @@ export const ProductCard: React.FC = () => {
                     <div className="extra-card">
                         <span className="extra-card__label">Glass</span>
                         <div className="extra-card__content">
-                            <span className="extra-card__value">{cocktail.glass_type || 'Nothing'}</span>
+                            <span className="extra-card__value">{glass || cocktail.glass_type || 'Nothing'}</span>
                         </div>
                     </div>
 
