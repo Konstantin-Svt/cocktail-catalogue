@@ -14,7 +14,6 @@ import { Profile } from "./components/Profile/Profile";
 import { WelcomeStep } from "./components/Steps/WelcomeStep/WelcomeStep";
 import { EmailVerification } from "./components/EmailVerification/EmailVerification";
 import { RegisterEmailVerification } from "./components/RegisterEmailVerification/RegisterEmailVerification";
-import { ConfirmEmailChange } from "./components/ConfirmEmailChange/ConfirmEmailChange";
 import { ChangePassword } from "./components/ChangePassword/ChangePassword";
 import { Favorites } from "./components/FavoritesPage/FavoritesPage";
 
@@ -86,38 +85,41 @@ export const App = () => {
             )}
 
             {isVerified && (
-                <Routes>
-                    <Route path="/" element={mainPageElement} />
-                    <Route path="/catalog" element={mainPageElement} />
 
-                    <Route path="/filters" element={
-                        <div className="mobile-filters-layout">
-                            <div className="mobile-filters-header">
-                                <Link to="/" className="back-link">← Back</Link>
-                                <h2>Filters</h2>
-                            </div>
-                            <AlcoFilters
-                                filters={activeFilters}
-                                onFilterChange={setActiveFilters}
-                                summary={serverData}
-                            />
-                            <div className="show-results-btn__container">
-                                <Link to="/" className="show-results-btn">Show {totalFound} cocktails</Link>
-                            </div>
-                        </div>
-                    } />
+                <div className="background">
+                    <Routes>
+                        <Route path="/" element={mainPageElement} />
+                        <Route path="/catalog" element={mainPageElement} />
 
-                    <Route path="/product/:id" element={<ProductCard />} />
-                    <Route path="/LogIn" element={<LogIn />} />
-                    <Route path="/SignUp" element={<SignUp />} />
-                    <Route path="/restore" element={<Restore />} />
-                    <Route path="/Profile" element={<Profile />} />
-                    <Route path="/Welcome" element={<WelcomeStep />} />
-                    <Route path="/register-verify-email" element={<RegisterEmailVerification />} />
-                    <Route path="/verify-email" element={<EmailVerification />} />
-                    <Route path="/ChangePassword" element={<ChangePassword />} />
-                    <Route path="/Favorites" element={<Favorites searchQuery={searchQuery} onSearchClear={setSearchQuery} />} />  
-                </Routes>
+                        <Route path="/filters" element={
+                            <div className="mobile-filters-layout">
+                                <div className="mobile-filters-header">
+                                    <Link to="/" className="back-link">← Back</Link>
+                                    <h2>Filters</h2>
+                                </div>
+                                <AlcoFilters
+                                    filters={activeFilters}
+                                    onFilterChange={setActiveFilters}
+                                    summary={serverData}
+                                />
+                                <div className="show-results-btn__container">
+                                    <Link to="/" className="show-results-btn">Show {totalFound} cocktails</Link>
+                                </div>
+                            </div>
+                        } />
+
+                        <Route path="/product/:id" element={<ProductCard />} />
+                        <Route path="/LogIn" element={<LogIn />} />
+                        <Route path="/SignUp" element={<SignUp />} />
+                        <Route path="/restore" element={<Restore />} />
+                        <Route path="/Profile" element={<Profile />} />
+                        <Route path="/Welcome" element={<WelcomeStep />} />
+                        <Route path="/register-verify-email" element={<RegisterEmailVerification />} />
+                        <Route path="/verify-email" element={<EmailVerification />} />
+                        <Route path="/ChangePassword" element={<ChangePassword />} />
+                        <Route path="/Favorites" element={<Favorites searchQuery={searchQuery} onSearchClear={setSearchQuery} />} />
+                    </Routes>
+                </div>
             )}
         </div>
     );

@@ -1,0 +1,261 @@
+.comments-section {
+    grid-column: span 12; // Повертаємо на всю ширину сітки сайту
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+        width: 100%; // Гарантуємо, що він не стиснутий
+    
+        &__block {
+            width: 100%; // Блоки "Write a review" та "Reviews" розтягуються
+        }
+
+    &__title {
+        grid-column: span 12; // Заголовок на всю ширину над формою
+        font-size: 24px;
+        font-weight: 700;
+        color: #362C2C;
+        margin-bottom: 24px;
+    }
+    &__form-card,
+    &__rate-card {
+        background: #FFFFFF;
+        border: 1px solid #E4E7EE;
+        border-radius: 20px;
+        padding: 24px;
+        box-sizing: border-box;
+        width: 100%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        display: flex;
+        justify-content: space-between;
+    }
+
+        &__form-card {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+    &__form {
+        grid-column: span 12; // Тепер форма займає всю доступну ширину (під сітку ProductCard)
+        background: #FFFFFF;
+        border: 1px solid #E4E7EE;
+        border-radius: 20px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        max-width: 100%;
+        &-content {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+    }
+
+    &__user-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__user-avatar {
+        width: 44px;
+        height: 44px;
+        background-image: url(../../../public/img/default-avatar.svg);
+        background-size: cover;
+        background-position: center;
+        border-radius: 50%;
+        background-color: #f4f5f7;
+    }
+
+    &__rating-select {
+        display: flex;
+        gap: 4px;
+
+        .star-selectable {
+            width: 20px;
+            height: 20px;
+            background-image: url(../../../public/img/star.svg);
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            opacity: 0.3;
+
+            &.active {
+                opacity: 1;
+                background-image: url(../../../public/img/star-active.svg);
+            }
+        }
+    }
+
+    &__field {
+        width: 100%; 
+            min-height: 140px;
+            background: rgba(245, 247, 250, 1);
+            border: 1px solid transparent; 
+            border-radius: 16px;
+            padding: 16px 16px 40px 16px;
+            box-sizing: border-box; 
+            resize: none;
+            outline: none;
+        &::placeholder {
+            color: #A0AEC0;
+        }
+
+        &:focus {
+            background: rgba(240, 242, 245, 1); 
+        }
+    }
+
+    &__char-count {
+        align-self: flex-end;
+        font-size: 12px;
+        color: #A0AEC0;
+        margin: 0;
+    }
+&__rate-card {
+    display: flex;
+        align-items: center;
+        width: auto; // НЕ 100% і НЕ span 12
+        min-width: 240px; // Компактний розмір як на макеті
+        padding: 24px;
+        background: #FFFFFF;
+        border: 1px solid #E4E7EE;
+        border-radius: 20px;
+        gap: 32px;
+    @media (max-width: 600px) {
+        flex-direction: column;
+        gap: 24px;
+    }
+}
+
+.rate-stats {
+    flex: 0 0 140px; // Фіксована ширина для зони зі смужками
+    
+        &__row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+    
+        &__progress {
+            flex: 1; // Смужка заповнює лише залишок від 140px
+            height: 6px;
+            background: #F0F2F5;
+            border-radius: 10px;
+        }
+
+    &__num {
+        width: 10px;
+        font-size: 14px;
+        color: #7D7D7D;
+    }
+
+    &__fill {
+        height: 100%;
+        background: #F4A261;
+        border-radius: 10px;
+    }
+
+    // Помаранчевий як на скріні
+    &__count {
+        font-size: 12px;
+        color: #A0AEC0;
+        width: 20px;
+    }
+}
+
+.rate-summary {
+    display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0; // Видаляємо padding-left: 60px або подібне
+    
+        &__value {
+            font-size: 48px; // Трохи менше, щоб влізло в компактну картку
+            line-height: 1;
+        }
+
+    &__stars {
+        color: #F4A261;
+        font-size: 20px;
+        margin: 8px 0;
+    }
+
+    &__total {
+        font-size: 14px;
+        color: #7D7D7D;
+    }
+}
+    &__submit {
+        align-self: flex-end;
+        background: #832C42;
+        color: #ffffff;
+        border: none;
+        padding: 12px 32px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+
+        &:hover:not(:disabled) {
+            background: #6b2436;
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}
+
+.comment-item {
+    display: flex;
+    gap: 16px;
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 20px;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.02);
+
+    // ... стилі аватара, юзера та тексту з попереднього кроку ...
+    &__avatar {
+        width: 44px;
+        height: 44px;
+        background: #F4F5F7;
+        color: #832C42;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    &__content {
+        flex-grow: 1;
+    }
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+
+    &__user {
+        font-weight: 600;
+        color: #362C2C;
+    }
+
+    &__date {
+        font-size: 13px;
+        color: #7D7D7D;
+    }
+
+    &__text {
+        font-size: 15px;
+        color: #555555;
+        line-height: 1.6;
+        margin: 0;
+    }
+}
