@@ -1,14 +1,16 @@
 from django.db.models import Case, When, Value, IntegerField
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import generics
+from rest_framework import generics, viewsets, status
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 
 from cocktail.documentation import cocktail_reviews_documentation
-from review.models import Review
+from review.models import Review, Like
 from review.serializers import (
     ReviewRecursiveSerializer,
     ReviewSerializer,
@@ -69,16 +71,16 @@ class LoadMoreReviewsView(APIView):
                 )
 
         sort_by = request.query_params.get("sort_by", "timestamp")
-        user_id = (
-            Case(
-                When(user_id=request.user.id, then=Value(0)),
+        user_id = request.user.id if request.user.is_authenticated else None
+        if user_id is not None:
+            user_sort = Case(
+                When(user_id=user_id, then=Value(0)),
                 default=Value(1),
                 output_field=IntegerField(),
             )
-            if request.user.is_authenticated
-            else None
-        )
-        ordering = [user_id, sort_by] if user_id else [sort_by]
+            ordering = [user_sort, sort_by]
+        else:
+            ordering = [sort_by]
 
         upper_node = get_object_or_404(Review, id=int_params["id"])
         try:
@@ -86,11 +88,10 @@ class LoadMoreReviewsView(APIView):
                 upper_node.cocktail_id,
                 ordering,
                 upper_node.parent_id,
-                skip_index=int_params["index"],
                 page_size=int_params["page_size"],
-                current_depth=int_params["depth"],
                 max_depth=int_params["max_depth"],
                 max_children_len=int_params["max_children_len"],
+                user_id=user_id,
             )
         except ValueError as e:
             raise ValidationError(e)
@@ -141,16 +142,16 @@ class LoadNextRenderReviewsView(APIView):
                 )
 
         sort_by = request.query_params.get("sort_by", "timestamp")
-        user_id = (
-            Case(
-                When(user_id=request.user.id, then=Value(0)),
+        user_id = request.user.id if request.user.is_authenticated else None
+        if user_id is not None:
+            user_sort = Case(
+                When(user_id=user_id, then=Value(0)),
                 default=Value(1),
                 output_field=IntegerField(),
             )
-            if request.user.is_authenticated
-            else None
-        )
-        ordering = [user_id, sort_by] if user_id else [sort_by]
+            ordering = [user_sort, sort_by]
+        else:
+            ordering = [sort_by]
 
         upper_node = get_object_or_404(Review, id=int_params["id"])
         try:
@@ -161,6 +162,7 @@ class LoadNextRenderReviewsView(APIView):
                 page_size=int_params["page_size"],
                 max_depth=int_params["max_depth"],
                 max_children_len=int_params["max_children_len"],
+                user_id=user_id,
             )
         except ValueError as e:
             raise ValidationError(e)
@@ -195,3 +197,53 @@ class CreateReviewView(generics.GenericAPIView):
 
         serializer.save(**params)
         return Response(serializer.data)
+
+
+class ReviewLikesViewSet(viewsets.GenericViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = Review.objects
+    serializer_class = Serializer
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="toggle-like",
+    )
+    def toggle_like(self, request, pk):
+        """
+       Toggles user like for a given review. Must be authenticated.
+       If not liked/disliked, sets as liked.
+       If already liked, removes like.
+       If already disliked, sets as liked.
+        """
+        review = self.get_object()
+        like, created = Like.objects.get_or_create(review=review, user=request.user, defaults={"liked": True})
+        if not created:
+            if like.liked is True:
+                like.delete()
+            else:
+                like.liked = True
+                like.save(update_fields=["liked"])
+        return Response(status=status.HTTP_200_OK)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="toggle-dislike",
+    )
+    def toggle_dislike(self, request, pk):
+        """
+       Toggles user dislike for a given review. Must be authenticated.
+       If not liked/disliked, sets as disliked.
+       If already disliked, removes dislike.
+       If already liked, sets as disliked.
+        """
+        review = self.get_object()
+        like, created = Like.objects.get_or_create(review=review, user=request.user, defaults={"liked": False})
+        if not created:
+            if like.liked is False:
+                like.delete()
+            else:
+                like.liked = False
+                like.save(update_fields=["liked"])
+        return Response(status=status.HTTP_200_OK)

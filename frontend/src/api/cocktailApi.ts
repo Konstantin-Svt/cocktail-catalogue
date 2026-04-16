@@ -1,6 +1,6 @@
 import { FilterState } from "../components/AlcoFilters/AlcoFilters";
 
-const DEFAULT_URL = 'https://cocktail-catalogue.onrender.com/api';
+const DEFAULT_URL = 'https://cocktail-catalogue-uj8l.onrender.com/api';
 export const BASE_URL = (import.meta as any).env?.VITE_API_URL || DEFAULT_URL;
 
 

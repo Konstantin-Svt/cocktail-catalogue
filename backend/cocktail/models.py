@@ -40,6 +40,28 @@ class CocktailQuerySet(models.QuerySet):
             ),
         )
 
+    def with_ratings(self, with_avg: bool = False):
+        res = self.annotate(
+            one=models.Count(
+                "user_reviews__mark", filter=models.Q(user_reviews__mark=1)
+            ),
+            two=models.Count(
+                "user_reviews__mark", filter=models.Q(user_reviews__mark=2)
+            ),
+            three=models.Count(
+                "user_reviews__mark", filter=models.Q(user_reviews__mark=3)
+            ),
+            four=models.Count(
+                "user_reviews__mark", filter=models.Q(user_reviews__mark=4)
+            ),
+            five=models.Count(
+                "user_reviews__mark", filter=models.Q(user_reviews__mark=5)
+            ),
+        )
+        if with_avg:
+            res = res.annotate(avg=models.Avg("user_reviews__mark"))
+        return res
+
 
 class Cocktail(models.Model):
     objects = CocktailQuerySet.as_manager()
@@ -59,9 +81,7 @@ class Cocktail(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     average_price = models.DecimalField(max_digits=10, decimal_places=2)
-    average_rate = models.DecimalField(
-        max_digits=3, decimal_places=2, default=5
-    )
+    average_rating = models.FloatField(null=True, blank=True)
     alcohol_promille = models.PositiveIntegerField(default=0)
     alcohol_scale = models.PositiveIntegerField(
         default=0, validators=[MinValueValidator(0), MaxValueValidator(10)]

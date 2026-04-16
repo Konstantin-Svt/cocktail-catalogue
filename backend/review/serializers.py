@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from rest_framework import serializers
 
 from cocktail.models import Cocktail
-from review.models import Review
+from review.models import Review, Like
 
 
 class ReviewRecursiveSerializer(serializers.ModelSerializer):
@@ -12,12 +12,16 @@ class ReviewRecursiveSerializer(serializers.ModelSerializer):
     hidden_children = serializers.BooleanField()
     index = serializers.IntegerField()
     depth = serializers.IntegerField()
+    user_fullname = serializers.SerializerMethodField()
+    positive_likes = serializers.IntegerField()
+    dislikes = serializers.IntegerField()
+    user_liked = serializers.BooleanField(allow_null=True)
 
     class Meta:
         model = Review
         fields = (
             "id",
-            "user_id",
+            "user_fullname",
             "cocktail_id",
             "text",
             "mark",
@@ -27,8 +31,15 @@ class ReviewRecursiveSerializer(serializers.ModelSerializer):
             "hidden_children",
             "index",
             "depth",
+            "positive_likes",
+            "dislikes",
+            "user_liked",
             "children",
         )
+        read_only_fields = fields
+
+    def get_user_fullname(self, obj):
+        return obj.user.full_name
 
     def get_children(self, obj):
         children = getattr(obj, "children", [])
@@ -40,12 +51,16 @@ class ReviewSerializer(serializers.ModelSerializer):
     hidden_children = serializers.BooleanField()
     index = serializers.IntegerField()
     depth = serializers.IntegerField()
+    user_fullname = serializers.SerializerMethodField()
+    positive_likes = serializers.IntegerField()
+    dislikes = serializers.IntegerField()
+    user_liked = serializers.BooleanField(allow_null=True)
 
     class Meta:
         model = Review
         fields = (
             "id",
-            "user_id",
+            "user_fullname",
             "cocktail_id",
             "text",
             "mark",
@@ -55,7 +70,14 @@ class ReviewSerializer(serializers.ModelSerializer):
             "hidden_children",
             "index",
             "depth",
+            "positive_likes",
+            "dislikes",
+            "user_liked"
         )
+        read_only_fields = fields
+
+    def get_user_fullname(self, obj):
+        return obj.user.full_name
 
 
 class CreateReviewSerializer(serializers.ModelSerializer):

@@ -115,5 +115,11 @@ class User(AbstractUser):
             return False
         return True
 
+    @property
+    def full_name(self) -> str:
+        if self.is_active:
+            return f"{self.first_name} {self.last_name}"
+        return "Deleted User"
+
     def __str__(self):
         return self.email

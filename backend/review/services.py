@@ -1,7 +1,7 @@
-from django.db.models import Window, F
+from django.db.models import Window, F, Count, Q, OuterRef, Subquery
 from django.db.models.functions import RowNumber
 
-from review.models import Review
+from review.models import Review, Like
 
 
 def build_reviews_tree(
@@ -13,13 +13,22 @@ def build_reviews_tree(
     current_depth: int = 0,
     max_depth: int = 2,
     max_children_len: int = 2,
+    user_id: int | None = None,
 ) -> list:
     max_depth = min(9, max_depth) - current_depth
     if max_depth < 0:
         raise ValueError("current_depth can't be higher than max_depth")
 
     nodes = dict()
-    base_qs = Review.objects.filter(cocktail_id=cocktail_id)
+    base_qs = Review.objects.filter(cocktail_id=cocktail_id).annotate(
+        positive_likes=Count("likes", filter=Q(likes__liked=True)),
+        dislikes=Count("likes", filter=Q(likes__liked=False)),
+    )
+    if user_id is not None:
+        user_liked = Like.objects.filter(
+            user_id=user_id, review=OuterRef("pk")
+        ).values("liked")[:1]
+        base_qs = base_qs.annotate(user_liked=Subquery(user_liked))
 
     if skip_index is None:
         skip = 0
@@ -39,6 +48,7 @@ def build_reviews_tree(
             "cocktail_id",
             "parent_id",
             "user__id",
+            "user__is_active",
             "user__first_name",
             "user__last_name",
         )[skip : limit + 1]
@@ -92,6 +102,7 @@ def build_reviews_tree(
                     "cocktail_id",
                     "parent_id",
                     "user__id",
+                    "user__is_active",
                     "user__first_name",
                     "user__last_name",
                 )
@@ -101,7 +112,11 @@ def build_reviews_tree(
                 prev_parent = curr_layer[0].parent_id
 
             for i, node in enumerate(curr_layer):
-                if node.rn > max_children_len and node.parent_id == prev_parent and i != 0:
+                if (
+                    node.rn > max_children_len
+                    and node.parent_id == prev_parent
+                    and i != 0
+                ):
                     curr_layer[i - 1].has_more = True
                     continue
                 parent = nodes.get(node.parent_id)

@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 from httpx import AsyncClient, Timeout, Response, HTTPStatusError
@@ -8,7 +9,7 @@ from django.conf import settings
 from cocktail.models import Cocktail, Vibe, Ingredient
 from cocktail.serializers import AIFiltersSerializer
 
-MODEL_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent"
+MODEL_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent"
 HEADERS = {
     "content-type": "application/json",
     "x-goog-api-key": settings.GEMINI_API_KEY,
@@ -26,9 +27,12 @@ def get_filters():
         ],
         "vibe": list(Vibe.objects.values_list("name", flat=True)),
         "ingredients": list(
-            Ingredient.objects.filter(category=Ingredient.Category.ALCOHOL)[
-                :20
-            ].values_list("name", flat=True)
+            Ingredient.objects.filter(
+                category__in=[
+                    Ingredient.Category.ALCOHOL,
+                    Ingredient.Category.MIXER,
+                ]
+            )[:40].values_list("name", flat=True)
         ),
     }
 
@@ -47,7 +51,9 @@ def get_cocktails(filters: dict) -> dict:
             del conditions[condition]
 
     result = list(
-        Cocktail.objects.with_levels().prefetch_related("vibes").filter(**conditions)
+        Cocktail.objects.with_levels()
+        .prefetch_related("vibes")
+        .filter(**conditions)
         .distinct()
         .values_list("id", "name")[:3]
     )
@@ -55,7 +61,9 @@ def get_cocktails(filters: dict) -> dict:
     while len(result) == 0 and len(conditions) > 1:
         conditions.popitem()
         result = list(
-            Cocktail.objects.with_levels().prefetch_related("vibes").filter(**conditions)
+            Cocktail.objects.with_levels()
+            .prefetch_related("vibes")
+            .filter(**conditions)
             .distinct()
             .values_list("id", "name")[:3]
         )
@@ -103,7 +111,6 @@ async def serializer_exc_fallback(
 class AIFiltersConsumer(AsyncWebsocketConsumer):
     async def gemini_response_parser(self, response: Response) -> dict | None:
         try:
-            response.raise_for_status()
             response_data = (
                 response.json()
                 .get("candidates")[0]
@@ -207,21 +214,35 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
         if len(self.chat_history) >= 6:
             self.chat_history = self.chat_history[-4:]
         self.chat_history.append(user_query)
-
-        response = await self.client.post(
-            url=MODEL_URL,
-            headers=HEADERS,
-            json={
-                "system_instruction": {
-                    "parts": [
-                        {
-                            "text": self.system_instructions,
-                        }
-                    ]
-                },
-                "contents": self.chat_history,
-            },
-        )
+        for i in range(5):
+            try:
+                response = await self.client.post(
+                    url=MODEL_URL,
+                    headers=HEADERS,
+                    json={
+                        "system_instruction": {
+                            "parts": [
+                                {
+                                    "text": self.system_instructions,
+                                }
+                            ]
+                        },
+                        "contents": self.chat_history,
+                    },
+                )
+                response.raise_for_status()
+                break
+            except HTTPStatusError as e:
+                if e.response.status_code in (500, 502, 503, 504):
+                    print(e)
+                    await asyncio.sleep(2 * i + 1)
+                else:
+                    raise
+        else:
+            print("HTTP API Error")
+            await self.send(text_data=json.dumps({"message": "API Error"}))
+            await self.close()
+            raise Exception
         response_data = await self.gemini_response_parser(response)
 
         if response_data.get("type") == "extra_query":
