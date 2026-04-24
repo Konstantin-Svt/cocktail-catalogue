@@ -20,13 +20,12 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from analytics.tasks import (
+from analytics.services import (
     signup_analytics_wrapper,
     login_analytics_wrapper,
     logout_analytics_wrapper,
 )
 from catalogue_system.pagination import StandardResultsSetPagination
-from catalogue_system.celery import request_dict_converter
 from cocktail.models import Cocktail
 from cocktail.serializers import (
     FavCocktailIdSerializer,
@@ -102,6 +101,13 @@ class CreateUserView(generics.GenericAPIView):
                 user = serializer.save()
 
         send_verification_email.delay_on_commit(user.pk)
+        if settings.AUTO_VERIFY_EMAIL:
+            signup_analytics_wrapper(request, user.pk)
+            return Response(
+                {"detail": "User is successfully created."},
+                status=status.HTTP_200_OK,
+            )
+
         return Response(
             {"detail": "Verification link has been send to email."},
             status=status.HTTP_201_CREATED,
@@ -376,8 +382,7 @@ class ManageUserView(
         """
         Send empty post to logout and delete both tokens from cookies.
         """
-        request_dict = request_dict_converter(request)
-        logout_analytics_wrapper.delay(request_dict)
+        logout_analytics_wrapper(request)
 
         res = Response(
             {"detail": "Successfully logged out."}, status=status.HTTP_200_OK
@@ -392,15 +397,14 @@ class ManageUserView(
 class TokenObtainCookiePairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        request_dict = request_dict_converter(request)
         try:
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
-            login_analytics_wrapper.delay(request_dict)
+            login_analytics_wrapper(request)
             raise InvalidToken(e.args[0]) from e
 
         if serializer.user.email_verified is False:
-            login_analytics_wrapper.delay(request_dict)
+            login_analytics_wrapper(request)
             send_verification_email.delay(serializer.user.pk)
             return Response(
                 {
@@ -409,8 +413,7 @@ class TokenObtainCookiePairView(TokenObtainPairView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        request_dict["user_id"] = serializer.user.id
-        login_analytics_wrapper.delay(request_dict)
+        login_analytics_wrapper(request, serializer.user.pk)
 
         access_token = serializer.validated_data["access"]
         refresh_token = serializer.validated_data["refresh"]
@@ -528,7 +531,6 @@ class EmailVerifyView(APIView):
         if not token or not uid:
             raise ValidationError("Link is invalid.")
 
-        request_dict = request_dict_converter(request)
         try:
             user_id = signing.loads(
                 uid,
@@ -537,14 +539,13 @@ class EmailVerifyView(APIView):
             )
             user = get_user_model().objects.get(pk=user_id)
         except (signing.BadSignature, get_user_model().DoesNotExist):
-            signup_analytics_wrapper.delay(request_dict)
+            signup_analytics_wrapper(request)
             raise ValidationError("Link is invalid.")
         if not email_token_generator.check_token(user, token):
-            signup_analytics_wrapper.delay(request_dict)
+            signup_analytics_wrapper(request)
             raise ValidationError("Link is invalid.")
 
-        request_dict["user_id"] = user_id
-        signup_analytics_wrapper.delay(request_dict)
+        signup_analytics_wrapper(request, user.pk)
         if not user.email_verified:
             user.email_verified = True
             user.save(update_fields=["email_verified"])
@@ -646,7 +647,7 @@ class ResetPasswordView(APIView):
                 status=status.HTTP_429_TOO_MANY_REQUESTS,
             )
 
-        mail = send_reset_password_email.delay(user.pk)
+        mail = send_reset_password_email.delay_on_commit(user.pk)
         if settings.AUTO_VERIFY_EMAIL:
             mail = mail.get()
             return Response({"link": mail}, status=status.HTTP_200_OK)

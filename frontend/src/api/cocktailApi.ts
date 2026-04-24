@@ -71,7 +71,10 @@ export const sendAnalyticsEvent = (payload: Record<string, unknown>) => {
 
 export const fetchComments = async (cocktailId: string) => {
     // 1. Прибираємо фільтрацію (?cocktail_id=...), беремо все підряд
-    const response = await fetch(`${BASE_URL}/review/`);
+    const response = await fetch(`${BASE_URL}/review/`, {
+        method: 'GET',
+        credentials: 'include',
+        });
 
     if (!response.ok) throw new Error('Failed to fetch comments');
 
@@ -112,6 +115,7 @@ export const postComment = async (cocktailId: string, text: string, mark: number
             'Accept': 'application/json', // Додай це
             'Authorization': `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify(body)
     });
 

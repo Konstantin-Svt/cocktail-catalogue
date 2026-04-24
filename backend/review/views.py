@@ -211,13 +211,15 @@ class ReviewLikesViewSet(viewsets.GenericViewSet):
     )
     def toggle_like(self, request, pk):
         """
-       Toggles user like for a given review. Must be authenticated.
-       If not liked/disliked, sets as liked.
-       If already liked, removes like.
-       If already disliked, sets as liked.
+        Toggles user like for a given review. Must be authenticated.
+        If not liked/disliked, sets as liked.
+        If already liked, removes like.
+        If already disliked, sets as liked.
         """
         review = self.get_object()
-        like, created = Like.objects.get_or_create(review=review, user=request.user, defaults={"liked": True})
+        like, created = Like.objects.get_or_create(
+            review=review, user=request.user, defaults={"liked": True}
+        )
         if not created:
             if like.liked is True:
                 like.delete()
@@ -233,13 +235,15 @@ class ReviewLikesViewSet(viewsets.GenericViewSet):
     )
     def toggle_dislike(self, request, pk):
         """
-       Toggles user dislike for a given review. Must be authenticated.
-       If not liked/disliked, sets as disliked.
-       If already disliked, removes dislike.
-       If already liked, sets as disliked.
+        Toggles user dislike for a given review. Must be authenticated.
+        If not liked/disliked, sets as disliked.
+        If already disliked, removes dislike.
+        If already liked, sets as disliked.
         """
         review = self.get_object()
-        like, created = Like.objects.get_or_create(review=review, user=request.user, defaults={"liked": False})
+        like, created = Like.objects.get_or_create(
+            review=review, user=request.user, defaults={"liked": False}
+        )
         if not created:
             if like.liked is False:
                 like.delete()

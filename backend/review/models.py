@@ -46,9 +46,7 @@ class Review(models.Model):
         #         name="valid_mark_usage",
         #     ),
         # ]
-        indexes = [
-            models.Index(fields=["cocktail", "parent", "timestamp"]),
-       ]
+        indexes = [models.Index(fields=["cocktail", "parent", "timestamp"])]
 
     def clean(self):
         if self._state.adding:
@@ -74,9 +72,8 @@ class Review(models.Model):
     def recalculate_avg_rating(self):
         if self.parent_id is None and self.mark is not None:
             try:
-                cocktail = (
-                    Cocktail.objects.with_ratings(with_avg=True)
-                    .get(id=self.cocktail_id)
+                cocktail = Cocktail.objects.with_ratings(with_avg=True).get(
+                    id=self.cocktail_id
                 )
             except Cocktail.DoesNotExist:
                 raise ValidationError({"cocktail_id": "Does not exist."})

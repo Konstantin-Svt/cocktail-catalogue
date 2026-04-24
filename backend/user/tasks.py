@@ -14,7 +14,7 @@ from user.services import create_email_payload, send_email_via_provider
 email_token_generator = EmailVerificationTokenGenerator()
 
 
-@shared_task(bind=True)
+@shared_task(bind=True, retry_kwargs={"max_retries": 3})
 def send_verification_email(self, user_id) -> int:
     if settings.AUTO_VERIFY_EMAIL:
         get_user_model().objects.filter(pk=user_id).update(email_verified=True)
@@ -48,10 +48,12 @@ def send_verification_email(self, user_id) -> int:
     return response.status_code
 
 
-@shared_task(bind=True)
+@shared_task(bind=True, retry_kwargs={"max_retries": 3})
 def send_change_email(self, user_id, new_email) -> int:
     if settings.AUTO_VERIFY_EMAIL:
-        existing_user = get_user_model().objects.filter(email=new_email).first()
+        existing_user = (
+            get_user_model().objects.filter(email=new_email).first()
+        )
         if existing_user:
             if existing_user.email_verified is True:
                 return 400
@@ -85,14 +87,16 @@ def send_change_email(self, user_id, new_email) -> int:
 
     uid = signing.dumps([user_id, new_email], salt="email-change-id")
     token = email_token_generator.make_token(user)
-    link = f"{settings.FRONTEND_BASE_URL}/verify-email/?uid={uid}&token={token}"
+    link = (
+        f"{settings.FRONTEND_BASE_URL}/verify-email/?uid={uid}&token={token}"
+    )
     payload = create_email_payload(new_email, link, mail_type="email_change")
     response = send_email_via_provider(payload)
     response.raise_for_status()
     return response.status_code
 
 
-@shared_task(bind=True)
+@shared_task(bind=True, retry_kwargs={"max_retries": 3})
 def send_reset_password_email(self, user_id):
     user = get_user_model().objects.get(pk=user_id)
     uid = signing.dumps(user_id, salt="password-reset-id")

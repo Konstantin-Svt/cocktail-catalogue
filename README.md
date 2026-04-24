@@ -1,7 +1,7 @@
 # cocktail catalogue
 ## Live demo:
 - Frontend https://drinkly.onrender.com/
-- Backend https://cocktail-catalogue.onrender.com/api/
+- Backend https://cocktail-catalogue-uj8l.onrender.com/api/
 
 ## Installation on a local machine
 ```bash
