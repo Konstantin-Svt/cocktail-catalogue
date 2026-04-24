@@ -10,6 +10,7 @@ services:
       - ./backend/fixtures:/app/fixtures
     depends_on:
       - db
+      - redis
     restart: unless-stopped
     command: sh -c "python manage.py collectstatic --noinput &&
                     python manage.py wait_for_db &&
@@ -19,6 +20,7 @@ services:
     environment:
       DJANGO_DEBUG: ${DJANGO_DEBUG:-false}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      REDIS_URL: "redis://redis:6379"
     env_file:
       - path: .env
         required: false
@@ -35,8 +37,6 @@ services:
         required: false
 
   redis:
-    depends_on:
-      - app
     image: redis:5.0.3-alpine
     restart: unless-stopped
     expose:
@@ -55,7 +55,7 @@ services:
     environment:
       DJANGO_DEBUG: ${DJANGO_DEBUG:-false}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      CELERY_BROKER_URL: "redis://redis:6379/0"
+      REDIS_URL: "redis://redis:6379"
     env_file:
       - path: .env
         required: false
