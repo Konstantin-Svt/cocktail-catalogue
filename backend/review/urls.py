@@ -1,7 +1,12 @@
 from django.urls import path, include
 from rest_framework import routers
 
-from review.views import LoadMoreReviewsView, LoadNextRenderReviewsView, CreateReviewView, ReviewLikesViewSet
+from review.views import (
+    LoadMoreReviewsView,
+    LoadNextRenderReviewsView,
+    CreateReviewView,
+    ReviewLikesViewSet,
+)
 
 likes_router = routers.DefaultRouter()
 likes_router.register("", ReviewLikesViewSet)

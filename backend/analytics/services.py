@@ -1,92 +1,34 @@
-from datetime import timedelta
-from typing import Iterable
-
 from django.utils import timezone
 from rest_framework.request import Request
 from rest_framework.serializers import ModelSerializer
-from user_agents import parse
 
-from analytics.models import Session, Event
-from catalogue_system.celery import request_dict_converter
-
-
-def event_create_executor(
-    data: dict | Iterable[Event],
-    request_dict: dict,
-    session: Session = None,
-    bulk: bool = False,
-) -> Session:
-    """
-    Creates analytics Event(s) and returns
-    Session instance to which Event(s) were bound.
-    """
-    anon_id = request_dict["anon_id"]
-    user_id = request_dict.get("user_id")
-    now = timezone.now()
-    old_session = False if session else True
-
-    if not session:
-        session = (
-            Session.objects.filter(
-                anonymous_user_id=anon_id,
-                session_end__gte=now - timedelta(minutes=30),
-            )
-            .order_by("-session_end")
-            .first()
-        )
-    if not session:
-        ua = parse(request_dict["User-Agent"])
-        session = Session.objects.create(
-            anonymous_user_id=anon_id,
-            session_start=now,
-            session_end=now,
-            browser=ua.browser.family,
-            device_type=ua.os.family,
-            user_id=user_id,
-        )
-        old_session = False
-
-    if bulk:
-        for event in data:
-            event.session_id = session.id
-            event.anonymous_user_id = anon_id
-            event.timestamp = now
-            event.user_id = user_id
-        Event.objects.bulk_create(data)
-    else:
-        Event.objects.create(
-            anonymous_user_id=anon_id,
-            session=session,
-            timestamp=now,
-            user_id=user_id,
-            **data
-        )
-
-    if old_session:
-        session.session_end = now
-        session.user_id = user_id
-        session.save()
-
-    return session
+from analytics.tasks import collect_events
 
 
 def create_event_from_frontend(
     serializer: ModelSerializer, request: Request
-) -> Session:
-    request_dict = request_dict_converter(request)
+) -> dict:
     data = serializer.data
-    return event_create_executor(data, request_dict)
+    data["user_id"] = (
+        request.user.id if request.user.is_authenticated else None
+    )
+    data["anonymous_user_id"] = getattr(request, "anon_id", None)
+    data["User-Agent"] = request.headers.get("User-Agent", "")
+    data["timestamp"] = timezone.now()
+    return data
 
 
-def create_page_view_event(
-    request_dict: dict, page_name: str, session: Session = None
-) -> Session:
-    q_params = request_dict["query_params"].copy()
+def create_page_view_event(request: Request, page_name: str, user_id : int = None) -> dict:
     data = {
         "event_name": "page_view",
-        "page_url": request_dict["page_url"],
+        "page_url": request.build_absolute_uri(),
+        "User-Agent": request.headers.get("User-Agent", ""),
+        "user_id": request.user.id if request.user.is_authenticated else user_id,
+        "anonymous_user_id": getattr(request, "anon_id", None),
+        "timestamp": timezone.now(),
     }
-    for key, value in request_dict["query_params"].items():
+    q_params = request.query_params.copy()
+    for key, value in request.query_params.items():
         if (
             (key == "max_price" and value == "180")
             or (key == "min_price" and value == "0")
@@ -97,20 +39,25 @@ def create_page_view_event(
     if page_name == "search" and len(q_params) == 0:
         page_name = "home"
     elif page_name == "cocktail_page":
-        data["cocktail_id"] = request_dict["cocktail_page_id"]
+        data["cocktail_id"] = (
+            request.resolver_match.kwargs.get("pk")
+            if request.resolver_match
+            else None
+        )
 
     data["page_name"] = page_name
 
-    session = event_create_executor(data, request_dict, session)
-    return session
+    return data
 
 
-def create_filter_applied_events(
-    request_dict: dict, response_dict: dict, session: Session = None
-) -> Session:
+def create_filter_applied_events(request: Request, response: dict) -> list:
+    user_id = request.user.id if request.user.is_authenticated else None
+    user_agent = request.headers.get("User-Agent", "")
+    now = timezone.now()
+    anon_id = getattr(request, "anon_id", None)
     search = None
-    q_params = request_dict["query_params"].copy()
-    for key, value in request_dict["query_params"].items():
+    q_params = request.query_params.copy()
+    for key, value in request.query_params.items():
         if (
             (key == "max_price" and value == "180")
             or (key == "min_price" and value == "0")
@@ -121,97 +68,151 @@ def create_filter_applied_events(
             search = value
             q_params.pop(key)
 
-    result_count = len(response_dict["results"])
+    result_count = len(response.get("results") or [])
+    data_results = []
+
     if search is not None:
         data = {
             "event_name": "search_query",
             "search_text": search,
             "results_count": result_count,
             "filters_applied": True if len(q_params) > 0 else False,
+            "User-Agent": user_agent,
+            "user_id": user_id,
+            "anonymous_user_id": anon_id,
+            "timestamp": now,
         }
-        session = event_create_executor(data, request_dict, session)
+        data_results.append(data)
 
-    bulk_data = []
     for key, value in q_params.items():
         split_value = value.split(",")
         for v in split_value:
-            bulk_data.append(
-                Event(
-                    event_name="filter_applied",
-                    filter_type=key,
-                    filter_value=v,
-                    results_count=result_count,
-                )
+            data_results.append(
+                {
+                    "event_name": "filter_applied",
+                    "filter_type": key,
+                    "filter_value": v,
+                    "results_count": result_count,
+                    "User-Agent": user_agent,
+                    "user_id": user_id,
+                    "anonymous_user_id": anon_id,
+                    "timestamp": now,
+                }
             )
 
-    session = event_create_executor(
-        bulk_data, request_dict, session, bulk=True
-    )
-    return session
+    return data_results
 
 
 def create_card_view_events(
-    request_dict: dict,
-    response_dict: dict,
-    source: str,
-    session: Session = None,
-) -> Session:
-    results = response_dict["results"]
-    bulk_data = [
-        Event(
-            event_name="cocktail_card_view",
-            position=i,
-            cocktail_id=cocktail["id"],
-            source=source,
-        )
+    request: Request, response: dict, source: str
+) -> list:
+    user_id = request.user.id if request.user.is_authenticated else None
+    user_agent = request.headers.get("User-Agent", "")
+    now = timezone.now()
+    results = (
+        response.get("results") or response.get("similar_cocktails") or []
+    )
+    anon_id = getattr(request, "anon_id", None)
+    result_data = [
+        {
+            "event_name": "cocktail_card_view",
+            "position": i,
+            "cocktail_id": cocktail["id"],
+            "source": source,
+            "User-Agent": user_agent,
+            "user_id": user_id,
+            "anonymous_user_id": anon_id,
+            "timestamp": now,
+        }
         for i, cocktail in enumerate(results, start=1)
     ]
 
-    session = event_create_executor(
-        bulk_data, request_dict, session, bulk=True
-    )
-    return session
+    return result_data
 
 
-def create_cocktail_page_open_event(
-    request_dict: dict, response_dict: dict, session: Session = None
-) -> Session:
+def create_cocktail_page_open_event(request: Request, response: dict) -> dict:
     data = {
         "event_name": "cocktail_page_open",
-        "cocktail_id": response_dict["id"],
+        "cocktail_id": response["id"],
+        "User-Agent": request.headers.get("User-Agent", ""),
+        "user_id": request.user.id if request.user.is_authenticated else None,
+        "anonymous_user_id": getattr(request, "anon_id", None),
+        "timestamp": timezone.now(),
     }
-    session = event_create_executor(data, request_dict, session)
-    return session
+    return data
 
 
-def create_signup_event(
-    request_dict: dict, session: Session = None
-) -> Session:
+def create_signup_event(request: Request, user_id: int = None) -> dict:
     data = {
         "event_name": "signup",
-        "success": True if request_dict.get("user_id") else False,
+        "success": True if user_id else False,
+        "User-Agent": request.headers.get("User-Agent", ""),
+        "user_id": user_id,
+        "anonymous_user_id": getattr(request, "anon_id", None),
+        "timestamp": timezone.now(),
     }
-    session = event_create_executor(data, request_dict, session)
-    return session
+    return data
 
 
-def create_login_event(
-    request_dict: dict, session: Session = None
-) -> Session:
+def create_login_event(request: Request, user_id: int = None) -> dict:
     data = {
         "event_name": "login",
-        "success": True if request_dict.get("user_id") else False,
+        "success": True if user_id else False,
+        "User-Agent": request.headers.get("User-Agent", ""),
+        "user_id": user_id,
+        "anonymous_user_id": getattr(request, "anon_id", None),
+        "timestamp": timezone.now(),
     }
-    session = event_create_executor(data, request_dict, session)
-    return session
+    return data
 
 
-def create_logout_event(
-    request_dict: dict, session: Session = None
-) -> Session:
+def create_logout_event(request: Request) -> dict:
     data = {
         "event_name": "logout",
-        "success": True if request_dict.get("user_id") else False,
+        "success": True if request.user.is_authenticated else False,
+        "User-Agent": request.headers.get("User-Agent", ""),
+        "user_id": request.user.id if request.user.is_authenticated else None,
+        "anonymous_user_id": getattr(request, "anon_id", None),
+        "timestamp": timezone.now(),
     }
-    session = event_create_executor(data, request_dict, session)
-    return session
+    return data
+
+
+def cocktail_list_analytics_wrapper(request: Request, response: dict) -> None:
+    events = (
+        [create_page_view_event(request, "search")]
+        + create_filter_applied_events(request, response)
+        + create_card_view_events(request, response, "search_results")
+    )
+    collect_events.delay(events)
+
+
+def cocktail_detail_analytics_wrapper(
+    request: Request, response: dict
+) -> None:
+    events = [
+        create_page_view_event(request, "cocktail_page"),
+        create_cocktail_page_open_event(request, response),
+    ] + create_card_view_events(request, response, "similar_cocktails")
+    collect_events.delay(events)
+
+
+def login_analytics_wrapper(request: Request, user_id: int = None) -> None:
+    events = [
+        create_page_view_event(request, "login", user_id),
+        create_login_event(request, user_id),
+    ]
+    collect_events.delay(events)
+
+
+def signup_analytics_wrapper(request: Request, user_id: int = None) -> None:
+    events = [
+        create_page_view_event(request, "signup", user_id),
+        create_signup_event(request, user_id),
+    ]
+    collect_events.delay(events)
+
+
+def logout_analytics_wrapper(request: Request) -> None:
+    events = [create_logout_event(request)]
+    collect_events.delay(events)

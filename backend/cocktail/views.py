@@ -14,11 +14,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from catalogue_system.celery import (
-    request_dict_converter,
-    response_data_dict_converter,
-)
-from analytics.tasks import (
+from analytics.services import (
     cocktail_list_analytics_wrapper,
     cocktail_detail_analytics_wrapper,
 )
@@ -219,9 +215,7 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
             "vibes_count": vibes_count,
         }
 
-        request_dict = request_dict_converter(request)
-        response_dict = response_data_dict_converter(res.data)
-        cocktail_list_analytics_wrapper.delay(request_dict, response_dict)
+        cocktail_list_analytics_wrapper(request, res.data)
 
         res.data.update(summary)
         return res
@@ -231,9 +225,8 @@ class CocktailViewSet(viewsets.ReadOnlyModelViewSet):
         cocktail = self.get_object()
         serializer = self.get_serializer(cocktail)
         res = Response(serializer.data)
-        request_dict = request_dict_converter(request)
-        response_dict = response_data_dict_converter(res.data)
-        cocktail_detail_analytics_wrapper.delay(request_dict, response_dict)
+
+        cocktail_detail_analytics_wrapper(request, res.data)
 
         reviews_mode = request.query_params.get("reviews_mode", "flat")
         if reviews_mode not in ("flat", "tree"):

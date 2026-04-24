@@ -193,8 +193,10 @@ USE_I18N = True
 USE_TZ = False
 
 # External libs settings
+load_dotenv()
+REDIS_URL = os.environ.get("REDIS_URL")
 
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
+CELERY_BROKER_URL = REDIS_URL
 if not CELERY_BROKER_URL:
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
@@ -228,12 +230,12 @@ SIMPLE_JWT = {
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
-if CELERY_BROKER_URL:
+if REDIS_URL:
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [CELERY_BROKER_URL],
+                "hosts": [REDIS_URL],
             },
         },
     }
@@ -289,7 +291,6 @@ else:
     )
 
 # Email
-load_dotenv()
 PASSWORD_RESET_TIMEOUT = 86400
 EMAIL_VERIFY_RESET_TIMEOUT = 86400
 DAILY_MAIL_THRESHOLD = 20

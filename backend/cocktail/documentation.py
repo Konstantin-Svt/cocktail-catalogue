@@ -94,7 +94,7 @@ cocktail_reviews_documentation = extend_schema(
         OpenApiParameter(
             name="page_size",
             type=int,
-            description=f"Number of reviews shown for level depth 0."
+            description="Number of reviews shown for level depth 0."
             " If not given default is 10",
         ),
         OpenApiParameter(

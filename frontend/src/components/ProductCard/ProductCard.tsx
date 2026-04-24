@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import './ProductCard.scss';
 import { fetchCocktailById, sendAnalyticsEvent } from '../../api/cocktailApi';
 import {CatalogCard} from '../CatalogCard/CatalogCard';
+import { Comments } from './Comments/Comments';
+import { favoritesApi } from '../../api/favoritesApi';
 
 type Tab = 'ingredients' | 'preparation';
 
@@ -14,7 +16,36 @@ export const ProductCard: React.FC = () => {
     const [unit, setUnit] = useState<'ml' | 'oz' | 'cl'>('ml');
     const [isFirstRender, setIsFirstRender] = useState(true);
     const [activeTab, setActiveTab] = useState<Tab>('ingredients');
+    const [addFavorite] = favoritesApi.useAddToFavoritesMutation();
+    const [removeFavorite] = favoritesApi.useRemoveFromFavoritesMutation();
 
+    const cocktailId = Number(id);
+    const token = localStorage.getItem('access_token');
+    const isAuthenticated = !!token;
+    const { data: favoriteItems } = favoritesApi.useGetFavoritesQuery(undefined, {
+        skip: !isAuthenticated,
+    });
+
+    const isFavorite = favoriteItems?.some((item: any) => item.id === cocktailId) || false;
+
+
+
+    const handleFavoriteClick = async () => {
+        if (!isAuthenticated) {
+            alert("Please log in to save favorites");
+            return;
+        }
+
+        try {
+            if (isFavorite) {
+                await removeFavorite({ cocktail_id: cocktailId }).unwrap();
+            } else {
+                await addFavorite({ cocktail_id: cocktailId }).unwrap();
+            }
+        } catch (error) {
+            console.error("Failed to update favorites:", error);
+        }
+    };
     useEffect(() => {
         if (isFirstRender) {
             setIsFirstRender(false);
@@ -69,6 +100,11 @@ export const ProductCard: React.FC = () => {
     const ingredients = cocktail.ingredients || [];
     const mainIngredients = ingredients.filter((ing: any) => ing.category !== 'garnish');
 
+    const glass = ingredients
+        .filter((ing: any) => ing.category === 'glass')
+        .map((ing: any) => ing.name)
+        .join(', ');
+
     const garnishIngredients = ingredients
         .filter((ing: any) => ing.category === 'garnish')
         .map((ing: any) => ing.name)
@@ -101,8 +137,22 @@ export const ProductCard: React.FC = () => {
                         <div className="cocktail__nav">
                             <div className="cocktail__title">{cocktail.name}</div>
                             
-                            <div className="cocktail__button cocktail__button--save"></div>
-                            <div className="cocktail__button cocktail__button--share"></div>
+                            <div
+                                className={`cocktail__button cocktail__button--save ${isFavorite ? 'active' : ''}`}
+                                onClick={handleFavoriteClick}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {isFavorite ? (
+                                    <span className='heart-icon heart-icon-checked'>
+
+                                    </span>
+                                ) : (
+                                    <span className='heart-icon heart-icon-default'>
+
+                                    </span>
+                                )}
+                            </div>
+                            
                         </div>
                         <div className="cocktail__rates">
                             <div className="cocktail__rate">★ 4.8</div>
@@ -115,8 +165,10 @@ export const ProductCard: React.FC = () => {
                         </div>
                         <h2 className='cocktail__details-title'>Drink details</h2>
                         <div className="cocktail__details">
-                            <div className="cocktail__detail">{cocktail.ingredients ? calculateDrinks(cocktail.ingredients) : '0.0'}</div>
-                            <div className="cocktail__detail">{cocktail.alcohol_level}</div>
+                            <div className="cocktail__detail"><span className='cocktail__text'>
+                                {cocktail.ingredients ? calculateDrinks(cocktail.ingredients) : '0.0'}</span></div>
+                            <div className="cocktail__detail"><span className='cocktail__text'>
+                                {cocktail.alcohol_level}</span></div>
                         </div>
                     </div>
                 </div>
@@ -155,7 +207,7 @@ export const ProductCard: React.FC = () => {
                     </div>
 
                     {/* Додаємо динамічні класи залежно від activeTab */}
-                    <div className={`making__ingredients ${activeTab === 'ingredients' ? 'is-active' : 'is-hidden'}`}>
+                    <div className={`making__page making__ingredients ${activeTab === 'ingredients' ? 'is-active' : 'is-hidden'}`}>
                         <h3 className="making__subtitle">Ingredients</h3>
                         <ul className="ingredients__list">
                             {mainIngredients.map((ing: any) => (
@@ -172,7 +224,7 @@ export const ProductCard: React.FC = () => {
                         </ul>
                     </div>
 
-                    <div className={`making__preparation ${activeTab === 'preparation' ? 'is-active' : 'is-hidden'}`}>
+                    <div className={`making__page making__preparation ${activeTab === 'preparation' ? 'is-active' : 'is-hidden'}`}>
                         <h3 className="making__subtitle">Preparation</h3>
                         <div className="preparation__list">
                             {cocktail.preparation.split('.').filter((s: string) => s.trim()).map((step: string, index: number) => (
@@ -188,7 +240,7 @@ export const ProductCard: React.FC = () => {
                     <div className="extra-card">
                         <span className="extra-card__label">Glass</span>
                         <div className="extra-card__content">
-                            <span className="extra-card__value">{cocktail.glass_type || 'Nothing'}</span>
+                            <span className="extra-card__value">{glass || cocktail.glass_type || 'Nothing'}</span>
                         </div>
                     </div>
 
@@ -264,6 +316,12 @@ export const ProductCard: React.FC = () => {
                         </div>
                     </div>
                 )}
+            </div>
+            <div className="review">
+                <Comments
+                    cocktailId={id!}
+                    initialComments={cocktail.reviews || []}
+                />
             </div>
         </div>
     )

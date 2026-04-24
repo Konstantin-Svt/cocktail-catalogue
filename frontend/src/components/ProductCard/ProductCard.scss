@@ -2,7 +2,12 @@
     padding: 40px 0;
     background-color: #fcfcfc;
     min-height: 100vh;
-
+&__comments {
+        grid-column: span 12; 
+        margin-top: 64px;
+        border-top: 1px solid #F0F0F0; 
+        padding-top: 48px;
+    }
     &__back {
         grid-column: span 12;
         margin-bottom: 24px;
@@ -29,6 +34,9 @@
 }
 
 .cocktail {
+    &__text {
+        font-size: 18px;
+    }
     &__img {
         grid-column: span 6;
 
@@ -64,7 +72,7 @@
     }
 
     &__title {
-        font-size: 40px;
+        font-size: 28px;
         font-weight: 700;
         color: #362c2c;
         margin-right: auto;
@@ -85,16 +93,6 @@
         &:hover {
             background: #f8f9fa;
             border-color: #d1d5db;
-        }
-
-        &--save::before {
-            content: '❤';
-            color: #832c42;
-        }
-
-
-        &--share::before {
-            content: '🔗';
         }
     }
 
@@ -168,7 +166,7 @@
 }
 
 .product-page__making {
-    grid-column: span 12; // На всю ширину гріда
+    grid-column: span 12; 
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -253,9 +251,9 @@
         }
     }
         &__ingredients {
-            grid-column: span 5; // Займає 5 колонок із 12
+            grid-column: span 7;
             padding-right: 40px;
-            border-right: 1px solid #F0F0F0; // Вертикальна лінія між блоками
+            border-right: 1px solid #F0F0F0;
     
             @media (max-width: 710px) {
                 grid-column: span 12;
@@ -266,7 +264,7 @@
         }
     
         &__preparation {
-            grid-column: span 7; // Займає решту 7 колонок
+            grid-column: span 5; 
             padding-left: 40px;
     
             @media (max-width: 710px) {
@@ -348,19 +346,7 @@
                 align-items: flex-start;
             }
     
-            .step__number {
-                flex-shrink: 0;
-                width: 28px;
-                height: 28px;
-                background-color: #F4F5F7;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 14px;
-                font-weight: 700;
-                color: #362C2C;
-            }
+    
     
             .step__text {
                 margin: 0;
@@ -483,7 +469,9 @@
 .guide {
     grid-column: span 12;
     margin-top: 48px;
-
+    &__container {
+        gap: 20px;
+    }
     &__title {
         font-size: 24px;
         font-weight: 700;
@@ -504,7 +492,7 @@
         padding: 32px 24px;
         box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.02);
         border: 1px solid #f0f0f0;
-
+        margin-left: 20px;
         @media (max-width: 710px) {
             grid-column: span 12;
             margin-bottom: 16px;
@@ -610,6 +598,7 @@
         color: #7D7D7D;
         cursor: pointer;
         position: relative;
+        width: 50%;
 
         &.active {
             color: #832C42;
@@ -628,6 +617,7 @@
 
     &__ingredients,
     &__preparation {
+        width: 100%;
         @media (max-width: 710px) {
 
             &.is-hidden {
@@ -661,4 +651,40 @@
             display: none; 
         }
     }
+    &__page {
+        grid-column: span 6;
+    }
+}
+
+.step__number {
+    display: flex;
+    box-sizing: border-box;
+    flex-shrink: 0;
+    min-width: 28px;
+    min-height: 28px;
+    background-color: #F4F5F7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #362C2C;
+    border: 1px solid rgba(228, 231, 238, 1);
+    border-radius: 50%;
+    line-height: 1;
+}
+
+.heart-icon {
+    width: 40px;
+    height: 40px;
+    background-repeat: no-repeat;
+    background-position: center;
+
+    &-default {
+        background-image: url(../../public/img/CatalogHeart-default.svg);
+    }
+
+        &-checked {
+            background-image: url(../../public/img/CatalogHeart-checked.svg);
+        }
 }

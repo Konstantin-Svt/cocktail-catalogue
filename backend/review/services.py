@@ -51,7 +51,7 @@ def build_reviews_tree(
             "user__is_active",
             "user__first_name",
             "user__last_name",
-        )[skip : limit + 1]
+        )[skip: limit + 1]
     )
 
     for i, root in enumerate(qs, start=skip):

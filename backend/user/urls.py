@@ -46,7 +46,10 @@ urlpatterns = [
     ),
     path("me/logout/", ManageUserView.as_view({"post": "logout"})),
     path("me/delete/", ManageUserView.as_view({"post": "delete_account"})),
-    path("me/favourites/", ManageUserView.as_view({"get": "favourite_cocktails"})),
+    path(
+        "me/favourites/",
+        ManageUserView.as_view({"get": "favourite_cocktails"}),
+    ),
     path(
         "me/add-favourites/",
         ManageUserView.as_view({"post": "add_favourite_cocktail"}),

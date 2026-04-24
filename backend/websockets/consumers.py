@@ -1,5 +1,7 @@
 import asyncio
 import json
+from functools import wraps
+from typing import Type
 
 from httpx import AsyncClient, Timeout, Response, HTTPStatusError
 from channels.db import database_sync_to_async
@@ -9,11 +11,32 @@ from django.conf import settings
 from cocktail.models import Cocktail, Vibe, Ingredient
 from cocktail.serializers import AIFiltersSerializer
 
-MODEL_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent"
+MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
 HEADERS = {
     "content-type": "application/json",
     "x-goog-api-key": settings.GEMINI_API_KEY,
 }
+
+
+def ai_api_decorator(retries: int, exception: Type[Exception]):
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(self, *args, **kwargs):
+            for i in range(retries):
+                try:
+                    res = await func(*args, **kwargs)
+                    res.raise_for_status()
+                    return res
+                except exception as e:
+                    print(e)
+                    print(res.json())
+                    await asyncio.sleep(2 * i + 1)
+            else:
+                await self.send(text_data=json.dumps({"message": "API Error"}))
+                await self.close()
+                raise Exception(f"External API Error for {retries} retries")
+        return wrapper
+    return decorator
 
 
 @database_sync_to_async
@@ -71,51 +94,46 @@ def get_cocktails(filters: dict) -> dict:
     return {"filters_popped": filters_popped, "res": result}
 
 
-async def serializer_exc_fallback(
-    a_client: AsyncClient, model_result: dict
-) -> Response:
-    response = await a_client.post(
-        url=MODEL_URL,
-        headers=HEADERS,
-        json={
-            "contents": {
-                "role": "server",
-                "parts": [
-                    {
-                        "text": f"""Your previous JSON result: 
-                                {json.dumps(model_result, indent=2, ensure_ascii=False)}
-                                
-                                It should have looked like this:
-                                {{
-                                  "type": "result",
-                                  "content": {{
-                                    "alcohol_level": string or null,
-                                    "sweetness_level": string or null,
-                                    "vibe": string or null,
-                                    "ingredients": [string] or null,
-                                  }}
-                                }}
-                                
-                                Fix it and return ONLY valid JSON.
-                                No explanations.
-                                No additional text.
-                                """
-                    }
-                ],
-            }
-        },
-    )
-    return response
 
 
 class AIFiltersConsumer(AsyncWebsocketConsumer):
+    async def serializer_exc_fallback(
+        self, model_result: dict
+    ) -> Response:
+        response = await self.client.post(
+            self,
+            url=MODELS_URL,
+            headers=HEADERS,
+            json = {
+                "model": "gemini-3.1-flash-lite-preview",
+                "system_instruction": self.system_instructions,
+                "input": f"""Your previous JSON result: 
+                        {json.dumps(model_result, indent=2, ensure_ascii=False)}
+                        
+                        It should have looked like this:
+                        {{
+                          "type": "result",
+                          "content": {{
+                            "alcohol_level": string or null,
+                            "sweetness_level": string or null,
+                            "vibe": string or null,
+                            "ingredients": [string] or null,
+                          }}
+                        }}
+                        
+                        Fix it and return ONLY valid JSON.
+                        No explanations.
+                        No additional text.
+                        """
+            }
+        )
+        return response
+
     async def gemini_response_parser(self, response: Response) -> dict | None:
         try:
             response_data = (
                 response.json()
-                .get("candidates")[0]
-                .get("content")
-                .get("parts")[0]
+                .get("outputs")[1]
                 .get("text")
             )
             response_data = json.loads(response_data)
@@ -129,10 +147,6 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
                     raise TypeError
 
             return response_data
-        except HTTPStatusError as e:
-            print("HTTP API Error:", e)
-            await self.send(text_data=json.dumps({"message": "API Error"}))
-            await self.close()
         except (KeyError, IndexError, TypeError) as e:
             print("Structure error:", e)
             await self.send(
@@ -143,6 +157,7 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
                 )
             )
             await self.close()
+            raise e
         except json.JSONDecodeError as e:
             print("JSONDecodeError:", e)
             await self.send(
@@ -151,11 +166,13 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
                 )
             )
             await self.close()
+            raise e
 
     async def connect(self):
         await self.accept()
-        self.chat_history = []
         self.client = AsyncClient(timeout=Timeout(120.0))
+        self.client.post = ai_api_decorator(5, HTTPStatusError)(self.client.post)
+        self.chat_history = []
         self.filters = await get_filters()
         self.system_instructions = f"""
         You are a barman AI assistant.
@@ -168,6 +185,7 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
         - "ingredients" can contain multiple values (OR logic).
         - Use ONLY values from provided filters.
         - Do NOT invent new values.
+        - At least 1 filter should be applied.
         - If unsure — return null.
 
         Filters are:
@@ -194,6 +212,7 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
         Return ONLY valid JSON.
         No explanations.
         No additional text.
+        No ```json``` segregation.
         """
         await self.send(
             text_data=json.dumps(
@@ -209,41 +228,24 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
         text_data = json.loads(text_data).get("message")
         if len(text_data) > 500:
             text_data = text_data[:500]
-        user_query = {"role": "user", "parts": [{"text": text_data}]}
+        user_query = {"role": "user", "content": text_data}
 
         if len(self.chat_history) >= 6:
             self.chat_history = self.chat_history[-4:]
         self.chat_history.append(user_query)
-        for i in range(5):
-            try:
-                response = await self.client.post(
-                    url=MODEL_URL,
-                    headers=HEADERS,
-                    json={
-                        "system_instruction": {
-                            "parts": [
-                                {
-                                    "text": self.system_instructions,
-                                }
-                            ]
-                        },
-                        "contents": self.chat_history,
-                    },
-                )
-                response.raise_for_status()
-                break
-            except HTTPStatusError as e:
-                if e.response.status_code in (500, 502, 503, 504):
-                    print(e)
-                    await asyncio.sleep(2 * i + 1)
-                else:
-                    raise
-        else:
-            print("HTTP API Error")
-            await self.send(text_data=json.dumps({"message": "API Error"}))
-            await self.close()
-            raise Exception
+
+        response = await self.client.post(
+            self,
+            url=MODELS_URL,
+            headers=HEADERS,
+            json={
+                "model": "gemini-3.1-flash-lite-preview",
+                "system_instruction": self.system_instructions,
+                "input": self.chat_history,
+            },
+        )
         response_data = await self.gemini_response_parser(response)
+        print(response_data)
 
         if response_data.get("type") == "extra_query":
             await self.send(
@@ -253,9 +255,7 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
             serializer = AIFiltersSerializer(data=response_data.get("res"))
             if not serializer.is_valid():
                 for retry in range(3):
-                    response = await serializer_exc_fallback(
-                        self.client, response_data
-                    )
+                    response = await self.serializer_exc_fallback(response_data)
                     response_data = await self.gemini_response_parser(response)
                     serializer = AIFiltersSerializer(
                         data=response_data.get("res")
@@ -299,7 +299,7 @@ class AIFiltersConsumer(AsyncWebsocketConsumer):
 
         model_response = {
             "role": "model",
-            "parts": [{"text": json.dumps(response_data)}],
+            "content": json.dumps(response_data),
         }
         self.chat_history.append(model_response)
 
