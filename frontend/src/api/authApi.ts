@@ -9,6 +9,7 @@ interface LoginCredentials {
 const api = axios.create({
     baseURL: BASE_URL,
     credentials: 'include',
+    withCredentials: true,
 });
 
 const API_URL = `${BASE_URL}/user`;
